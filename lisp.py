@@ -23,9 +23,9 @@ def intern(s):
     return symbols[s]
 
 
-def ends_token(program, i):
+def ends_token(s):
     """assumes that all tokens are ended by one of token_end_chars"""
-    return program[i] in token_end_chars
+    return s.peek() in token_end_chars
 
 
 def is_paren_open(c):
@@ -40,88 +40,103 @@ def is_whitespace(c):
     return c in " \n\t"
 
 
-def next_token_is(reader, program, i):
-    return reader(program, i) != 0
+class Stream:
+    def __init__(self, program, i):
+        self.program = program
+        self.i = i
+
+    def peek(self):
+        return self.program[self.i]
+
+    def next(self):
+        c = self.program[self.i]
+        self.i += 1
+        return c
+
+    def advance(self, n):
+        self.i += n
+
+    def empty(self):
+        return self.i >= len(self.program)
 
 
-def read_list(program, i):
-    c = program[i]
-    print(c, i)
-    if not is_paren_open(c):
-        return 0
-    _, i = read_sublist(program, i + 1)
+def next_token_is(reader, s):
+    return reader(s) != 0
+
+
+def read_list(s):
+    if s.empty() or not is_paren_open(s.peek()):
+        return None
+    s.next()
+    _ = read_sublist(s)
     print('is paren')
-    return 1 + i
+    return True
 
 
-def read_sublist(program, i):
-    def parse_list_end(program, ilast, i):
+def read_sublist(s):
+    def parse_list_end(token):
         return None, STOP_ACTION
 
-    els, i = read(program, i, readers=[(read_list_end, parse_list_end)] + readers)
-    assert(read_list_end(program, i))
-    return els, i
+    els = read(s, readers=[(read_list_end, parse_list_end)] + readers)
+    return els
 
 
-def parse_list(program, ilast, i):
-    els, i = read_sublist(program, ilast + 1)
+def parse_list(token):
+    els = read_sublist(Stream(token, 1))
     return els, None
 
 
-def read_list_end(program, i):
-    return 1 if is_paren_close(program[i]) else 0
+def read_list_end(s):
+    if not s.empty() and is_paren_close(s.peek()):
+        s.next()
+        return True
 
 
-def _read_int(program, istart):
-    i = istart
-    while i < len(program) and program[i] in '0123456789':
-        i += 1
-    return i - istart
+def _read_int(s):
+    istart = s.i
+    while not s.empty() and s.peek() in '0123456789':
+        s.next()
+    return istart != s.i
+        
+
+def read_num(s):
+    istart = s.i
+    _read_int(s)
+    if not s.empty() and s.peek() in floating_point:
+        s.next()
+        _read_int(s)
+    return istart != s.i and (s.empty() or ends_token(s))
 
 
-def read_num(program, istart):
-    print('read num', program[istart:], istart)
-    i = istart + _read_int(program, istart)
-    print(program[istart:i], istart, i, len(program))
-    if i < len(program) and program[i] in floating_point:
-        i = i + 1 + _read_int(program, i + 1)
-    print(program[istart:i])
-    if i < len(program) and not ends_token(program, i):
-        return 0
-    return i - istart
-
-
-def parse_num(program, ilast, i):
-    num = float if floating_point in program[ilast:i] else int
-    print('creating %s %s' % (num, program[ilast:i]))
-    return num(program[ilast:i]), None
+def parse_num(token):
+    num = float if floating_point in token else int
+    print('creating %s %s' % (num, token))
+    return num(token), None
     
 
 
-def read_whitespace(program, istart):
-    i = istart
-    print('read_whitespace', program[i:])
-    while i < len(program) and program[i] in whitespace:
-        i += 1
-    return i - istart
+def read_whitespace(s):
+    parsed = None
+    while not s.empty() and s.peek() in whitespace:
+        s.next()
+        parsed = True
+    return parsed
 
 
-def parse_whitespace(program, ilast, i):
+def parse_whitespace(token):
     return None, None
         
 
-def read_symbol(program, istart):
-    i = istart
-    while i < len(program):
-        for reader in [read_list_end] + [r for r, p in readers if r is not read_symbol]:
-            if next_token_is(reader, program, i):
-                return i - istart
-        i += 1
-    return i - istart
+def read_symbol(s):
+    parsed = None
+    while not (s.empty() or ends_token(s)):
+        s.next()
+        parsed = True
+    return parsed
 
 
-def parse_symbol(program, ilast, i):
-    return intern(program[ilast:i]), None
+def parse_symbol(token):
+    return intern(token), None
         
 
 readers = [
@@ -134,36 +149,31 @@ readers = [
 STOP_ACTION = 'STOP'
 
 
-def read(program, start_i=0, readers=readers):
-    in_list = start_i != 0
-    i = start_i
-    print('read %s %s' % (i, in_list))
+def read(s, readers=readers):
     r = []
-    while i < len(program):
-        c = program[i]
-
-        print('CHAR', c)
+    while not s.empty():
         parsed = None
         action = None
         for reader, parser in readers:
             print(reader)
-            num_read = reader(program, i)
-            if num_read > 0:
-                print(reader, num_read)
-                e, action = parser(program, i, i + num_read)
-                i += num_read
+            i = s.i
+            valid = reader(s)
+            if valid:
+                print(reader, valid)
+                e, action = parser(program[i:s.i])
                 print('after parse', e, i, action)
                 if e is not None:
                     r.append(e)
                 parsed = True
                 break
             else:
+                s.i = i
                 print('ignore')
         if not parsed:
-            raise Exception('Unexpected: "%s"' % program[i:])
+            raise Exception('Unexpected: "%s"' % s.peek())
         if action is STOP_ACTION:
             break
-    return r, i - 1
+    return r
 
 if __name__ == '__main__':
     programs = [
@@ -182,7 +192,7 @@ if __name__ == '__main__':
     for program, expected_result in programs:
         print('STARTING')
         print('   ', program)
-        sexps, _ = read(program)
+        sexps = read(Stream(program, 0))
         for sexp in sexps:
             print(str(sexp))
         for sexp in expected_result:
