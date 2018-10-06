@@ -106,7 +106,6 @@ def parse_symbol(program, ilast, i):
     return intern(program[ilast:i]), i, None
         
 
-
 readers = [
     (read_list, parse_list)
     , (read_whitespace, parse_whitespace)
