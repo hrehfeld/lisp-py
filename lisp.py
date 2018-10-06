@@ -21,8 +21,9 @@ def intern(s):
     return symbols[s]
 
 
-def ends_token(c):
-    return c in token_end_chars
+def ends_token(program, i):
+    """assumes that all tokens are ended by one of token_end_chars"""
+    return program[i] in token_end_chars
 
 
 def is_paren_open(c):
@@ -71,7 +72,7 @@ def read_num(program, istart):
     while i < len(program) and program[i] in '0123456789':
         i += 1
     print(program[istart:i])
-    if i < len(program) and not ends_token(program[i]):
+    if i < len(program) and not ends_token(program, i):
         return istart
     return i
 
