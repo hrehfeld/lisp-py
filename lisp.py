@@ -49,18 +49,22 @@ def read_list(program, i):
     print(c, i)
     if not is_paren_open(c):
         return 0
+    _, i = read_sublist(program, i + 1)
     print('is paren')
-    return 1
+    return 1 + i
 
 
-def parse_list(program, ilast, i):
-    assert(ilast + 1 == i)
-
+def read_sublist(program, i):
     def list_end(program, ilast, i):
         return None, i, STOP_ACTION
 
     els, i = read(program, i, readers=[(read_list_end, list_end)] + readers)
     assert(read_list_end(program, i))
+    return els, i
+
+
+def parse_list(program, ilast, i):
+    els, i = read_sublist(program, ilast + 1)
     return els, i + 1, None
 
 
