@@ -56,7 +56,7 @@ def read_list(program, i):
 
 def read_sublist(program, i):
     def parse_list_end(program, ilast, i):
-        return None, i, STOP_ACTION
+        return None, STOP_ACTION
 
     els, i = read(program, i, readers=[(read_list_end, parse_list_end)] + readers)
     assert(read_list_end(program, i))
@@ -65,7 +65,7 @@ def read_sublist(program, i):
 
 def parse_list(program, ilast, i):
     els, i = read_sublist(program, ilast + 1)
-    return els, i + 1, None
+    return els, None
 
 
 def read_list_end(program, i):
@@ -94,7 +94,7 @@ def read_num(program, istart):
 def parse_num(program, ilast, i):
     num = float if floating_point in program[ilast:i] else int
     print('creating %s %s' % (num, program[ilast:i]))
-    return num(program[ilast:i]), i, None
+    return num(program[ilast:i]), None
     
 
 
@@ -107,7 +107,7 @@ def read_whitespace(program, istart):
 
 
 def parse_whitespace(program, ilast, i):
-    return None, i, None
+    return None, None
         
 
 def read_symbol(program, istart):
@@ -121,7 +121,7 @@ def read_symbol(program, istart):
 
 
 def parse_symbol(program, ilast, i):
-    return intern(program[ilast:i]), i, None
+    return intern(program[ilast:i]), None
         
 
 readers = [
@@ -150,7 +150,8 @@ def read(program, start_i=0, readers=readers):
             num_read = reader(program, i)
             if num_read > 0:
                 print(reader, num_read)
-                e, i, action = parser(program, i, i + num_read)
+                e, action = parser(program, i, i + num_read)
+                i += num_read
                 print('after parse', e, i, action)
                 if e is not None:
                     r.append(e)
