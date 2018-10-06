@@ -3,6 +3,8 @@ from collections import OrderedDict as odict
 whitespace = ' \t\n'
 token_end_chars = whitespace + ')'
 
+floating_point = '.'
+
 symbols = {}
 
 class Symbol:
@@ -66,11 +68,18 @@ def read_list_end(program, i):
     return i + 1 if is_paren_close(program[i]) else i
 
 
-def read_num(program, istart):
-    print('read num', program[istart:], istart, program[istart])
+def _read_int(program, istart):
     i = istart
     while i < len(program) and program[i] in '0123456789':
         i += 1
+    return i
+
+
+def read_num(program, istart):
+    print('read num', program[istart:], istart, program[istart])
+    i = _read_int(program, istart)
+    if i < len(program) and program[i] in floating_point:
+        i = _read_int(program, i + 1)
     print(program[istart:i])
     if i < len(program) and not ends_token(program, i):
         return istart
@@ -78,7 +87,9 @@ def read_num(program, istart):
 
 
 def parse_num(program, ilast, i):
-    return int(program[ilast:i]), i, None
+    num = float if floating_point in program[ilast:i] else int
+    print('creating %s %s' % (num, program[ilast:i]))
+    return num(program[ilast:i]), i, None
     
 
 
@@ -148,6 +159,7 @@ if __name__ == '__main__':
     programs = [
         ('''''', [])
         , ('1', [1])
+        , ('1.0', [1.0])
         , ('''()''', [[]])
         , ('''(1)''', [[1]])
         , ('''(1 2)''', [[1, 2]])
