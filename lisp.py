@@ -55,10 +55,10 @@ def read_list(program, i):
 
 
 def read_sublist(program, i):
-    def list_end(program, ilast, i):
+    def parse_list_end(program, ilast, i):
         return None, i, STOP_ACTION
 
-    els, i = read(program, i, readers=[(read_list_end, list_end)] + readers)
+    els, i = read(program, i, readers=[(read_list_end, parse_list_end)] + readers)
     assert(read_list_end(program, i))
     return els, i
 
