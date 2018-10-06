@@ -41,16 +41,16 @@ def is_whitespace(c):
 
 
 def next_token_is(reader, program, i):
-    return reader(program, i) != i
+    return reader(program, i) != 0
 
 
 def read_list(program, i):
     c = program[i]
     print(c, i)
     if not is_paren_open(c):
-        return i
+        return 0
     print('is paren')
-    return i + 1
+    return 1
 
 
 def parse_list(program, ilast, i):
@@ -65,25 +65,26 @@ def parse_list(program, ilast, i):
 
 
 def read_list_end(program, i):
-    return i + 1 if is_paren_close(program[i]) else i
+    return 1 if is_paren_close(program[i]) else 0
 
 
 def _read_int(program, istart):
     i = istart
     while i < len(program) and program[i] in '0123456789':
         i += 1
-    return i
+    return i - istart
 
 
 def read_num(program, istart):
-    print('read num', program[istart:], istart, program[istart])
-    i = _read_int(program, istart)
+    print('read num', program[istart:], istart)
+    i = istart + _read_int(program, istart)
+    print(program[istart:i], istart, i, len(program))
     if i < len(program) and program[i] in floating_point:
-        i = _read_int(program, i + 1)
+        i = i + 1 + _read_int(program, i + 1)
     print(program[istart:i])
     if i < len(program) and not ends_token(program, i):
-        return istart
-    return i
+        return 0
+    return i - istart
 
 
 def parse_num(program, ilast, i):
@@ -93,24 +94,26 @@ def parse_num(program, ilast, i):
     
 
 
-def read_whitespace(program, i):
+def read_whitespace(program, istart):
+    i = istart
     print('read_whitespace', program[i:])
     while i < len(program) and program[i] in whitespace:
         i += 1
-    return i
+    return i - istart
 
 
 def parse_whitespace(program, ilast, i):
     return None, i, None
         
 
-def read_symbol(program, i):
+def read_symbol(program, istart):
+    i = istart
     while i < len(program):
         for reader in [read_list_end] + [r for r, p in readers if r is not read_symbol]:
             if next_token_is(reader, program, i):
-                return i
+                return i - istart
         i += 1
-    return i
+    return i - istart
 
 
 def parse_symbol(program, ilast, i):
@@ -140,15 +143,17 @@ def read(program, start_i=0, readers=readers):
         action = None
         for reader, parser in readers:
             print(reader)
-            next_i = reader(program, i)
-            if next_i != i:
-                print(next_i, reader)
-                e, i, action = parser(program, i, next_i)
+            num_read = reader(program, i)
+            if num_read > 0:
+                print(reader, num_read)
+                e, i, action = parser(program, i, i + num_read)
                 print('after parse', e, i, action)
                 if e is not None:
                     r.append(e)
                 parsed = True
                 break
+            else:
+                print('ignore')
         if not parsed:
             raise Exception('Unexpected: "%s"' % program[i:])
         if action is STOP_ACTION:
