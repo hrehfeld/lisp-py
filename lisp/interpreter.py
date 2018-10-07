@@ -1,5 +1,13 @@
+from .symbol import intern
+
+
+def is_num(f):
+    return isinstance(f, int) or isinstance(f, float)
+
+
 def eval(form):
-    pass
+    if is_num(form):
+        return form
 
 
 def interpret(forms):
