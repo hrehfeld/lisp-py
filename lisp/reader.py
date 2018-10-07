@@ -121,7 +121,7 @@ def parse_symbol(token):
         
 
 def internal_read_quote(s):
-    return read(s, readers=[r for r in readers if r not in (read_quote, read_whitespace)])
+    return read(s, readers=[r for r in readers if r[0] not in (read_quote, )])
 
 
 def read_quote(s):
