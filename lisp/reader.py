@@ -50,9 +50,8 @@ def next_token_is(reader, s):
 
 
 def read_list(s):
-    if s.empty() or not is_paren_open(s.peek()):
+    if s.empty() or not is_paren_open(s.next()):
         return None
-    s.next()
     _ = read_sublist(s)
     return True
 
