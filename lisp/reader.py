@@ -49,6 +49,12 @@ def next_token_is(reader, s):
     return reader(s) != 0
 
 
+def make_parse_fail(msg):
+    def parse_fail(token):
+        raise Exception('unexpected %s: %s' % (token, msg))
+    return parse_fail
+
+
 def read_list(s):
     if s.empty() or not is_paren_open(s.next()):
         return None
@@ -60,7 +66,7 @@ def read_sublist(s):
     def parse_list_end(token):
         return None, RETURN_ACTION
 
-    els = read(s, readers=[(read_list_end, parse_list_end)] + readers)
+    els = read(s, readers=[(read_list_end, parse_list_end)] + readers_parsers)
     return els
 
 
@@ -121,8 +127,13 @@ def parse_symbol(token):
         
 
 def internal_read_quote(s):
-    # TODO make quote choke on "''" or "' " etc.
-    return read(s, readers=[r for r in readers if r[0] not in (read_quote, )])
+    readers = [read_quote, read_whitespace]
+    parsers = [
+        make_parse_fail('quote not allowed after quote')
+        , make_parse_fail('whitespace not allowed after quote')
+    ]
+    readers = list(zip(readers, parsers)) + [(reader, parser) for reader, parser in readers_parsers if reader not in readers]
+    return read(s, readers=readers)
 
 
 def read_quote(s):
@@ -142,7 +153,7 @@ def parse_quote(token):
     
 
 
-readers = [
+readers_parsers = [
     (read_list, parse_list)
     , (read_whitespace, parse_whitespace)
     , (read_num, parse_num)
@@ -153,7 +164,7 @@ readers = [
 RETURN_ACTION = 'RETURN'
 
 
-def read(s, readers=readers):
+def read(s, readers=readers_parsers):
     r = []
     action = None
     while not s.empty() and action is not RETURN_ACTION:
