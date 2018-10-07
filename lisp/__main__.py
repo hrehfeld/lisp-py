@@ -30,6 +30,7 @@ interpreter_tests = [
     , ("(setq foo)", None)
     , ("(setq foo 1)", 1)
     , ("(setq foo 1) foo", 1)
+    , ("(setq foo (list 1 2)) foo", [1, 2])
 ]
 
 
