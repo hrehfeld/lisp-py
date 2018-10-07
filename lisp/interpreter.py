@@ -123,9 +123,13 @@ def base_env():
     return env
 
 
-def interpret(forms):
-    env = base_env()
+def progn(env, forms):
     r = None
     for form in forms:
         r = eval(form, env)
     return r
+
+
+def interpret(forms):
+    return progn(base_env(), forms)
+    
