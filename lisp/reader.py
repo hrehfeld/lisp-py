@@ -169,7 +169,7 @@ def read(s, readers=readers):
             else:
                 s.i = istart
         if not parsed:
-            raise Exception('Unexpected: "%s"' % s.peek())
+            raise Exception('Unexpected: "%s" at %s' % (s.peek(), s.i))
         if action is RETURN_ACTION:
             break
     return r
