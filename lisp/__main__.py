@@ -26,7 +26,7 @@ def load_tests(loader, tests, pattern):
 
     def make_test(program, expected_result):
         def testf(self):
-            self.assertEqual(read(Stream(program, 0)), expected_result)
+            self.assertListEqual(read(Stream(program, 0)), expected_result)
         return testf
 
     for itest, (program, expected_result) in enumerate(tests):
