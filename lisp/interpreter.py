@@ -1,5 +1,7 @@
 from .symbol import intern, Symbol
 
+import operator
+
 
 MACRO = '__macro'
 
@@ -21,6 +23,7 @@ def eval_macro(m, args):
 def eval_fun(f, args):
     assert(isinstance(args, list))
     assert(callable(f))
+    print(f, args, type(args))
     return f(*args)
     
 
@@ -74,6 +77,10 @@ def base_env():
         , list=lambda *args: list(args)
         , quote=Macro(lambda e: e)
     )
+    env['+'] = operator.__add__
+    env['-'] = operator.__sub__
+    env['*'] = operator.__mul__
+    env['/'] = operator.__truediv__
     return env
 
 def interpret(forms):
