@@ -1,26 +1,9 @@
-from collections import OrderedDict as odict
+from .symbol import intern
 
 whitespace = ' \t\n'
 token_end_chars = whitespace + ')'
 
 floating_point = '.'
-
-symbols = {}
-
-class Symbol:
-    def __init__(self, s):
-        self.s = s
-
-    def __repr__(self):
-        return self.s
-
-    def __str__(self):
-        return self.s
-
-
-def intern(s):
-    symbols.setdefault(s, Symbol(s))
-    return symbols[s]
 
 
 def ends_token(s):
@@ -160,7 +143,7 @@ def read(s, readers=readers):
             valid = reader(s)
             if valid:
                 print(reader, valid)
-                e, action = parser(program[i:s.i])
+                e, action = parser(s.program[i:s.i])
                 print('after parse', e, i, action)
                 if e is not None:
                     r.append(e)
@@ -174,28 +157,4 @@ def read(s, readers=readers):
         if action is STOP_ACTION:
             break
     return r
-
-if __name__ == '__main__':
-    programs = [
-        ('''''', [])
-        , ('1', [1])
-        , ('1.0', [1.0])
-        , ('''()''', [[]])
-        , ('''(1)''', [[1]])
-        , ('''(1 2)''', [[1, 2]])
-        , ('''(foo)''', [[intern('foo')]])
-        , ('''(foo bar)''', [[intern('foo'), intern('bar')]])
-        , ('''(1+)''', [[intern('1+')]])
-    ]
-
-
-    for program, expected_result in programs:
-        print('STARTING')
-        print('   ', program)
-        sexps = read(Stream(program, 0))
-        for sexp in sexps:
-            print(str(sexp))
-        for sexp in expected_result:
-            print(str(sexp))
-        assert(sexps == expected_result)
 
