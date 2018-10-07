@@ -162,7 +162,8 @@ def read(s, readers=readers):
             istart = s.i
             valid = reader(s)
             if valid:
-                e, action = parser(s.program[istart:s.i])
+                token = s.program[istart:s.i]
+                e, action = parser(token)
                 if e is not None:
                     r.append(e)
                 parsed = True
