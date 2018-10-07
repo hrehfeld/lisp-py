@@ -27,10 +27,11 @@ interpreter_tests = [
     , ('''(quote ())''', [])
     , ("'()", [])
     , ('''(+ 1 2)''', 3)
-    , ("(setq foo)", None)
-    , ("(setq foo 1)", 1)
-    , ("(setq foo 1) foo", 1)
-    , ("(setq foo (list 1 2)) foo", [1, 2])
+    , ("(def foo) (set foo 1)", 1)
+    , ("(def foo 1)", 1)
+    , ("(def foo 1) foo", 1)
+    , ("(def foo 1) (set foo 2) foo", 2)
+    , ("(def foo (list 1 2)) foo", [1, 2])
 ]
 
 

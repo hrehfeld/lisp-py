@@ -49,12 +49,25 @@ def callablep(e):
     return callable(e)
 
 
-def setq(env, name, *args):
-    assert(symbolp(name))
+def set_var(env, name, args):
     assert(len(args) <= 1)
     val = eval(args[0], env) if args else None
     env[name.s] = val
     return val
+
+
+def defq(env, name, *args):
+    assert(symbolp(name))
+    if name.s in env:
+        raise Exception('var %s already declared' % name.s)
+    return set_var(env, name, args)
+
+
+def setq(env, name, *args):
+    assert(symbolp(name))
+    if name.s not in env:
+        raise Exception('var %s not declared' % name.s)
+    return set_var(env, name, args)
 
 
 def eval(form, env):
@@ -84,8 +97,10 @@ def base_env():
         t=True
         , list=lambda *args: list(args)
         , quote=Macro(lambda env, e: e)
-        , setq=Macro(setq)
+        , set=Macro(setq)
     )
+    env['def'] = Macro(defq)
+
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
     env['*'] = operator.__mul__
