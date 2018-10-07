@@ -160,16 +160,16 @@ def read(s, readers=readers):
         parsed = None
         action = None
         for reader, parser in readers:
-            i = s.i
+            istart = s.i
             valid = reader(s)
             if valid:
-                e, action = parser(s.program[i:s.i])
+                e, action = parser(s.program[istart:s.i])
                 if e is not None:
                     r.append(e)
                 parsed = True
                 break
             else:
-                s.i = i
+                s.i = istart
         if not parsed:
             raise Exception('Unexpected: "%s"' % s.peek())
         if action is STOP_ACTION:
