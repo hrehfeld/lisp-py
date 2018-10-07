@@ -5,6 +5,8 @@ token_end_chars = whitespace + ')'
 
 floating_point = '.'
 
+quote_char = "'"
+
 
 def ends_token(s):
     """assumes that all tokens are ended by one of token_end_chars"""
@@ -120,10 +122,34 @@ def parse_symbol(token):
     return intern(token), None
         
 
+def internal_read_quote(s):
+    return read(s, readers=[r for r in readers if r not in (read_quote, read_whitespace)])
+
+
+def read_quote(s):
+    if s.peek() == quote_char:
+        s.next()
+
+        els = internal_read_quote(s)
+        # quote only supports one following exp
+        if len(els) == 1:
+            return True
+
+
+def parse_quote(token):
+    els = internal_read_quote(Stream(token, 1))
+    print(els)
+    r = [intern('quote'), *els]
+    print(r)
+    return r, None
+    
+
+
 readers = [
     (read_list, parse_list)
     , (read_whitespace, parse_whitespace)
     , (read_num, parse_num)
+    , (read_quote, parse_quote)
     , (read_symbol, parse_symbol)
 ]
 

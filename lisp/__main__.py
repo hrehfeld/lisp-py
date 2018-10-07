@@ -14,6 +14,7 @@ tests = [
     , ('''(1+)''', [[intern('1+')]])
     , ('''(())''', [[[]]])
     , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
+    , ("'a", [[intern('quote'), intern('a')]])
 ]
 
 interpreter_tests = [
