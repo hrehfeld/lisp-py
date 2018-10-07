@@ -11,6 +11,8 @@ programs = [
     , ('''(foo)''', [[intern('foo')]])
     , ('''(foo bar)''', [[intern('foo'), intern('bar')]])
     , ('''(1+)''', [[intern('1+')]])
+    , ('''(())''', [[[]]])
+    , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
 ]
 
 
