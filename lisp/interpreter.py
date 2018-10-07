@@ -65,7 +65,7 @@ def eval(form, env):
 def base_env():
     env = dict(
         t=True
-        , list=list
+        , list=lambda *args: list(args)
         , quote=Macro(lambda e: e)
     )
     return env
