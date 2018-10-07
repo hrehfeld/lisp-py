@@ -38,6 +38,7 @@ for program, expected_result in tests:
 
 print('----interpret')
 for program, expected_result in interpreter_tests:
+    print('Program:', program)
     r = interpret(read(Stream(program, 0)))
     print('%s == %s' % (r, expected_result))
     assert(r == expected_result)
