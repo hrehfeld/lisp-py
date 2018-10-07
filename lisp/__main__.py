@@ -1,5 +1,6 @@
 from .symbol import intern
 from .reader import read, Stream
+from .interpreter import interpret
 
 tests = [
     ('''''', [])
@@ -15,6 +16,15 @@ tests = [
     , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
 ]
 
+interpreter_tests = [
+    ('''''', None)
+    , ('1', 1)
+    , ('1.0', 1.0)
+    , ('t', True)
+    , ('''(quote ())''', [])
+    , ('''(list)''', [])
+]
+
 
 for program, expected_result in tests:
     print('STARTING')
@@ -26,3 +36,8 @@ for program, expected_result in tests:
         print(str(sexp))
     assert(sexps == expected_result)
 
+print('----interpret')
+for program, expected_result in interpreter_tests:
+    r = interpret(read(Stream(program, 0)))
+    print('%s == %s' % (r, expected_result))
+    assert(r == expected_result)
