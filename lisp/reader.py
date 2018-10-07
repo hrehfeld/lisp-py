@@ -63,6 +63,10 @@ def read_list(s):
 
 
 def read_sublist(s):
+    def read_list_end(s):
+        if not s.empty() and is_paren_close(s.next()):
+            return True
+
     def parse_list_end(token):
         return None, RETURN_ACTION
 
@@ -73,11 +77,6 @@ def read_sublist(s):
 def parse_list(token):
     els = read_sublist(Stream(token, 1))
     return els, None
-
-
-def read_list_end(s):
-    if not s.empty() and is_paren_close(s.next()):
-        return True
 
 
 def _read_int(s):
