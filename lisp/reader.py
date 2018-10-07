@@ -52,7 +52,6 @@ def read_list(s):
         return None
     s.next()
     _ = read_sublist(s)
-    print('is paren')
     return True
 
 
@@ -93,7 +92,6 @@ def read_num(s):
 
 def parse_num(token):
     num = float if floating_point in token else int
-    print('creating %s %s' % (num, token))
     return num(token), None
     
 
@@ -138,20 +136,16 @@ def read(s, readers=readers):
         parsed = None
         action = None
         for reader, parser in readers:
-            print(reader)
             i = s.i
             valid = reader(s)
             if valid:
-                print(reader, valid)
                 e, action = parser(s.program[i:s.i])
-                print('after parse', e, i, action)
                 if e is not None:
                     r.append(e)
                 parsed = True
                 break
             else:
                 s.i = i
-                print('ignore')
         if not parsed:
             raise Exception('Unexpected: "%s"' % s.peek())
         if action is STOP_ACTION:
