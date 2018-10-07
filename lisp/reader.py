@@ -70,8 +70,7 @@ def parse_list(token):
 
 
 def read_list_end(s):
-    if not s.empty() and is_paren_close(s.peek()):
-        s.next()
+    if not s.empty() and is_paren_close(s.next()):
         return True
 
 
