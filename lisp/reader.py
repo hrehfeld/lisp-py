@@ -121,6 +121,7 @@ def parse_symbol(token):
         
 
 def internal_read_quote(s):
+    # TODO make quote choke on "''" or "' " etc.
     return read(s, readers=[r for r in readers if r[0] not in (read_quote, )])
 
 
