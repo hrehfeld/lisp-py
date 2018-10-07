@@ -17,8 +17,8 @@ def Macro(f):
     return (MACRO, f)
 
 
-def eval_macro(m, args):
-    return m[1](*args)
+def eval_macro(env, m, args):
+    return m[1](env, *args)
     
 
 def eval_fun(f, args):
@@ -63,7 +63,7 @@ def eval(form, env):
         args_forms = form[1:]
 
         if macrop(fun):
-            return eval_macro(fun, args_forms)
+            return eval_macro(env, fun, args_forms)
 
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
@@ -75,7 +75,7 @@ def base_env():
     env = dict(
         t=True
         , list=lambda *args: list(args)
-        , quote=Macro(lambda e: e)
+        , quote=Macro(lambda env, e: e)
     )
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
