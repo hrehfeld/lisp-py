@@ -18,6 +18,12 @@ def eval_macro(m, args):
     return m[1](*args)
     
 
+def eval_fun(f, args):
+    assert(isinstance(args, list))
+    assert(callable(f))
+    return f(*args)
+    
+
 def is_num(f):
     return isinstance(f, int) or isinstance(f, float)
 
@@ -58,7 +64,7 @@ def eval(form, env):
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
-        return fun([eval(f, env) for f in args_forms])
+        return eval_fun(fun, [eval(f, env) for f in args_forms])
         
 
 
