@@ -58,7 +58,7 @@ def read_list(s):
 
 def read_sublist(s):
     def parse_list_end(token):
-        return None, STOP_ACTION
+        return None, RETURN_ACTION
 
     els = read(s, readers=[(read_list_end, parse_list_end)] + readers)
     return els
@@ -150,7 +150,7 @@ readers = [
     , (read_symbol, parse_symbol)
 ]
 
-STOP_ACTION = 'STOP'
+RETURN_ACTION = 'RETURN'
 
 
 def read(s, readers=readers):
@@ -171,7 +171,7 @@ def read(s, readers=readers):
                 s.i = istart
         if not parsed:
             raise Exception('Unexpected: "%s"' % s.peek())
-        if action is STOP_ACTION:
+        if action is RETURN_ACTION:
             break
     return r
 
