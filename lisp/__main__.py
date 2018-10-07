@@ -1,7 +1,7 @@
 from .symbol import intern
 from .reader import read, Stream
 
-programs = [
+tests = [
     ('''''', [])
     , ('1', [1])
     , ('1.0', [1.0])
@@ -16,7 +16,7 @@ programs = [
 ]
 
 
-for program, expected_result in programs:
+for program, expected_result in tests:
     print('STARTING')
     print('   ', program)
     sexps = read(Stream(program, 0))
