@@ -27,6 +27,9 @@ interpreter_tests = [
     , ('''(quote ())''', [])
     , ("'()", [])
     , ('''(+ 1 2)''', 3)
+    , ("(setq foo)", None)
+    , ("(setq foo 1)", 1)
+    , ("(setq foo 1) foo", 1)
 ]
 
 

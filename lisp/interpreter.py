@@ -49,6 +49,14 @@ def callablep(e):
     return callable(e)
 
 
+def setq(env, name, *args):
+    assert(symbolp(name))
+    assert(len(args) <= 1)
+    val = eval(args[0], env) if args else None
+    env[name.s] = val
+    return val
+
+
 def eval(form, env):
     if is_num(form):
         return form
@@ -76,6 +84,7 @@ def base_env():
         t=True
         , list=lambda *args: list(args)
         , quote=Macro(lambda env, e: e)
+        , setq=Macro(setq)
     )
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
