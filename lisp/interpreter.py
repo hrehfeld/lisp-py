@@ -92,8 +92,23 @@ def eval(form, env):
         return eval_fun(fun, [eval(f, env) for f in args_forms])
         
 
+class Env:
+    def __init__(self, **kwargs):
+        self.d = {}
+        self.d.update(kwargs)
+
+    def __setitem__(self, k, v):
+        self.d[k] = v
+
+    def __getitem__(self, k):
+        return self.d[k]
+
+    def __contains__(self, k):
+        return self.d.__contains__(k)
+
+
 def base_env():
-    env = dict(
+    env = Env(
         t=True
         , list=lambda *args: list(args)
         , quote=Macro(lambda env, e: e)
