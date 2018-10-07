@@ -127,9 +127,7 @@ def internal_read_quote(s):
 
 
 def read_quote(s):
-    if s.peek() == quote_char:
-        s.next()
-
+    if s.next() == quote_char:
         els = internal_read_quote(s)
         # quote only supports one following exp
         if len(els) == 1:
