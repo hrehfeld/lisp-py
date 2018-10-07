@@ -58,7 +58,7 @@ def make_parse_fail(msg):
 def read_list(s):
     if s.empty() or not is_paren_open(s.next()):
         return None
-    _ = read_sublist(s)
+    read_sublist(s)
     return True
 
 
