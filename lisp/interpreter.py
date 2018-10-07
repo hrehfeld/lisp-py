@@ -1,6 +1,23 @@
 from .symbol import intern, Symbol
 
 
+MACRO = '__macro'
+
+def macrop(e):
+    return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
+
+
+def Macro(f):
+    if not callablep(f):
+        raise Exception('%s is not callable' % (f))
+
+    return (MACRO, f)
+
+
+def eval_macro(m, args):
+    return m[1](*args)
+    
+
 def is_num(f):
     return isinstance(f, int) or isinstance(f, float)
 
@@ -33,11 +50,15 @@ def eval(form, env):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')
         fun = eval(form[0], env)
+        args_forms = form[1:]
+
+        if macrop(fun):
+            return eval_macro(fun, args_forms)
 
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
-        return fun([eval(f, env) for f in form[1:]])
+        return fun([eval(f, env) for f in args_forms])
         
 
 
@@ -45,6 +66,7 @@ def base_env():
     env = dict(
         t=True
         , list=list
+        , quote=Macro(lambda e: e)
     )
     return env
 
