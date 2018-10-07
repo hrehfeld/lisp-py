@@ -5,6 +5,7 @@ import operator
 
 MACRO = '__macro'
 
+
 def macrop(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
 
@@ -70,7 +71,6 @@ def eval(form, env):
         return eval_fun(fun, [eval(f, env) for f in args_forms])
         
 
-
 def base_env():
     env = dict(
         t=True
@@ -82,6 +82,7 @@ def base_env():
     env['*'] = operator.__mul__
     env['/'] = operator.__truediv__
     return env
+
 
 def interpret(forms):
     env = base_env()
