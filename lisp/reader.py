@@ -155,9 +155,9 @@ RETURN_ACTION = 'RETURN'
 
 def read(s, readers=readers):
     r = []
-    while not s.empty():
+    action = None
+    while not s.empty() and action is not RETURN_ACTION:
         parsed = None
-        action = None
         for reader, parser in readers:
             istart = s.i
             valid = reader(s)
@@ -172,7 +172,5 @@ def read(s, readers=readers):
                 s.i = istart
         if not parsed:
             raise Exception('Unexpected: "%s" at %s' % (s.peek(), s.i))
-        if action is RETURN_ACTION:
-            break
     return r
 
