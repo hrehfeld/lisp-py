@@ -20,7 +20,7 @@ tests = [
     , ("'a", [[intern('quote'), intern('a')]])
     , ("'()", [[intern('quote'), []]])
     , ("()1", [[], 1])
-    , ("'()1", [[intern('quote'), []], [1]])
+    , ("'()1", [[intern('quote'), []], 1])
 ]
 
 def load_tests():
