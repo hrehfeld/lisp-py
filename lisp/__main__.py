@@ -26,7 +26,7 @@ tests = [
 def load_tests():
     def make_test(i, program, expected_result):
         def run(self):
-            self.assertListEqual(read(Stream(program, 0)), expected_result)
+            self.assertListEqual(expected_result, read(Stream(program, 0)))
 
         # have test name in stacktrace
         class testf(unittest.TestCase):
