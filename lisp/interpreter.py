@@ -93,7 +93,8 @@ def eval(form, env):
         
 
 class Env:
-    def __init__(self, **kwargs):
+    def __init__(self, parent=None, **kwargs):
+        self.parent = parent
         self.d = {}
         self.d.update(kwargs)
 
@@ -101,10 +102,10 @@ class Env:
         self.d[k] = v
 
     def __getitem__(self, k):
-        return self.d[k]
+        return self.d[k] if k in self.d else self.parent[k]
 
     def __contains__(self, k):
-        return self.d.__contains__(k)
+        return self.d.__contains__(k) or (self.parent and self.parent.__contains__(k))
 
 
 def base_env():
