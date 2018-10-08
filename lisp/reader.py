@@ -132,7 +132,7 @@ def internal_read_quote(s):
         , make_parse_fail('whitespace not allowed after quote')
     ]
     readers = list(zip(readers, parsers)) + [(reader, parser) for reader, parser in readers_parsers if reader not in readers]
-    return read(s, readers=readers)
+    return read(s, readers=readers, one=True)
 
 
 def read_quote(s):
@@ -161,7 +161,7 @@ readers_parsers = [
 RETURN_ACTION = 'RETURN'
 
 
-def read(s, readers=readers_parsers):
+def read(s, readers=readers_parsers, one=False):
     r = []
     action = None
     while not s.empty() and action is not RETURN_ACTION:
@@ -180,5 +180,7 @@ def read(s, readers=readers_parsers):
                 s.i = istart
         if not parsed:
             raise Exception('Unexpected: "%s" at %s' % (s.peek(), s.i))
+        if one:
+            break
     return r
 
