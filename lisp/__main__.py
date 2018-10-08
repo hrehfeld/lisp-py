@@ -57,6 +57,14 @@ def load_tests():
         , ("(def foo (list 1 2)) foo", [1, 2])
         , ("(defun foo ()) (foo)", None)
         , ("(defun foo () 1) (foo)", 1)
+        , ("(defun foo () (+ 1 2) (foo)", 3)
+        , ("""
+(defun foo ()
+        (def a (+ 1 2))
+        (* a 4)
+        )
+        (foo)
+""", 12)
     ]
 
 
