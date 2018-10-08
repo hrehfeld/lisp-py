@@ -145,9 +145,7 @@ def read_quote(s):
 
 def parse_quote(token):
     els = internal_read_quote(Stream(token, 1))
-    print(els)
     r = [intern('quote'), *els]
-    print(r)
     return r, None
     
 
