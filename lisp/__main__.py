@@ -3,34 +3,41 @@ from .reader import read, Stream
 from .interpreter import interpret
 
 import unittest
-    
+import argparse
 
-def load_tests(loader, tests, pattern):
-    tests = [
-        ('''''', [])
-        , ('1', [1])
-        , ('1.0', [1.0])
-        , ('''()''', [[]])
-        , ('''(1)''', [[1]])
-        , ('''(1 2)''', [[1, 2]])
-        , ('''(foo)''', [[intern('foo')]])
-        , ('''(foo bar)''', [[intern('foo'), intern('bar')]])
-        , ('''(1+)''', [[intern('1+')]])
-        , ('''(())''', [[[]]])
-        , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
-        , ("'a", [[intern('quote'), intern('a')]])
-    ]
+tests = [
+    ('''''', [])
+    , ('1', [1])
+    , ('1.0', [1.0])
+    , ('''()''', [[]])
+    , ('''(1)''', [[1]])
+    , ('''(1 2)''', [[1, 2]])
+    , ('''(foo)''', [[intern('foo')]])
+    , ('''(foo bar)''', [[intern('foo'), intern('bar')]])
+    , ('''(1+)''', [[intern('1+')]])
+    , ('''(())''', [[[]]])
+    , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
+    , ("'a", [[intern('quote'), intern('a')]])
+    , ("'()", [[intern('quote'), []]])
+    , ("()1", [[], 1])
+    , ("'()1", [[intern('quote'), []], [1]])
+]
 
-    class ReaderTestCase(unittest.TestCase):
-        pass
-
-    def make_test(program, expected_result):
-        def testf(self):
+def load_tests():
+    def make_test(i, program, expected_result):
+        def run(self):
             self.assertListEqual(read(Stream(program, 0)), expected_result)
-        return testf
 
+        # have test name in stacktrace
+        class testf(unittest.TestCase):
+            pass
+        name = 'test%s' % i
+        setattr(testf, name, run)
+        return testf(name)
+
+    suite = unittest.TestSuite()
     for itest, (program, expected_result) in enumerate(tests):
-        setattr(ReaderTestCase, 'test_%s' % itest, make_test(program, expected_result))
+        suite.addTest(make_test(itest, program, expected_result))
 
     interpreter_tests = [
         ('''''', None)
@@ -51,22 +58,28 @@ def load_tests(loader, tests, pattern):
     ]
 
 
-    class InterpreterTestCase(unittest.TestCase):
-        pass
-
     def make_test(program, expected_result):
         def testf(self):
             self.assertEqual(interpret(read(Stream(program, 0))), expected_result)
         return testf
 
     for itest, (program, expected_result) in enumerate(interpreter_tests):
-        setattr(InterpreterTestCase, 'test_%s' % itest, make_test(program, expected_result))
+        #suite.addTest(make_test(program, expected_result)))
 
-    suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(ReaderTestCase))
-    suite.addTests(loader.loadTestsFromTestCase(InterpreterTestCase))
     return suite
 
-unittest.main()
+p = argparse.ArgumentParser()
+p.add_argument('--type')
+p.add_argument('--num', type=int)
+
+args = p.parse_args()
+
+if args.type is not None and args.num is not None:
+    if args.type == 'reader':
+        program = tests[args.num][0]
+        print(interpret(read(Stream(program, 0))))
+else:
+    suite = load_tests()
+    unittest.TextTestRunner().run(suite)
 
 
