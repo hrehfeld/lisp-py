@@ -68,13 +68,20 @@ def load_tests():
     ]
 
 
-    def make_test(program, expected_result):
-        def testf(self):
+    def make_test(i, program, expected_result):
+        def run(self):
             self.assertEqual(interpret(read(Stream(program, 0))), expected_result)
-        return testf
+
+        # have test name in stacktrace
+        class testf(unittest.TestCase):
+            pass
+        name = 'test%s' % i
+        setattr(testf, name, run)
+        return testf(name)
 
     for itest, (program, expected_result) in enumerate(interpreter_tests):
-        #suite.addTest(make_test(program, expected_result)))
+        suite.addTest(make_test(itest, program, expected_result))
+        pass
 
     return suite
 
