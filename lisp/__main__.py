@@ -23,6 +23,36 @@ tests = [
     , ("'()1", [[intern('quote'), []], 1])
 ]
 
+interpreter_tests = [
+    ('''''', None)
+    , ('1', 1)
+    , ('1.0', 1.0)
+    , ('t', True)
+    , ('''(list)''', [])
+    , ('''(list 1)''', [1])
+    , ('''(quote ())''', [])
+    , ("'1", 1)
+    , ("'()", [])
+    , ('''(+ 1 2)''', 3)
+    , ("(def foo) (set foo 1)", 1)
+    , ("(def foo 1)", 1)
+    , ("(def foo 1) foo", 1)
+    , ("(def foo 1) (set foo 2) foo", 2)
+    , ("(def foo (list 1 2)) foo", [1, 2])
+    , ("(defun foo ()) (foo)", None)
+    , ("(defun foo () 1) (foo)", 1)
+    , ("(defun foo () (+ 1 2)) (foo)", 3)
+    , ("(defun foo (a) (+ a 2)) (foo 1)", 3)
+    , ("""
+(defun foo (b)
+        (def a (+ 1 2))
+        (* a b)
+        )
+        (foo 4)
+""", 12)
+]
+
+
 def load_tests():
     def make_test(name, program, expected_result):
         def run(self):
@@ -37,35 +67,6 @@ def load_tests():
     suite = unittest.TestSuite()
     for itest, (program, expected_result) in enumerate(tests):
         suite.addTest(make_test('reader_%s' % itest, program, expected_result))
-
-    interpreter_tests = [
-        ('''''', None)
-        , ('1', 1)
-        , ('1.0', 1.0)
-        , ('t', True)
-        , ('''(list)''', [])
-        , ('''(list 1)''', [1])
-        , ('''(quote ())''', [])
-        , ("'1", 1)
-        , ("'()", [])
-        , ('''(+ 1 2)''', 3)
-        , ("(def foo) (set foo 1)", 1)
-        , ("(def foo 1)", 1)
-        , ("(def foo 1) foo", 1)
-        , ("(def foo 1) (set foo 2) foo", 2)
-        , ("(def foo (list 1 2)) foo", [1, 2])
-        , ("(defun foo ()) (foo)", None)
-        , ("(defun foo () 1) (foo)", 1)
-        , ("(defun foo () (+ 1 2) (foo)", 3)
-        , ("""
-(defun foo ()
-        (def a (+ 1 2))
-        (* a 4)
-        )
-        (foo)
-""", 12)
-    ]
-
 
     def make_test(name, program, expected_result):
         def run(self):
@@ -92,6 +93,9 @@ args = p.parse_args()
 if args.type is not None and args.num is not None:
     if args.type == 'reader':
         program = tests[args.num][0]
+        print(read(Stream(program, 0)))
+    if args.type == 'interpreter':
+        program = interpreter_tests[args.num][0]
         print(interpret(read(Stream(program, 0))))
 else:
     suite = load_tests()
