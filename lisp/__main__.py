@@ -21,6 +21,7 @@ tests = [
     , ("'()", [[intern('quote'), []]])
     , ("()1", [[], 1])
     , ("'()1", [[intern('quote'), []], 1])
+    , ("(defun foo () (+ 1 2)) (foo)", [[intern('defun'), intern('foo'), [], [intern('+'), 1, 2]], [intern('foo')]])
 ]
 
 interpreter_tests = [
