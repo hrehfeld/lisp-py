@@ -4,7 +4,22 @@ import operator
 
 
 MACRO = '__macro'
+SPECIAL_FORM = '__special'
 
+
+def special_formp(e):
+    return isinstance(e, tuple) and len(e) == 2 and e[0] == SPECIAL_FORM
+
+
+def special_form(f):
+    if not callablep(f):
+        raise Exception('%s is not callable' % (f))
+    return (SPECIAL_FORM, f)
+
+
+def eval_special_form(env, m, args):
+    return m[1](env, *args)
+    
 
 def macrop(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
@@ -18,7 +33,8 @@ def Macro(f):
 
 
 def eval_macro(env, m, args):
-    return m[1](env, *args)
+    form = m[1](env, *args)
+    return eval(form, env)
     
 
 def eval_fun(f, args):
@@ -83,6 +99,9 @@ def eval(form, env):
         fun = eval(form[0], env)
         args_forms = form[1:]
 
+        if special_formp(fun):
+            return eval_special_form(env, fun, args_forms)
+
         if macrop(fun):
             return eval_macro(env, fun, args_forms)
 
@@ -112,7 +131,7 @@ def base_env():
     env = Env(
         t=True
         , list=lambda *args: list(args)
-        , quote=Macro(lambda env, e: e)
+        , quote=special_form(lambda env, e: e)
         , set=Macro(setq)
     )
     env['def'] = Macro(defq)
