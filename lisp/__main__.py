@@ -35,7 +35,7 @@ interpreter_tests = [
     , ("'1", 1)
     , ("'()", [])
     , ('''(+ 1 2)''', 3)
-    , ("(def foo) (set foo 1)", 1)
+    , ("(def foo 2) (set foo 1)", 1)
     , ("(def foo 1)", 1)
     , ("(def foo 1) foo", 1)
     , ("(def foo 1) (set foo 2) foo", 2)
