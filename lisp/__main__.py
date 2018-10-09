@@ -24,20 +24,19 @@ tests = [
 ]
 
 def load_tests():
-    def make_test(i, program, expected_result):
+    def make_test(name, program, expected_result):
         def run(self):
             self.assertListEqual(expected_result, read(Stream(program, 0)))
 
         # have test name in stacktrace
         class testf(unittest.TestCase):
             pass
-        name = 'test%s' % i
         setattr(testf, name, run)
         return testf(name)
 
     suite = unittest.TestSuite()
     for itest, (program, expected_result) in enumerate(tests):
-        suite.addTest(make_test(itest, program, expected_result))
+        suite.addTest(make_test('reader_%s' % itest, program, expected_result))
 
     interpreter_tests = [
         ('''''', None)
