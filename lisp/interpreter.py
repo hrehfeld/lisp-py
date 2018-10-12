@@ -37,6 +37,24 @@ def eval_macro(env, m, args):
     return eval(form, env)
     
 
+def defun(env, name, parameters, *body):
+    assert(symbolp(name))
+    if name.s in env:
+        raise Exception('fun %s already declared' % name.s)
+
+    for parameter in parameters:
+        assert(symbolp(parameter))
+    parameters = [p.s for p in parameters]
+
+    def f(*args):
+        fun_env = Env(parent=env)
+        for name, val in zip(parameters, args):
+            fun_env[name] = val
+        return progn(fun_env, body)
+    env[name.s] = f
+    return f
+
+
 def eval_fun(f, args):
     assert(isinstance(args, list))
     assert(callable(f))
@@ -136,6 +154,7 @@ def base_env():
         , set=special_form(setq)
     )
     env['def'] = special_form(defq)
+    env['defun'] = special_form(defun)
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
