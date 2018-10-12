@@ -133,7 +133,7 @@ def base_env():
         t=True
         , list=lambda *args: list(args)
         , quote=special_form(lambda env, e: e)
-        , set=Macro(setq)
+        , set=special_form(setq)
     )
     env['def'] = special_form(defq)
 
