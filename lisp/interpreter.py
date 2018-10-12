@@ -135,7 +135,7 @@ def base_env():
         , quote=special_form(lambda env, e: e)
         , set=Macro(setq)
     )
-    env['def'] = Macro(defq)
+    env['def'] = special_form(defq)
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
