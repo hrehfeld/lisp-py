@@ -109,6 +109,7 @@ def eval(form, env):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
         return eval_fun(fun, [eval(f, env) for f in args_forms])
+    raise Exception('unknown form: %s' % form)
         
 
 class Env:
