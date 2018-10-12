@@ -52,6 +52,7 @@ interpreter_tests = [
         )
         (foo 4)
 """, 12)
+    , ("(defun foo (a b c) (+ a (+ b c))) (foo 1 2 3)", 6)
 ]
 
 
