@@ -166,9 +166,12 @@ class Env:
 
 
 def base_env():
+    def list_(*args):
+        return list(args)
+
     env = Env(
         t=True
-        , list=lambda *args: list(args)
+        , list=list_
         , quote=special_form(lambda env, e: e)
         , set=special_form(setq)
     )
