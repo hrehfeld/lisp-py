@@ -89,6 +89,7 @@ def apply(env, f, args):
     return eval_fun(f, args)
     
 
+# TODO if without else
 def _if(env, cond, then, _else):
     cond = eval(env, cond)
     # TODO check trueness test
