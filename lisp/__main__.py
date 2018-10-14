@@ -105,6 +105,7 @@ if args.type is not None and args.num is not None:
         print(read(Stream(program, 0)))
     if args.type == 'interpreter':
         program = interpreter_tests[args.num][0]
+        print(program)
         print(interpret(read(Stream(program, 0))))
 else:
     suite = load_tests()
