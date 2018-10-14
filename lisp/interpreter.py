@@ -37,11 +37,7 @@ def eval_macro(env, m, args):
     return eval(form, env)
     
 
-def defun(env, name, parameters, *body):
-    assert(symbolp(name))
-    if name.s in env:
-        raise Exception('fun %s already declared' % name.s)
-
+def fn(env, parameters, *body):
     for parameter in parameters:
         assert(symbolp(parameter))
     parameters = [p.s for p in parameters]
@@ -51,6 +47,15 @@ def defun(env, name, parameters, *body):
         for name, val in zip(parameters, args):
             fun_env[name] = val
         return progn(fun_env, body)
+    return f
+
+
+def defun(env, name, parameters, *body):
+    assert(symbolp(name))
+    if name.s in env:
+        raise Exception('fun %s already declared' % name.s)
+
+    f = fn(env, parameters, *body)
     env[name.s] = f
     return f
 
@@ -60,16 +65,8 @@ def defmacro(lexical_env, name, parameters, *body):
     if name.s in lexical_env:
         raise Exception('fun %s already declared' % name.s)
 
-    for parameter in parameters:
-        assert(symbolp(parameter))
-    parameters = [p.s for p in parameters]
-
-    def f(env, *args):
-        fun_env = Env(parent=lexical_env)
-        for name, val in zip(parameters, args):
-            fun_env[name] = val
-        return progn(fun_env, body)
-    m = Macro(f)
+    f = fn(lexical_env, parameters, *body)
+    m = Macro(lambda dynamic_env, *args: f(*args))
     lexical_env[name.s] = m
     return m
 
@@ -178,6 +175,7 @@ def base_env():
     env['def'] = special_form(defq)
     env['defun'] = special_form(defun)
     env['defmacro'] = special_form(defmacro)
+    env['fn'] = special_form(fn)
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
