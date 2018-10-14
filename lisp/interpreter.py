@@ -83,6 +83,12 @@ def funcall(env, f, *args):
     return eval_fun(f, args)
     
 
+def apply(env, f, args):
+    f = eval(env, f)
+    args = eval(env, args)
+    return eval_fun(f, args)
+    
+
 def is_num(f):
     return isinstance(f, int) or isinstance(f, float)
 
@@ -182,6 +188,7 @@ def base_env():
     env['defmacro'] = special_form(defmacro)
     env['fn'] = special_form(fn)
     env['call'] = special_form(funcall)
+    env['apply'] = special_form(apply)
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
