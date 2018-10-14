@@ -82,22 +82,16 @@ def defmacro(lexical_env, name, parameters, *body):
     return m
 
 
-def eval_fun(f, args):
-    assert(callable(f))
-    print(f, args, type(args))
-    return f(*args)
-    
-
 def funcall(env, f, *args):
     f = eval(env, f)
     args = [eval(env, a) for a in args]
-    return eval_fun(f, args)
+    return f(*args)
     
 
 def apply(env, f, args):
     f = eval(env, f)
     args = eval(env, args)
-    return eval_fun(f, args)
+    return f(*args)
     
 
 # TODO if without else
@@ -173,7 +167,7 @@ def eval(env, form):
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
-        return eval_fun(fun, [eval(env, f) for f in args_forms])
+        return fun(*[eval(env, f) for f in args_forms])
     raise Exception('unknown form: %s' % form)
         
 
