@@ -32,11 +32,6 @@ def Macro(f):
     return (MACRO, f)
 
 
-def eval_macro(env, m, args):
-    form = m[1](env, *args)
-    return eval(env, form)
-    
-
 def fn(env, parameters, *body):
     for i, parameter in enumerate(parameters):
         assert(symbolp(parameter))
@@ -172,7 +167,8 @@ def eval(env, form):
             return eval_special_form(env, fun, args_forms)
 
         if macrop(fun):
-            return eval_macro(env, fun, args_forms)
+            form = fun[1](env, *args_forms)
+            return eval(env, form)
 
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
