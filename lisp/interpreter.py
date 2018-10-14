@@ -202,6 +202,19 @@ def base_env():
     env['-'] = operator.__sub__
     env['*'] = operator.__mul__
     env['/'] = operator.__truediv__
+
+    def nth(i, l):
+        return l[i]
+    env['nth'] = nth
+
+    def head(l):
+        return l[0]
+    env['head'] = head
+
+    def tail(l):
+        return l[1:]
+    env['tail'] = tail
+    
     return env
 
 
