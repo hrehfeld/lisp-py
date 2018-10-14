@@ -38,14 +38,30 @@ def eval_macro(env, m, args):
     
 
 def fn(env, parameters, *body):
-    for parameter in parameters:
+    for i, parameter in enumerate(parameters):
         assert(symbolp(parameter))
-    parameters = [p.s for p in parameters]
+
+    variadic_name_sym = None
+    for i in (1, 2):
+        if len(parameters) >= i and parameters[-i] == intern('&'):
+            if i == 2:
+                variadic_name_sym = parameters[-1]
+            parameters = parameters[:-i]
+            break
 
     def f(*args):
         fun_env = Env(parent=env)
-        for name, val in zip(parameters, args):
-            fun_env[name] = val
+
+        for name_sym, val in zip(parameters, args):
+            fun_env[name_sym.s] = val
+
+        if variadic_name_sym is not None:
+            var_args = []
+            if len(args) > len(parameters):
+                var_args = args[len(parameters):]
+            fun_env[variadic_name_sym.s] = var_args
+        else:
+            assert(len(args) == len(parameters))
         return progn(fun_env, body)
     return f
 
