@@ -89,6 +89,13 @@ def apply(env, f, args):
     return eval_fun(f, args)
     
 
+def _if(env, cond, then, _else):
+    cond = eval(env, cond)
+    # TODO check trueness test
+    body = then if cond else _else
+    return progn(env, [body])
+
+
 def is_num(f):
     return isinstance(f, int) or isinstance(f, float)
 
@@ -189,6 +196,7 @@ def base_env():
     env['fn'] = special_form(fn)
     env['call'] = special_form(funcall)
     env['apply'] = special_form(apply)
+    env['if'] = special_form(_if)
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
