@@ -190,6 +190,10 @@ def base_env():
         return list(args)
     env['list'] = list_
 
+    def Tuple(*args):
+        return tuple(args)
+    env['Tuple'] = Tuple
+
     env['quote'] = special_form(lambda env, e: e)
     env['set'] = special_form(setq)
 
