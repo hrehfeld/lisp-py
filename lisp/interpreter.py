@@ -34,7 +34,7 @@ def Macro(f):
 
 def eval_macro(env, m, args):
     form = m[1](env, *args)
-    return eval(form, env)
+    return eval(env, form)
     
 
 def fn(env, parameters, *body):
@@ -78,7 +78,7 @@ def eval_fun(f, args):
     
 
 def funcall(env, f, *args):
-    f = eval(f, env)
+    f = eval(env, f)
     return eval_fun(f, args)
     
 
@@ -105,7 +105,7 @@ def callablep(e):
 
 def set_var(env, name, args):
     assert(len(args) <= 1)
-    val = eval(args[0], env) if args else None
+    val = eval(env, args[0]) if args else None
     env[name.s] = val
     return val
 
@@ -124,7 +124,7 @@ def setq(env, name, *args):
     return set_var(env, name, args)
 
 
-def eval(form, env):
+def eval(env, form):
     if is_num(form):
         return form
     if symbolp(form):
@@ -134,7 +134,7 @@ def eval(form, env):
     if listp(form):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')
-        fun = eval(form[0], env)
+        fun = eval(env, form[0])
         args_forms = form[1:]
 
         if special_formp(fun):
@@ -146,7 +146,7 @@ def eval(form, env):
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
-        return eval_fun(fun, [eval(f, env) for f in args_forms])
+        return eval_fun(fun, [eval(env, f) for f in args_forms])
     raise Exception('unknown form: %s' % form)
         
 
@@ -192,7 +192,7 @@ def base_env():
 def progn(env, forms):
     r = None
     for form in forms:
-        r = eval(form, env)
+        r = eval(env, form)
     return r
 
 
