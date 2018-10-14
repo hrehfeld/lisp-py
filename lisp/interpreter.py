@@ -184,15 +184,16 @@ class Env:
 
 
 def base_env():
+    env = Env()
+    env['t'] = True
     def list_(*args):
         return list(args)
 
-    env = Env(
-        t=True
-        , list=list_
-        , quote=special_form(lambda env, e: e)
-        , set=special_form(setq)
-    )
+    env['list'] = list_
+
+    env['quote'] = special_form(lambda env, e: e)
+    env['set'] = special_form(setq)
+
     env['def'] = special_form(defq)
     env['defun'] = special_form(defun)
     env['defmacro'] = special_form(defmacro)
