@@ -72,7 +72,6 @@ def defmacro(lexical_env, name, parameters, *body):
 
 
 def eval_fun(f, args):
-    assert(isinstance(args, list))
     assert(callable(f))
     print(f, args, type(args))
     return f(*args)
