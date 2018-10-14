@@ -36,6 +36,7 @@ interpreter_tests = [
     , ("'()", [])
     , ('''(+ 1 2)''', 3)
     , ("(call + 1 2)", 3)
+    , ("(call (fn (a) (+ a 2)) 1)", 3)
     , ("(def foo 2) (set foo 1)", 1)
     , ("(def foo 1)", 1)
     , ("(def foo 1) foo", 1)
