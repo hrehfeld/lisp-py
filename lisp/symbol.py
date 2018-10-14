@@ -2,13 +2,13 @@ symbols = {}
 
 class Symbol:
     def __init__(self, s):
-        self.s = s
+        self.name = s
 
     def __repr__(self):
-        return self.s
+        return self.name
 
     def __str__(self):
-        return self.s
+        return self.name
 
 
 def intern(s):
@@ -17,4 +17,4 @@ def intern(s):
 
 
 def symbol_name(sym):
-    return sym.s
+    return sym.name
