@@ -1,4 +1,4 @@
-from .symbol import intern, Symbol
+from .symbol import intern, Symbol, symbol_name
 
 import operator
 
@@ -44,13 +44,13 @@ def fn(env, parameters, *body):
         fun_env = Env(parent=env)
 
         for name_sym, val in zip(parameters, args):
-            fun_env[name_sym.s] = val
+            fun_env[symbol_name(name_sym)] = val
 
         if variadic_name_sym is not None:
             var_args = []
             if len(args) > len(parameters):
                 var_args = args[len(parameters):]
-            fun_env[variadic_name_sym.s] = var_args
+            fun_env[symbol_name(variadic_name_sym)] = var_args
         else:
             assert(len(args) == len(parameters))
         return progn(fun_env, body)
@@ -59,22 +59,22 @@ def fn(env, parameters, *body):
 
 def defun(env, name, parameters, *body):
     assert(symbolp(name))
-    if name.s in env:
-        raise Exception('fun %s already declared' % name.s)
+    if symbol_name(name) in env:
+        raise Exception('fun %s already declared' % symbol_name(name))
 
     f = fn(env, parameters, *body)
-    env[name.s] = f
+    env[symbol_name(name)] = f
     return f
 
 
 def defmacro(lexical_env, name, parameters, *body):
     assert(symbolp(name))
-    if name.s in lexical_env:
-        raise Exception('fun %s already declared' % name.s)
+    if symbol_name(name) in lexical_env:
+        raise Exception('fun %s already declared' % symbol_name(name))
 
     f = fn(lexical_env, parameters, *body)
     m = Macro(lambda dynamic_env, *args: f(*args))
-    lexical_env[name.s] = m
+    lexical_env[symbol_name(name)] = m
     return m
 
 
@@ -122,21 +122,21 @@ def callablep(e):
 def set_var(env, name, args):
     assert(len(args) <= 1)
     val = eval(env, args[0]) if args else None
-    env[name.s] = val
+    env[symbol_name(name)] = val
     return val
 
 
 def defq(env, name, *args):
     assert(symbolp(name))
-    if name.s in env:
-        raise Exception('var %s already declared' % name.s)
+    if symbol_name(name) in env:
+        raise Exception('var %s already declared' % symbol_name(name))
     return set_var(env, name, args)
 
 
 def setq(env, name, *args):
     assert(symbolp(name))
-    if name.s not in env:
-        raise Exception('var %s not declared' % name.s)
+    if symbol_name(name) not in env:
+        raise Exception('var %s not declared' % symbol_name(name))
     return set_var(env, name, args)
 
 
@@ -144,9 +144,9 @@ def eval(env, form):
     if is_num(form):
         return form
     if symbolp(form):
-        if not form.s in env:
-            raise Exception('Symbol %s not found in env (Keys: %s)' % (form.s, ', '.join(env.d.keys())))
-        return env[form.s]
+        if not symbol_name(form) in env:
+            raise Exception('Symbol %s not found in env (Keys: %s)' % (symbol_name(form), ', '.join(env.d.keys())))
+        return env[symbol_name(form)]
     if listp(form):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')

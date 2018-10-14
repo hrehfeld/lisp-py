@@ -16,3 +16,5 @@ def intern(s):
     return symbols[s]
 
 
+def symbol_name(sym):
+    return sym.s
