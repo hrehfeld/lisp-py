@@ -17,10 +17,6 @@ def special_form(f):
     return (SPECIAL_FORM, f)
 
 
-def eval_special_form(env, m, args):
-    return m[1](env, *args)
-    
-
 def macrop(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
 
@@ -158,7 +154,7 @@ def eval(env, form):
         args_forms = form[1:]
 
         if special_formp(fun):
-            return eval_special_form(env, fun, args_forms)
+            return fun[1](env, *args_forms)
 
         if macrop(fun):
             form = fun[1](env, *args_forms)
