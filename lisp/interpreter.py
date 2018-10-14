@@ -79,6 +79,7 @@ def eval_fun(f, args):
 
 def funcall(env, f, *args):
     f = eval(env, f)
+    args = [eval(env, a) for a in args]
     return eval_fun(f, args)
     
 
