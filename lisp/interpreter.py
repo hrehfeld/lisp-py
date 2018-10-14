@@ -188,7 +188,6 @@ def base_env():
     env['t'] = True
     def list_(*args):
         return list(args)
-
     env['list'] = list_
 
     env['quote'] = special_form(lambda env, e: e)
