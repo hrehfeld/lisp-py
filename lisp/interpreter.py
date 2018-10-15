@@ -7,6 +7,26 @@ MACRO = '__macro'
 SPECIAL_FORM = '__special'
 
 
+class Struct:
+    def __init__(self, *values):
+        self.values = list(values)
+
+
+    def __eq__(self, o):
+        return type(self) == type(o) and self.values == o.values
+
+
+def make_struct(env, name, *fields):
+    def constructor(*values):
+        assert(len(fields) == len(values))
+        return Struct(*values)
+
+    env['make-%s' % symbol_name(name)] = constructor
+    for ifield, field in enumerate(fields):
+        env['%s-%s' % (symbol_name(name), symbol_name(field))] = lambda struct: struct.values[ifield]
+
+    return constructor
+
 def special_formp(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == SPECIAL_FORM
 
@@ -222,6 +242,7 @@ def base_env():
         return l[1:]
     env['tail'] = tail
     
+    env['make-struct'] = special_form(make_struct)
     return env
 
 
