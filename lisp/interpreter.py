@@ -11,7 +11,6 @@ class Struct:
     def __init__(self, *values):
         self.values = list(values)
 
-
     def __eq__(self, o):
         return type(self) == type(o) and self.values == o.values
 
