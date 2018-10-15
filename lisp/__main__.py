@@ -5,6 +5,7 @@ from .interpreter import interpret, Struct
 import unittest
 import argparse
 
+import pathlib
 
 tests = [
     ('''''', [])
@@ -116,6 +117,7 @@ def load_tests():
 p = argparse.ArgumentParser()
 p.add_argument('--type')
 p.add_argument('--num', type=int)
+p.add_argument('-c', type=pathlib.Path)
 
 args = p.parse_args()
 
@@ -127,6 +129,10 @@ if args.type is not None and args.num is not None:
         program = interpreter_tests[args.num][0]
         print(program)
         print(interpret(read(Stream(program, 0))))
+elif args.c:
+    with args.c.open('r') as f:
+        program = f.read()
+    print(interpret(read(Stream(program, 0))))
 else:
     suite = load_tests()
     unittest.TextTestRunner().run(suite)
