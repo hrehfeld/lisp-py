@@ -127,13 +127,7 @@ def parse_symbol(token):
         
 
 def internal_read_quote(s):
-    readers = [read_quote, read_whitespace]
-    parsers = [
-        make_parse_fail('quote not allowed after quote')
-        , make_parse_fail('whitespace not allowed after quote')
-    ]
-    readers = list(zip(readers, parsers)) + [(reader, parser) for reader, parser in readers_parsers if reader not in readers]
-    return read(s, readers=readers, one=True)
+    return read(s, one=True)
 
 
 def read_quote(s):
