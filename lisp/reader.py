@@ -63,6 +63,7 @@ def read_list(s):
 
 
 def read_sublist(s):
+    # TODO check if ) throws error
     def read_list_end(s):
         if not s.empty() and is_paren_close(s.next()):
             return True
