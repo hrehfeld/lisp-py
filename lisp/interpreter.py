@@ -212,6 +212,8 @@ def base_env():
     def dict_(**kwargs):
         return dict(**kwargs)
     env['dict'] = dict_
+    env['dict-setdefault'] = dict.setdefault
+    env['dict-get'] = dict.get
 
     def Tuple(*args):
         return tuple(args)
