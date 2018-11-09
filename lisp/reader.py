@@ -6,6 +6,7 @@ token_end_chars = whitespace + ')'
 
 floating_point = '.'
 
+accessor_char = "."
 quote_char = "'"
 comment_chars = ";", 
 
@@ -137,7 +138,11 @@ def read_symbol(s):
 
 
 def parse_symbol(token):
-    return intern(token), None
+    if accessor_char not in token:
+        return intern(token), None
+    else:
+        accessors = token.split(accessor_char)
+        return [intern(s) for s in [accessor_char, *accessors]], None
         
 
 def internal_read_quote(s):
