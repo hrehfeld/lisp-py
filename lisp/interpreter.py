@@ -209,6 +209,10 @@ def base_env():
         return list(args)
     env['list'] = list_
 
+    def dict_(**kwargs):
+        return dict(**kwargs)
+    env['dict'] = dict_
+
     def Tuple(*args):
         return tuple(args)
     env['Tuple'] = Tuple
