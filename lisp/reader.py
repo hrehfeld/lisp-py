@@ -1,11 +1,13 @@
 from .symbol import intern
 
 whitespace = ' \t\n'
+newlines = '\n' #TODO add windows mac shit
 token_end_chars = whitespace + ')'
 
 floating_point = '.'
 
 quote_char = "'"
+comment_chars = ";", 
 
 
 def ends_token(s):
@@ -114,6 +116,18 @@ def parse_whitespace(token):
     return None, None
         
 
+def read_comment(s):
+    if s.next() not in comment_chars:
+        return False
+    while not s.empty() and s.peek() not in newlines:
+        s.next()
+    return True
+
+
+def parse_comment(token):
+    return None, None
+        
+
 def read_symbol(s):
     parsed = None
     while not (s.empty() or ends_token(s)):
@@ -148,6 +162,7 @@ def parse_quote(token):
 readers_parsers = [
     (read_list, parse_list)
     , (read_whitespace, parse_whitespace)
+    , (read_comment, parse_comment)
     , (read_num, parse_num)
     , (read_quote, parse_quote)
     , (read_symbol, parse_symbol)
