@@ -8,21 +8,29 @@ SPECIAL_FORM = '__special'
 
 
 class Struct:
-    def __init__(self, *values):
-        self.values = list(values)
+    def __init__(self, fields, values):
+        assert(len(fields) == len(values))
+        self.__slots__ = fields
+        for k, v in zip(fields, values):
+            setattr(self, k, v)
 
     def __eq__(self, o):
-        return type(self) == type(o) and self.values == o.values
-
+        if type(self) != type(o):
+            return False
+        for k in self.__slots__:
+            if getattr(self, k) != getattr(o, k):
+                return False
+        return True
 
 def make_struct(env, name, *fields):
     def constructor(*values):
         assert(len(fields) == len(values))
-        return Struct(*values)
+        return Struct([symbol_name(f) for f in fields], values)
 
     env['make-%s' % symbol_name(name)] = constructor
     for ifield, field in enumerate(fields):
-        env['%s-%s' % (symbol_name(name), symbol_name(field))] = lambda struct: struct.values[ifield]
+        fname = '%s-%s' % (symbol_name(name), symbol_name(field))
+        env[fname] = lambda struct: getattr(struct, symbol_name(field))
 
     return constructor
 

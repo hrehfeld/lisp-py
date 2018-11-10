@@ -82,9 +82,10 @@ interpreter_tests = [
 """, 12)
     , ("(defun foo (a b c) (+ a (+ b c))) (foo 1 2 3)", 6)
     , ("(defmacro add (a) (list '+ 5 a)) (add 1)", 6)
-    , ("(make-struct Foo) (make-Foo)", Struct())
-    , ("(make-struct Foo a) (make-Foo 1)", Struct(1))
+    , ("(make-struct Foo) (make-Foo)", Struct([], []))
+    , ("(make-struct Foo a) (make-Foo 1)", Struct(['a'], [1]))
     , ("(make-struct Foo a) (def v (make-Foo 1)) (Foo-a v)", 1)
+    , ("(make-struct Foo a) (def v (make-Foo 1)) v.a", 1)
 ]
 
 
