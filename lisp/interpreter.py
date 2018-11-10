@@ -227,6 +227,14 @@ def base_env():
         return tuple(args)
     env['Tuple'] = Tuple
 
+    def lookup(env, obj, *ks):
+        r = eval(env, obj)
+        for k in ks:
+            r = getattr(r, symbol_name(k))
+        return r
+
+    env['.'] = special_form(lookup)
+
     env['quote'] = special_form(lambda env, e: e)
     env['set'] = special_form(setq)
 
