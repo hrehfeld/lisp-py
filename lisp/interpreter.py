@@ -22,6 +22,7 @@ class Struct:
                 return False
         return True
 
+
 def make_struct(env, name, *fields):
     def constructor(*values):
         assert(len(fields) == len(values))
@@ -33,6 +34,7 @@ def make_struct(env, name, *fields):
         env[fname] = lambda struct: getattr(struct, symbol_name(field))
 
     return constructor
+
 
 def special_formp(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == SPECIAL_FORM
