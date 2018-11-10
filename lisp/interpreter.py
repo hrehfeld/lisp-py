@@ -119,6 +119,20 @@ def apply(env, f, args):
     return f(*args)
     
 
+def let(env, vars, *let_body):
+    for var in vars:
+        assert(listp(var))
+        assert(len(var) == 2)
+
+    env = Env(parent=env)
+
+    for var in vars:
+        name_sym, body = var
+        val = eval(env, body)
+        env[symbol_name(name_sym)] = val
+    return progn(env, let_body)
+
+
 # TODO if without else
 def _if(env, cond, then, _else):
     cond = eval(env, cond)
@@ -239,6 +253,7 @@ def base_env():
 
     env['quote'] = special_form(lambda env, e: e)
     env['set'] = special_form(setq)
+    env['let'] = special_form(let)
 
     env['def'] = special_form(defq)
     env['defun'] = special_form(defun)
