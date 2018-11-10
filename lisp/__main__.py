@@ -7,7 +7,7 @@ import argparse
 
 import pathlib
 
-tests = [
+reader_tests = [
     ('''''', [])
     , ('1', [1])
     , ('1.0', [1.0])
@@ -101,7 +101,7 @@ def load_tests():
         return testf(name)
 
     suite = unittest.TestSuite()
-    for itest, (program, expected_result) in enumerate(tests):
+    for itest, (program, expected_result) in enumerate(reader_tests):
         suite.addTest(make_test('reader_%s' % itest, program, expected_result))
 
     def make_test(name, program, expected_result):
@@ -129,7 +129,7 @@ args = p.parse_args()
 
 if args.type is not None and args.num is not None:
     if args.type == 'reader':
-        program = tests[args.num][0]
+        program = reader_tests[args.num][0]
         print(read(Stream(program, 0)))
     if args.type == 'interpreter':
         program = interpreter_tests[args.num][0]
