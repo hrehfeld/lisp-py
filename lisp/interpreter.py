@@ -296,6 +296,15 @@ def base_env():
     
     env['make-struct'] = special_form(make_struct)
 
+
+    def throw(e):
+        raise e
+    env['throw'] = throw
+
+    def exception(s):
+        return Exception(s)
+    env['Exception'] = exception
+    
     # sys utils
     def file_open(filename, mode):
         assert(symbolp(mode))
