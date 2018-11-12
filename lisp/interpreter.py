@@ -134,10 +134,12 @@ def let(env, vars, *let_body):
 
 
 # TODO if without else
-def _if(env, cond, then, _else):
+def _if(env, cond, then, *_else):
     cond = eval(env, cond)
     # TODO check trueness test
-    body = then if cond else _else
+    body = then
+    if not cond and _else:
+        body = _else[0]
     return progn(env, [body])
 
 
