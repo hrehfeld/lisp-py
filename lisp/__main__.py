@@ -35,7 +35,7 @@ interpreter_tests = [
     ('''''', None)
     , ('1', 1)
     , ('1.0', 1.0)
-    , ('t', True)
+    , ('true', True)
     , ('''(list)''', [])
     , ('''(list 1)''', [1])
     , ('''(quote ())''', [])

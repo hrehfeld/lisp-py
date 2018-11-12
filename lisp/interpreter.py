@@ -236,7 +236,7 @@ class Env:
 
 def base_env():
     env = Env()
-    env['t'] = True
+    env['true'] = True
     def list_(*args):
         return list(args)
     env['list'] = list_
