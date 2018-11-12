@@ -280,7 +280,10 @@ def base_env():
 
     env['eq'] = operator.__eq__
     env['neq'] = operator.__ne__
-    
+
+    def has(l, e):
+        return e in l
+    env['contains?'] = has
 
     def nth(i, l):
         return l[i]
