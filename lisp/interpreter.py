@@ -289,6 +289,10 @@ def base_env():
         return open(filename, mode)
 
     env['file-open'] = file_open
+    
+    import sys
+    env['argv'] = sys.argv[1:] # TODO hacky hack
+
     return env
 
 
