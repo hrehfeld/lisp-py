@@ -15,7 +15,7 @@ comment_chars = ";",
 
 def ends_token(s):
     """assumes that all tokens are ended by one of token_end_chars"""
-    return s.peek() in token_end_chars
+    return stream_peek(s) in token_end_chars
 
 
 def is_paren_open(c):
@@ -35,19 +35,19 @@ class Stream:
         self.program = program
         self.i = i
 
-    def peek(self):
-        return self.program[self.i]
+def stream_peek(self):
+    return self.program[self.i]
 
-    def next(self):
-        c = self.program[self.i]
-        self.i += 1
-        return c
+def stream_next(self):
+    c = self.program[self.i]
+    self.i += 1
+    return c
 
-    def advance(self, n):
-        self.i += n
+def stream_advance(self, n):
+    self.i += n
 
-    def empty(self):
-        return self.i >= len(self.program)
+def stream_empty(self):
+    return self.i >= len(self.program)
 
 
 def next_token_is(reader, s):
@@ -61,7 +61,7 @@ def make_parse_fail(msg):
 
 
 def read_list(s):
-    if s.empty() or not is_paren_open(s.next()):
+    if stream_empty(s) or not is_paren_open(stream_next(s)):
         return None
     read_sublist(s)
     return True
@@ -70,7 +70,7 @@ def read_list(s):
 def read_sublist(s):
     # TODO check if ) throws error
     def read_list_end(s):
-        if not s.empty() and is_paren_close(s.next()):
+        if not stream_empty(s) and is_paren_close(stream_next(s)):
             return True
 
     def parse_list_end(token):
@@ -87,18 +87,18 @@ def parse_list(token):
 
 def _read_int(s):
     istart = s.i
-    while not s.empty() and s.peek() in '0123456789':
-        s.next()
+    while not stream_empty(s) and stream_peek(s) in '0123456789':
+        stream_next(s)
     return istart != s.i
         
 
 def read_num(s):
     istart = s.i
     _read_int(s)
-    if not s.empty() and s.peek() in floating_point:
-        s.next()
+    if not stream_empty(s) and stream_peek(s) in floating_point:
+        stream_next(s)
         _read_int(s)
-    return istart != s.i and (s.empty() or ends_token(s))
+    return istart != s.i and (stream_empty(s) or ends_token(s))
 
 
 def parse_num(token):
@@ -107,12 +107,12 @@ def parse_num(token):
     
 
 def read_str(s):
-    if not s.peek() in str_start:
+    if not stream_peek(s) in str_start:
         return False
-    s.next()
-    while not s.empty() and s.next() not in str_end:
+    stream_next(s)
+    while not stream_empty(s) and stream_next(s) not in str_end:
         pass
-    return not s.empty()
+    return not stream_empty(s)
 
 
 def parse_str(token):
@@ -121,8 +121,8 @@ def parse_str(token):
 
 def read_whitespace(s):
     parsed = None
-    while not s.empty() and s.peek() in whitespace:
-        s.next()
+    while not stream_empty(s) and stream_peek(s) in whitespace:
+        stream_next(s)
         parsed = True
     return parsed
 
@@ -132,10 +132,10 @@ def parse_whitespace(token):
         
 
 def read_comment(s):
-    if s.next() not in comment_chars:
+    if stream_next(s) not in comment_chars:
         return False
-    while not s.empty() and s.peek() not in newlines:
-        s.next()
+    while not stream_empty(s) and stream_peek(s) not in newlines:
+        stream_next(s)
     return True
 
 
@@ -145,8 +145,8 @@ def parse_comment(token):
 
 def read_symbol(s):
     parsed = None
-    while not (s.empty() or ends_token(s)):
-        s.next()
+    while not (stream_empty(s) or ends_token(s)):
+        stream_next(s)
         parsed = True
     return parsed
 
@@ -164,7 +164,7 @@ def internal_read_quote(s):
 
 
 def read_quote(s):
-    if s.next() == quote_char:
+    if stream_next(s) == quote_char:
         els = internal_read_quote(s)
         # quote only supports one following exp
         if len(els) == 1:
@@ -194,7 +194,7 @@ RETURN_ACTION = 'RETURN'
 def read(s, readers=readers_parsers, one=False):
     r = []
     action = None
-    while not s.empty() and action is not RETURN_ACTION:
+    while not stream_empty(s) and action is not RETURN_ACTION:
         parsed = None
         for reader, parser in readers:
             istart = s.i
@@ -209,7 +209,7 @@ def read(s, readers=readers_parsers, one=False):
             else:
                 s.i = istart
         if not parsed:
-            raise Exception('Unexpected: "%s" at %s' % (s.peek(), s.i))
+            raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), s.i))
         if one:
             break
     return r
