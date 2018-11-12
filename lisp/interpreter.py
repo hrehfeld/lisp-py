@@ -293,6 +293,9 @@ def base_env():
     import sys
     env['argv'] = sys.argv[1:] # TODO hacky hack
 
+    import pathlib
+    env['make-Path'] = pathlib.Path
+
     return env
 
 
