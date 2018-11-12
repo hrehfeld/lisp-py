@@ -296,6 +296,13 @@ def base_env():
     import pathlib
     env['make-Path'] = pathlib.Path
 
+    def print_(*args):
+        s = ' '.join(map(str(args)))
+        print(s)
+        return s
+
+    env['print'] = print_
+
     return env
 
 
