@@ -281,6 +281,14 @@ def base_env():
     env['tail'] = tail
     
     env['make-struct'] = special_form(make_struct)
+
+    # sys utils
+    def file_open(filename, mode):
+        assert(symbolp(mode))
+        mode = symbol_name(mode)
+        return open(filename, mode)
+
+    env['file-open'] = file_open
     return env
 
 
