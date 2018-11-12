@@ -5,6 +5,8 @@ newlines = '\n' #TODO add windows mac shit
 token_end_chars = whitespace + ')'
 
 floating_point = '.'
+str_start = '"'
+str_end = '"'
 
 accessor_char = "."
 quote_char = "'"
@@ -104,6 +106,18 @@ def parse_num(token):
     return num(token), None
     
 
+def read_str(s):
+    if not s.peek() in str_start:
+        return False
+    s.next()
+    while not s.empty() and s.next() not in str_end:
+        pass
+    return not s.empty()
+
+
+def parse_str(token):
+    return token, None
+        
 
 def read_whitespace(s):
     parsed = None
@@ -169,6 +183,7 @@ readers_parsers = [
     , (read_whitespace, parse_whitespace)
     , (read_comment, parse_comment)
     , (read_num, parse_num)
+    , (read_str, parse_str)
     , (read_quote, parse_quote)
     , (read_symbol, parse_symbol)
 ]

@@ -145,6 +145,10 @@ def is_num(f):
     return isinstance(f, int) or isinstance(f, float)
 
 
+def is_str(f):
+    return isinstance(f, str)
+
+
 def symbolp(e):
     return isinstance(e, Symbol)
 
@@ -185,6 +189,8 @@ def setq(env, name, *args):
 
 def eval(env, form):
     if is_num(form):
+        return form
+    if is_str(form):
         return form
     if symbolp(form):
         if not symbol_name(form) in env:
