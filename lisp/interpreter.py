@@ -278,6 +278,7 @@ def base_env():
     env['*'] = operator.__mul__
     env['/'] = operator.__truediv__
 
+    env['eq'] = operator.__eq__
     def nth(i, l):
         return l[i]
     env['nth'] = nth
