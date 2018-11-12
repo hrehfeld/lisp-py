@@ -279,6 +279,9 @@ def base_env():
     env['/'] = operator.__truediv__
 
     env['eq'] = operator.__eq__
+    env['neq'] = operator.__ne__
+    
+
     def nth(i, l):
         return l[i]
     env['nth'] = nth
