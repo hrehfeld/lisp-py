@@ -238,6 +238,7 @@ def base_env():
     env = Env()
     env['true'] = True
     env['false'] = False
+    env['nil'] = None
     def list_(*args):
         return list(args)
     env['list'] = list_
