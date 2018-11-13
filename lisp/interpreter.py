@@ -82,7 +82,7 @@ def fn(env, parameters, *body):
             fun_env[symbol_name(variadic_name_sym)] = var_args
         else:
             assert(len(args) == len(parameters))
-        return progn(fun_env, body)
+        return progn(fun_env, *body)
     return f
 
 
@@ -140,7 +140,7 @@ def _if(env, cond, then, *_else):
     body = then
     if not cond and _else:
         body = _else[0]
-    return progn(env, [body])
+    return progn(env, body)
 
 
 def is_num(f):
@@ -332,7 +332,7 @@ def base_env():
     return env
 
 
-def progn(env, forms):
+def progn(env, *forms):
     r = None
     for form in forms:
         r = eval(env, form)
@@ -340,5 +340,5 @@ def progn(env, forms):
 
 
 def interpret(forms):
-    return progn(base_env(), forms)
+    return progn(base_env(), *forms)
     
