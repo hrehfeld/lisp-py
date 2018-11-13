@@ -130,7 +130,7 @@ def let(env, vars, *let_body):
         name_sym, body = var
         val = eval(env, body)
         env[symbol_name(name_sym)] = val
-    return progn(env, let_body)
+    return progn(env, *let_body)
 
 
 # TODO if without else
