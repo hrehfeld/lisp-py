@@ -56,13 +56,13 @@ interpreter_tests = [
     , ("(def foo 2) (call + 1 foo)", 3)
     , ("(call (fn (a) (+ a 2)) 1)", 3)
     , ("(apply (fn (a) (+ a 2)) '(1))", 3)
-    , ("(call (fn (a & b) (+ a 2)) 1)", 3)
-    , ("(call (fn (a & b) (+ a 2)) 1 2)", 3)
-    , ("(call (fn (a & b) (if b (head b) a)) 1)", 1)
-    , ("(call (fn (a & b) (if b (head b) a)) 1 2)", 2)
+    , ("(call (fn (a &optional b) (+ a 2)) 1)", 3)
+    , ("(call (fn (a &optional b) (+ a 2)) 1 2)", 3)
+    , ("(call (fn (a &optional b) (if b (head b) a)) 1)", 1)
+    , ("(call (fn (a &optional b) (if b (head b) a)) 1 2)", 2)
     , ("""
 (call 
-  (fn (a & b)
+  (fn (a &optional b)
     (+ a (if b (head b) 2)))
   1 2)""", 3)
     , ("(def foo 2) (set foo 1)", 1)

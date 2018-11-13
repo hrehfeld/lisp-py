@@ -63,7 +63,7 @@ def fn(env, parameters, *body):
 
     variadic_name_sym = None
     for i in (1, 2):
-        if len(parameters) >= i and parameters[-i] == intern('&'):
+        if len(parameters) >= i and parameters[-i] == intern('&optional'):
             if i == 2:
                 variadic_name_sym = parameters[-1]
             parameters = parameters[:-i]
