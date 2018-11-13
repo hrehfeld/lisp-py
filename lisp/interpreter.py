@@ -270,6 +270,7 @@ def base_env():
     env['quote'] = special_form(lambda env, e: e)
     env['set'] = special_form(setq)
     env['let'] = special_form(let)
+    env['progn'] = special_form(progn)
 
     env['def'] = special_form(defq)
     env['defun'] = special_form(defun)
