@@ -253,6 +253,12 @@ def base_env():
         return tuple(args)
     env['Tuple'] = Tuple
 
+    def while_(env, cond, *body):
+        while eval(env, cond):
+            eval(env, [intern('progn'), *body])
+
+    env['while'] = special_form(while_)
+
     def lookup(env, obj, *ks):
         r = eval(env, obj)
         for k in ks:
