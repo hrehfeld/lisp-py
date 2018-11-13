@@ -336,6 +336,8 @@ def base_env():
 
     env['print'] = print_
 
+    # TODO
+    #(infix
     return env
 
 
