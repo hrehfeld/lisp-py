@@ -28,7 +28,7 @@ def make_struct(env, name, *fields):
         assert(len(fields) == len(values))
         return Struct([symbol_name(f) for f in fields], values)
 
-    env['make-%s' % symbol_name(name)] = constructor
+    env[symbol_name(name)] = constructor
     for ifield, field in enumerate(fields):
         fname = '%s-%s' % (symbol_name(name), symbol_name(field))
         env[fname] = lambda struct: getattr(struct, symbol_name(field))
