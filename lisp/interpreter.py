@@ -1,5 +1,5 @@
 from .symbol import intern, Symbol, symbol_name
-
+from .reader import read, Stream
 import operator
 
 
@@ -339,6 +339,10 @@ def base_env(args=[]):
 
     # TODO
     #(infix
+
+    with open('stdlib.lisp', 'r') as f:
+        interpret(read(Stream(f.read(), 0)), env)
+
     return env
 
 
