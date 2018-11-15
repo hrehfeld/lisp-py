@@ -11,6 +11,9 @@ str_end = '"'
 accessor_char = "."
 quote_char = "'"
 comment_chars = ";", 
+escape_chars = '\\'
+
+special_chars = dict(n='\n', t='\t')
 
 
 class Valid:
@@ -125,15 +128,28 @@ def read_num(s):
 
 
 def read_str(s):
-    istart = stream_pos(s)
     if not stream_peek(s) in str_start:
         return None
     stream_next(s)
-    while not stream_empty(s) and stream_next(s) not in str_end:
-        pass
+    r = ''
+    escape_open = False
+    while not stream_empty(s) and (stream_peek(s) not in str_end or escape_open):
+        c = stream_next(s)
+        if c in escape_chars:
+            if escape_open:
+                r += c
+            escape_open = not escape_open
+        else:
+            if escape_open:
+                if c in special_chars:
+                    c = special_chars[c]
+            r += c
+            escape_open = False
     if stream_empty(s):
         return None
-    return Valid(stream_token(s, istart, stream_pos(s)))
+    else:
+        stream_next(s)
+    return Valid(r)
 
 
 def read_whitespace(s):
