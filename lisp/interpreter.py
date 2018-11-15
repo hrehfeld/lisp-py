@@ -289,6 +289,19 @@ def base_env(args=[]):
     env['eq'] = operator.__eq__
     env['neq'] = operator.__ne__
 
+    env['not'] = operator.__not__
+    env['and'] = operator.__and__
+    env['or'] = operator.__or__
+
+    env['<'] = operator.__lt__
+    env['<='] = operator.__le__
+    env['>'] = operator.__gt__
+    env['>='] = operator.__ge__
+
+    def length(l):
+        return len(l)
+    env['length'] = length
+
     def has(l, e):
         return e in l
     env['contains?'] = has
