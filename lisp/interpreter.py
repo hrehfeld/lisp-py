@@ -234,7 +234,7 @@ class Env:
         return self.d.__contains__(k) or (self.parent and self.parent.__contains__(k))
 
 
-def base_env():
+def base_env(args=[]):
     env = Env()
     env['true'] = True
     env['false'] = False
@@ -325,7 +325,7 @@ def base_env():
     env['file-open'] = file_open
     
     import sys
-    env['argv'] = sys.argv[1:] # TODO hacky hack
+    env['argv'] = args
 
     import pathlib
     env['make-Path'] = pathlib.Path
@@ -349,6 +349,6 @@ def progn(env, *forms):
     return r
 
 
-def interpret(forms):
-    return progn(base_env(), *forms)
+def interpret(forms, args=[]):
+    return progn(base_env(args), *forms)
     
