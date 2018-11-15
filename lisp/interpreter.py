@@ -243,9 +243,7 @@ def base_env():
         return list(args)
     env['list'] = list_
 
-    def dict_(**kwargs):
-        return dict(**kwargs)
-    env['dict'] = dict_
+    env['dict'] = dict
     env['dict-setdefault'] = dict.setdefault
     env['dict-get'] = dict.get
 
