@@ -324,7 +324,6 @@ def base_env(args=[]):
 
     env['file-open'] = file_open
     
-    import sys
     env['argv'] = args
 
     import pathlib
