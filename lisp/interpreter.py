@@ -169,7 +169,7 @@ def callablep(e):
 
 
 def set_var(env, name, args):
-    assert(len(args) <= 1)
+    assert(len(args) <= 1), len(args)
     val = eval(env, args[0]) if args else None
     env[symbol_name(name)] = val
     return val
