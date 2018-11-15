@@ -192,6 +192,7 @@ RETURN_ACTION = 'RETURN'
 
 
 def read(s, readers=readers_parsers, one=False):
+    assert isinstance(s, Stream), type(s)
     r = []
     action = None
     while not stream_empty(s) and action is not RETURN_ACTION:
