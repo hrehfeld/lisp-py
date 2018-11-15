@@ -252,7 +252,7 @@ def base_env(args=[]):
 
     def Tuple(*args):
         return tuple(args)
-    env['Tuple'] = Tuple
+    env['tuple'] = Tuple
 
     def while_(env, cond, *body):
         while eval(env, cond):
