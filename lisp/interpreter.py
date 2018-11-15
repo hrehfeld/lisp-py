@@ -246,6 +246,9 @@ def base_env():
     env['dict'] = dict
     env['dict-setdefault'] = dict.setdefault
     env['dict-get'] = dict.get
+    def dict_set(d, k, v):
+        d[k] = v
+    env['dict-set'] = dict_set
 
     def Tuple(*args):
         return tuple(args)
