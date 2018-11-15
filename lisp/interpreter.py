@@ -349,6 +349,8 @@ def progn(env, *forms):
     return r
 
 
-def interpret(forms, args=[]):
-    return progn(base_env(args), *forms)
+def interpret(forms, env=None, args=[]):
+    if env is None:
+        env = base_env(args)
+    return progn(env, *forms)
     
