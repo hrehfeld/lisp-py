@@ -57,24 +57,20 @@ def stream_token(self, a, b):
 
 
 def stream_peek(self):
-    assert isinstance(self, Stream)
     return self.program[self.i]
 
 
 def stream_next(self):
-    assert isinstance(self, Stream)
     c = self.program[self.i]
     self.i += 1
     return c
 
 
 def stream_advance(self, n):
-    assert isinstance(self, Stream), str(type(self))
     self.i += n
 
 
 def stream_empty(self):
-    assert isinstance(self, Stream), str(type(self))
     return self.i >= len(self.program)
 
 
