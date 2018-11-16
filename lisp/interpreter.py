@@ -192,15 +192,15 @@ def __setq(env, name, *args):
 def __eval(env, form):
     if is_num(form):
         return form
-    if is_str(form):
+    elif is_str(form):
         return form
-    if keywordp(form):
+    elif keywordp(form):
         return form
-    if symbolp(form):
+    elif symbolp(form):
         if not symbol_name(form) in env:
             raise Exception('Symbol "%s" not found in env (Keys: %s)' % (symbol_name(form), ', '.join(env.d.keys())))
         return env[symbol_name(form)]
-    if listp(form):
+    elif listp(form):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')
         fun = __eval(env, form[0])
@@ -234,7 +234,8 @@ def __eval(env, form):
                         args.append(arg)
 
             return fun(*args, **kwargs)
-    raise Exception('unknown form: %s' % form)
+    else:
+        raise Exception('unknown form: %s' % form)
         
 
 class Env:
