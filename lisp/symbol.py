@@ -1,14 +1,9 @@
 symbols = {}
 
-class Symbol:
-    def __init__(self, s):
-        self.name = s
+SYMBOL = '__SYMBOL'
 
-    def __repr__(self):
-        return self.name
-
-    def __str__(self):
-        return "'" + self.name
+def Symbol(s):
+    return (SYMBOL, s)
 
 
 def intern(s):
@@ -17,4 +12,10 @@ def intern(s):
 
 
 def symbol_name(sym):
-    return sym.name
+    return sym[1]
+
+
+def symbolp(sym):
+    return isinstance(sym, tuple) and len(sym) == 2 and sym[0] is SYMBOL
+
+

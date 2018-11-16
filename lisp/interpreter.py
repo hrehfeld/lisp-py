@@ -1,4 +1,4 @@
-from .symbol import intern, Symbol, symbol_name
+from .symbol import intern, Symbol, symbol_name, symbolp
 from .reader import read, Stream
 import operator
 
@@ -149,10 +149,6 @@ def is_num(f):
 
 def is_str(f):
     return isinstance(f, str)
-
-
-def symbolp(e):
-    return isinstance(e, Symbol)
 
 
 def keywordp(e):
