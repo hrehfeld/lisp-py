@@ -155,6 +155,10 @@ def symbolp(e):
     return isinstance(e, Symbol)
 
 
+def keywordp(e):
+    return symbolp(e) and symbol_name(e).startswith(':')
+
+
 def listp(e):
     return isinstance(e, list)
 
@@ -194,6 +198,8 @@ def eval(env, form):
         return form
     if is_str(form):
         return form
+    if keywordp(form):
+        return form
     if symbolp(form):
         if not symbol_name(form) in env:
             raise Exception('Symbol %s not found in env (Keys: %s)' % (symbol_name(form), ', '.join(env.d.keys())))
@@ -214,7 +220,23 @@ def eval(env, form):
         if not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
-        return fun(*[eval(env, f) for f in args_forms])
+        args_forms = [eval(env, f) for f in args_forms]
+        # TODO check keywords here or in fn()?
+        args = []
+        kwargs = {}
+        kw = False
+        for arg in args_forms:
+            if keywordp(arg):
+                kw = arg
+            else:
+                if kw:
+                    # without :
+                    k = symbol_name(kw)[1:]
+                    kwargs[k] = arg
+                else:
+                    args.append(arg)
+
+        return fun(*args, **kwargs)
     raise Exception('unknown form: %s' % form)
         
 

@@ -86,6 +86,7 @@ interpreter_tests = [
     , ("(make-struct Foo a) (Foo 1)", Struct(['a'], [1]))
     , ("(make-struct Foo a) (def v (Foo 1)) (Foo-a v)", 1)
     , ("(make-struct Foo a) (def v (Foo 1)) v.a", 1)
+    , ("(def symbols (dict :a 1))", dict(a=1))
 ]
 
 
