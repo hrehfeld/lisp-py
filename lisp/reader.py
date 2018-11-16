@@ -194,6 +194,8 @@ def read_symbol(s):
             return Valid(intern(token))
         else:
             accessors = token.split(accessor_char)
+            accessors = [a for a in accessors if a]
+            
             return Valid([intern(s) for s in [accessor_char, *accessors]])
     return None
         
