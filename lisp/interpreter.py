@@ -23,7 +23,7 @@ class Struct:
         return True
 
 
-def make_struct(env, name, *fields):
+def __make_struct(env, name, *fields):
     def constructor(*values):
         assert(len(fields) == len(values))
         return Struct([symbol_name(f) for f in fields], values)
@@ -57,7 +57,7 @@ def Macro(f):
     return (MACRO, f)
 
 
-def fn(env, parameters, *body):
+def __fn(env, parameters, *body):
     for i, parameter in enumerate(parameters):
         assert(symbolp(parameter))
 
@@ -82,44 +82,44 @@ def fn(env, parameters, *body):
             fun_env[symbol_name(variadic_name_sym)] = var_args
         else:
             assert(len(args) == len(parameters))
-        return progn(fun_env, *body)
+        return __progn(fun_env, *body)
     return f
 
 
-def defun(env, name, parameters, *body):
+def __defun(env, name, parameters, *body):
     assert(symbolp(name))
     if symbol_name(name) in env:
         raise Exception('fun %s already declared' % symbol_name(name))
 
-    f = fn(env, parameters, *body)
+    f = __fn(env, parameters, *body)
     env[symbol_name(name)] = f
     return f
 
 
-def defmacro(lexical_env, name, parameters, *body):
+def __defmacro(lexical_env, name, parameters, *body):
     assert(symbolp(name))
     if symbol_name(name) in lexical_env:
         raise Exception('fun %s already declared' % symbol_name(name))
 
-    f = fn(lexical_env, parameters, *body)
+    f = __fn(lexical_env, parameters, *body)
     m = Macro(lambda dynamic_env, *args: f(*args))
     lexical_env[symbol_name(name)] = m
     return m
 
 
-def funcall(env, f, *args):
-    f = eval(env, f)
-    args = [eval(env, a) for a in args]
+def __funcall(env, f, *args):
+    f = __eval(env, f)
+    args = [__eval(env, a) for a in args]
     return f(*args)
     
 
-def apply(env, f, args):
-    f = eval(env, f)
-    args = eval(env, args)
+def __apply(env, f, args):
+    f = __eval(env, f)
+    args = __eval(env, args)
     return f(*args)
     
 
-def let(env, vars, *let_body):
+def __let(env, vars, *let_body):
     for var in vars:
         assert(listp(var))
         assert(len(var) == 2)
@@ -128,19 +128,19 @@ def let(env, vars, *let_body):
 
     for var in vars:
         name_sym, body = var
-        val = eval(env, body)
+        val = __eval(env, body)
         env[symbol_name(name_sym)] = val
-    return progn(env, *let_body)
+    return __progn(env, *let_body)
 
 
 # TODO if without else
-def _if(env, cond, then, *_else):
-    cond = eval(env, cond)
+def __if(env, cond, then, *_else):
+    cond = __eval(env, cond)
     # TODO check trueness test
     body = then
     if not cond and _else:
         body = _else[0]
-    return progn(env, body)
+    return __progn(env, body)
 
 
 def is_num(f):
@@ -172,28 +172,28 @@ def callablep(e):
     return callable(e)
 
 
-def set_var(env, name, args):
+def __set_var(env, name, args):
     assert(len(args) <= 1), len(args)
-    val = eval(env, args[0]) if args else None
+    val = __eval(env, args[0]) if args else None
     env[symbol_name(name)] = val
     return val
 
 
-def defq(env, name, *args):
+def __def(env, name, *args):
     assert(symbolp(name))
     if symbol_name(name) in env:
         raise Exception('var %s already declared' % symbol_name(name))
-    return set_var(env, name, args)
+    return __set_var(env, name, args)
 
 
-def setq(env, name, *args):
+def __setq(env, name, *args):
     assert(symbolp(name))
     if symbol_name(name) not in env:
         raise Exception('var %s not declared' % symbol_name(name))
-    return set_var(env, name, args)
+    return __set_var(env, name, args)
 
 
-def eval(env, form):
+def __eval(env, form):
     if is_num(form):
         return form
     if is_str(form):
@@ -207,7 +207,7 @@ def eval(env, form):
     if listp(form):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')
-        fun = eval(env, form[0])
+        fun = __eval(env, form[0])
         args_forms = form[1:]
 
         if special_formp(fun):
@@ -215,14 +215,14 @@ def eval(env, form):
 
         elif macrop(fun):
             form = fun[1](env, *args_forms)
-            return eval(env, form)
+            return __eval(env, form)
 
         elif not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
         else:
-            args_forms = [eval(env, f) for f in args_forms]
-            # TODO check keywords here or in fn()?
+            args_forms = [__eval(env, f) for f in args_forms]
+            # TODO check keywords here or in __fn()?
             args = []
             kwargs = {}
             kw = False
@@ -277,32 +277,32 @@ def base_env(args=[]):
         return tuple(args)
     env['tuple'] = Tuple
 
-    def while_(env, cond, *body):
-        while eval(env, cond):
-            eval(env, [intern('progn'), *body])
+    def __while(env, cond, *body):
+        while __eval(env, cond):
+            __eval(env, [intern('__progn'), *body])
 
-    env['while'] = special_form(while_)
+    env['while'] = special_form(__while)
 
-    def lookup(env, obj, *ks):
-        r = eval(env, obj)
+    def __lookup(env, obj, *ks):
+        r = __eval(env, obj)
         for k in ks:
             r = getattr(r, symbol_name(k))
         return r
 
-    env['.'] = special_form(lookup)
+    env['.'] = special_form(__lookup)
 
     env['quote'] = special_form(lambda env, e: e)
-    env['set'] = special_form(setq)
-    env['let'] = special_form(let)
-    env['progn'] = special_form(progn)
+    env['set'] = special_form(__setq)
+    env['let'] = special_form(__let)
+    env['progn'] = special_form(__progn)
 
-    env['def'] = special_form(defq)
-    env['defun'] = special_form(defun)
-    env['defmacro'] = special_form(defmacro)
-    env['fn'] = special_form(fn)
-    env['call'] = special_form(funcall)
-    env['apply'] = special_form(apply)
-    env['if'] = special_form(_if)
+    env['def'] = special_form(__def)
+    env['defun'] = special_form(__defun)
+    env['defmacro'] = special_form(__defmacro)
+    env['fn'] = special_form(__fn)
+    env['call'] = special_form(__funcall)
+    env['apply'] = special_form(__apply)
+    env['if'] = special_form(__if)
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
@@ -341,7 +341,7 @@ def base_env(args=[]):
         return l[1:]
     env['tail'] = tail
     
-    env['make-struct'] = special_form(make_struct)
+    env['make-struct'] = special_form(__make_struct)
 
 
     def throw(e):
@@ -381,15 +381,15 @@ def base_env(args=[]):
     return env
 
 
-def progn(env, *forms):
+def __progn(env, *forms):
     r = None
     for form in forms:
-        r = eval(env, form)
+        r = __eval(env, form)
     return r
 
 
 def interpret(forms, env=None, args=[]):
     if env is None:
         env = base_env(args)
-    return progn(env, *forms)
+    return __progn(env, *forms)
     
