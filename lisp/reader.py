@@ -42,36 +42,42 @@ def is_whitespace(c):
     return c in " \n\t"
 
 
-class Stream:
-    def __init__(self, program, i):
-        self.program = program
-        self.i = i
+def Stream(source, pos):
+    return dict(source=source, pos=pos)
+
+
+def stream_source(self):
+    return self['source']
 
 
 def stream_pos(self):
-    return self.i
+    return self['pos']
+
+
+def stream_pos_set(self, pos):
+    self['pos'] = pos
 
 
 def stream_token(self, a, b):
-    return self.program[a:b]
+    return stream_source(self)[a:b]
 
 
 def stream_peek(self):
-    return self.program[self.i]
+    return stream_source(self)[stream_pos(self)]
 
 
 def stream_next(self):
-    c = self.program[self.i]
-    self.i += 1
+    c = stream_source(self)[stream_pos(self)]
+    stream_pos_set(self, stream_pos(self) + 1)
     return c
 
 
 def stream_advance(self, n):
-    self.i += n
+    stream_pos_set(self, stream_pos(self) + n)
 
 
 def stream_empty(self):
-    return self.i >= len(self.program)
+    return stream_pos(self) >= len(stream_source(self))
 
 
 def next_token_is(reader, s):
@@ -99,14 +105,14 @@ def read_list(s):
 
 
 def _read_int(s):
-    istart = s.i
+    istart = stream_pos(s)
     unary = 0
     if not stream_empty(s) and stream_peek(s) in ('-', '+'):
         stream_next(s)
         unary = 1
     while not stream_empty(s) and stream_peek(s) in '0123456789':
         stream_next(s)
-    return istart + unary < s.i
+    return istart + unary < stream_pos(s)
         
 
 def read_num(s):
@@ -213,7 +219,7 @@ def read(s, readers=readers, one=False):
     res = None
     while not stream_empty(s) and not return_action(res):
         for reader in readers:
-            istart = s.i
+            istart = stream_pos(s)
             res = reader(s)
             if valid_action(res):
                 e = res.expr
@@ -221,9 +227,9 @@ def read(s, readers=readers, one=False):
                     r.append(e)
                 break
             else:
-                s.i = istart
+                stream_pos_set(s, istart)
         if not valid_action(res):
-            raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), s.i))
+            raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), stream_pos(s)))
         elif one:
             break
     return r
