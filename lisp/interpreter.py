@@ -213,30 +213,31 @@ def eval(env, form):
         if special_formp(fun):
             return fun[1](env, *args_forms)
 
-        if macrop(fun):
+        elif macrop(fun):
             form = fun[1](env, *args_forms)
             return eval(env, form)
 
-        if not callablep(fun):
+        elif not callablep(fun):
             raise Exception('first el %s of list %s is not callable' % (fun, form))
 
-        args_forms = [eval(env, f) for f in args_forms]
-        # TODO check keywords here or in fn()?
-        args = []
-        kwargs = {}
-        kw = False
-        for arg in args_forms:
-            if keywordp(arg):
-                kw = arg
-            else:
-                if kw:
-                    # without :
-                    k = symbol_name(kw)[1:]
-                    kwargs[k] = arg
+        else:
+            args_forms = [eval(env, f) for f in args_forms]
+            # TODO check keywords here or in fn()?
+            args = []
+            kwargs = {}
+            kw = False
+            for arg in args_forms:
+                if keywordp(arg):
+                    kw = arg
                 else:
-                    args.append(arg)
+                    if kw:
+                        # without :
+                        k = symbol_name(kw)[1:]
+                        kwargs[k] = arg
+                    else:
+                        args.append(arg)
 
-        return fun(*args, **kwargs)
+            return fun(*args, **kwargs)
     raise Exception('unknown form: %s' % form)
         
 

@@ -91,14 +91,15 @@ def make_parse_fail(msg):
 def read_list(s):
     if stream_empty(s) or not is_paren_open(stream_next(s)):
         return
-    # TODO check if ) throws error
-    def read_list_end(s):
-        if stream_empty(s) or not is_paren_close(stream_next(s)):
-            return None
-        return Return(None)
+    else:
+        # TODO check if ) throws error
+        def read_list_end(s):
+            if stream_empty(s) or not is_paren_close(stream_next(s)):
+                return None
+            return Return(None)
 
-    els = read(s, readers=[read_list_end] + readers)
-    return Valid(els)
+        els = read(s, readers=[read_list_end] + readers)
+        return Valid(els)
 
 
 def _read_int(s):
@@ -121,35 +122,32 @@ def read_num(s):
         parsed = _read_int(s)
         num = float
     parsed = parsed and (stream_empty(s) or ends_token(s))
-    if not parsed:
-        return None
-    s = stream_token(s, istart, stream_pos(s))
-    return Valid(num(s))
+    if parsed:
+        s = stream_token(s, istart, stream_pos(s))
+        return Valid(num(s))
+    return None
 
 
 def read_str(s):
-    if not stream_peek(s) in str_start:
-        return None
-    stream_next(s)
-    r = ''
-    escape_open = False
-    while not stream_empty(s) and (stream_peek(s) not in str_end or escape_open):
-        c = stream_next(s)
-        if c in escape_chars:
-            if escape_open:
-                r += c
-            escape_open = not escape_open
-        else:
-            if escape_open:
-                if c in special_chars:
-                    c = special_chars[c]
-            r += c
-            escape_open = False
-    if stream_empty(s):
-        return None
-    else:
+    if stream_peek(s) in str_start:
         stream_next(s)
-    return Valid(r)
+        r = ''
+        escape_open = False
+        while not stream_empty(s) and (stream_peek(s) not in str_end or escape_open):
+            c = stream_next(s)
+            if c in escape_chars:
+                if escape_open:
+                    r += c
+                escape_open = not escape_open
+            else:
+                if escape_open and c in special_chars:
+                    c = special_chars[c]
+                r += c
+                escape_open = False
+        if not stream_empty(s):
+            stream_next(s)
+            return Valid(r)
+    return None
 
 
 def read_whitespace(s):
@@ -174,26 +172,25 @@ def read_symbol(s):
     while not (stream_empty(s) or ends_token(s)):
         stream_next(s)
         parsed = True
-    if not parsed:
-        return None
-
-    token = stream_token(s, istart, stream_pos(s))
-    if accessor_char not in token:
-        return Valid(intern(token))
-    else:
-        accessors = token.split(accessor_char)
-        return Valid([intern(s) for s in [accessor_char, *accessors]])
+    if parsed:
+        token = stream_token(s, istart, stream_pos(s))
+        if accessor_char not in token:
+            return Valid(intern(token))
+        else:
+            accessors = token.split(accessor_char)
+            return Valid([intern(s) for s in [accessor_char, *accessors]])
+    return None
         
 
 def read_quote(s):
-    if stream_next(s) != quote_char:
-        return None
-    
-    # quote only supports one following exp
-    expr =  read(s, one=True)
+    if stream_next(s) == quote_char:
+        # quote only supports one following exp
+        expr =  read(s, one=True)
 
-    r = [intern('quote'), *expr]
-    return Valid(r)
+        r = [intern('quote'), *expr]
+        return Valid(r)
+    return None
+    
     
 
 readers = [
@@ -232,7 +229,7 @@ def read(s, readers=readers, one=False):
                 s.i = istart
         if not valid_action(res):
             raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), s.i))
-        if one:
+        elif one:
             break
     return r
 
