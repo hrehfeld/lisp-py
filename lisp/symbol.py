@@ -3,6 +3,7 @@ symbols = {}
 SYMBOL = '__SYMBOL'
 
 def Symbol(s):
+    assert(s)
     return (SYMBOL, s)
 
 
