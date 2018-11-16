@@ -198,7 +198,7 @@ def __eval(env, form):
         return form
     if symbolp(form):
         if not symbol_name(form) in env:
-            raise Exception('Symbol %s not found in env (Keys: %s)' % (symbol_name(form), ', '.join(env.d.keys())))
+            raise Exception('Symbol "%s" not found in env (Keys: %s)' % (symbol_name(form), ', '.join(env.d.keys())))
         return env[symbol_name(form)]
     if listp(form):
         if not length(form):
