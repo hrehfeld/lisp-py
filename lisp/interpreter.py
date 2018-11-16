@@ -273,6 +273,11 @@ def base_env(args=[]):
         return tuple(args)
     env['tuple'] = Tuple
 
+    def __import(env, *args):
+        # TODO 
+        pass
+    env['import'] = special_form(__import)
+
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('__progn'), *body])
