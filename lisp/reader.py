@@ -16,13 +16,27 @@ escape_chars = '\\'
 special_chars = dict(n='\n', t='\t')
 
 
-class Valid:
-    def __init__(self, expr):
-        self.expr = expr
+VALID = '__VALID'
+RETURN = '__RETURN'
+
+def Valid(expr):
+    return (VALID, expr)
 
 
-class Return(Valid):
-    pass
+def Return(expr):
+    return (RETURN, expr)
+
+
+def valid_action(a):
+    return isinstance(a, tuple) and len(a) == 2 and a[0] in (VALID, RETURN)
+
+
+def return_action(a):
+    return isinstance(a, tuple) and len(a) == 2 and a[0] == RETURN
+    
+
+def get_expr(s):
+    return s[1]
 
 
 def ends_token(s):
@@ -206,14 +220,6 @@ readers = [
 ]
 
 
-def valid_action(a):
-    return isinstance(a, Valid)
-
-
-def return_action(a):
-    return isinstance(a, Return)
-    
-
 def read(s, readers=readers, one=False):
     r = []
     res = None
@@ -222,7 +228,7 @@ def read(s, readers=readers, one=False):
             istart = stream_pos(s)
             res = reader(s)
             if valid_action(res):
-                e = res.expr
+                e = get_expr(res)
                 if e is not None:
                     r.append(e)
                 break
