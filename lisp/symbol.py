@@ -8,7 +8,7 @@ class Symbol:
         return self.name
 
     def __str__(self):
-        return self.name
+        return "'" + self.name
 
 
 def intern(s):
