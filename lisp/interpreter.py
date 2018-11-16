@@ -238,10 +238,9 @@ def __eval(env, form):
         
 
 class Env:
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent=None):
         self.parent = parent
         self.d = {}
-        self.d.update(kwargs)
 
     def __setitem__(self, k, v):
         self.d[k] = v
