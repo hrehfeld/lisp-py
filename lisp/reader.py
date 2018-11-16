@@ -209,7 +209,6 @@ def return_action(a):
     
 
 def read(s, readers=readers, one=False):
-    assert isinstance(s, Stream), type(s)
     r = []
     res = None
     while not stream_empty(s) and not return_action(res):
