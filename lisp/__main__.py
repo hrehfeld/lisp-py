@@ -89,10 +89,10 @@ interpreter_tests = [
     , ("(defun foo (a &keys ks) (tuple a ks)) (foo 1 :b 2)", (1, dict(b=2)))
     , ("(defun foo (a &keys ks) (tuple a ks)) (foo :a 1 :b 2 :c 3)", (1, dict(b=2, c=3)))
     , ("(defmacro add (a) (list '+ 5 a)) (add 1)", 6)
-    , ("(make-struct Foo) (Foo)", Struct([], []))
-    , ("(make-struct Foo a) (Foo 1)", Struct(['a'], [1]))
-    , ("(make-struct Foo a) (def v (Foo 1)) (Foo-a v)", 1)
-    , ("(make-struct Foo a) (def v (Foo 1)) v.a", 1)
+    , ("(defstruct Foo) (Foo)", Struct([], []))
+    , ("(defstruct Foo a) (Foo 1)", Struct(['a'], [1]))
+    , ("(defstruct Foo a) (def v (Foo 1)) (Foo-a v)", 1)
+    , ("(defstruct Foo a) (def v (Foo 1)) v.a", 1)
     , ("(def symbols (dict :a 1))", dict(a=1))
 ]
 

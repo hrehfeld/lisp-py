@@ -26,7 +26,7 @@ class Struct:
         return True
 
 
-def __make_struct(env, name, *fields):
+def __defstruct(env, name, *fields):
     def constructor(*values):
         assert(len(fields) == len(values))
         return Struct([symbol_name(f) for f in fields], values)
@@ -501,7 +501,7 @@ def base_env(args=[]):
         return l[1:]
     env['tail'] = tail
     
-    env['make-struct'] = special_form(__make_struct)
+    env['defstruct'] = special_form(__defstruct)
 
 
     def throw(e):
