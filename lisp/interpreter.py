@@ -124,7 +124,7 @@ def __let(env, vars, *let_body):
         assert(listp(var))
         assert(len(var) == 2)
 
-    env = Env(parent=env)
+    env = Env(env)
 
     for var in vars:
         name_sym, body = var
