@@ -502,10 +502,6 @@ def base_env(args=[]):
         return l[i]
     env['nth'] = nth
 
-    def head(l):
-        return l[0]
-    env['head'] = head
-
     def tail(l):
         return l[1:]
     env['tail'] = tail

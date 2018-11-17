@@ -50,3 +50,6 @@
   (let ((r '()))
     (dotimes (e l)
       (append r e))))
+
+
+(defun head (l) (nth 0 l))
