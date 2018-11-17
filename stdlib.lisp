@@ -29,3 +29,18 @@
            (extend (list 'let (list (list value-var value)))
                    clauses)))
         (else (raise (Exception)))))
+
+
+(defmacro cond (&rest clauses)
+  (let ((ifs '()))
+    (dotimes (clause (reversed clauses))
+      (let ((test (head clause))
+            (body (list 'progn (tail clause)))
+            (oldifs ifs))
+        (set ifs (if (is test 'else)
+                     (progn
+                       (assert (not ifs))
+                       body)
+                   (list 'if test body)))
+        (extend ifs oldifs))))
+  ifs)
