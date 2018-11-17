@@ -1,5 +1,5 @@
 from .base import Struct
-from .symbol import intern, Symbol, symbol_name, symbolp
+from .symbol import intern, Symbol, symbol_name, symbolp, gensym
 from .reader import read, Stream
 import operator
 
@@ -472,6 +472,9 @@ def base_env(args=[]):
     env['call'] = special_form(__funcall)
     env['apply'] = special_form(__apply)
     env['if'] = special_form(__if)
+
+    env['gensym'] = gensym
+
 
     env['+'] = operator.__add__
     env['-'] = operator.__sub__
