@@ -1,3 +1,4 @@
+from .base import Struct
 from .symbol import intern, Symbol, symbol_name, symbolp
 from .reader import read, Stream
 import operator
@@ -9,58 +10,15 @@ SPECIAL_FORM = '__special'
 variadic_name = '&rest'
 keys_name = '&keys'
 
-class Struct:
-    def __init__(self, name, fields, values):
-        self.name = name
-        assert(len(fields) == len(values))
-        self.__slots__ = fields
-        for k, v in zip(fields, values):
-            setattr(self, k, v)
-
-    def __eq__(self, o):
-        if type(self) != type(o):
-            return False
-        for k in self.__slots__:
-            if getattr(self, k) != getattr(o, k):
-                return False
-        return True
-
-
-TYPE = '__type'
-TYPE_T = '__type_t'
-
-
-def Struct(name_str, *field_names):
-
-    type = {TYPE: TYPE_T, 'name': name_str, 'fields': field_names}
-
-    def constructor(*values):
-        assert(len(fields) == len(values))
-        r = {TYPE: type}
-        r.update(zip(field_names, values))
-        return r
-
-    getters = []
-    setters = []
-    for ifield, field in enumerate(field_names):
-        fname = '%s-%s' % (name_str, (field))
-        get = lambda struct: struct[field]
-        getters += [get]
-
-        def set(struct, value):
-            struct[field] = value
-            return struct
-        setters += [set]
-
-    return constructor, getters, setters
-
 
 def __defstruct(env, name, *fields):
     name_str = symbol_name(name)
     field_names = [symbol_name(f) for f in fields]
 
-    constructor, getter, setter = Struct(name_str, field_names)
+    constructor, instancep, getter, setter = Struct(name_str, *field_names)
     env[name_str] = constructor
+    fname = '%s?' % (name_str)
+    env[fname] = instancep
     for field, get in zip(field_names, getter):
         fname = '%s-%s' % (name_str, (field))
         env[fname] = get
