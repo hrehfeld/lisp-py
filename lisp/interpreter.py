@@ -49,6 +49,11 @@ def __defstruct(env, name, *fields):
         fname = '%s-%s' % (name_str, (field))
         env[fname] = lambda struct: struct[field]
 
+        def set(struct, value):
+            struct[field] = value
+            return struct
+        fname = '%s-%s-set' % (name_str, (field))
+        env[fname] = set
 
     return constructor
 
