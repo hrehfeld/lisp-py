@@ -4,6 +4,38 @@ from .reader import read, Stream
 import operator
 
 
+def sexps_str(form, indent=0):
+    def p(f):
+        return ('  ' * indent + str(f) + '\n')
+
+    r = ''
+    if isinstance(form, list):
+        r += p('(')
+        for e in form:
+            r += ps(e, indent + 1)
+        r += p(')')
+    elif symbolp(form):
+        r += p(symbol_name(form))
+    else:
+        r += p(form)
+    return r
+         
+
+def ps(form, indent=0):
+    def p(f):
+        print('  ' * indent + str(f))
+
+    if isinstance(form, list):
+        p('(')
+        [ps(e, indent + 1) for e in form]
+        p(')')
+    elif symbolp(form):
+        p(symbol_name(form))
+    else:
+        p(form)
+         
+
+
 MACRO = '__macro'
 SPECIAL_FORM = '__special'
 
