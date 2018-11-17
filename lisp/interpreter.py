@@ -458,6 +458,7 @@ def base_env(args=[]):
             l += e
         return l
     env['extend'] = extend
+
     env['dict'] = dict
     env['dict-setdefault'] = dict.setdefault
     env['dict-get'] = dict.get
