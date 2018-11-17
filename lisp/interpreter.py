@@ -417,7 +417,7 @@ def __eval(env, form):
         
         return __call(env, fun, args_forms)
     else:
-        raise Exception('unknown form: %s' % form)
+        raise Exception('unknown form: {form}'.format(form=sexps_str(form)))
         
 
 class Env:
