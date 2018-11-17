@@ -30,11 +30,7 @@ TYPE = '__type'
 TYPE_T = '__type_t'
 
 
-def __defstruct(env, name, *fields):
-
-    name_str = symbol_name(name)
-
-    field_names = [symbol_name(f) for f in fields]
+def Struct(name_str, *field_names):
 
     type = {TYPE: TYPE_T, 'name': name_str, 'fields': field_names}
 
@@ -44,14 +40,32 @@ def __defstruct(env, name, *fields):
         r.update(zip(field_names, values))
         return r
 
-    env[name_str] = constructor
+    getters = []
+    setters = []
     for ifield, field in enumerate(field_names):
         fname = '%s-%s' % (name_str, (field))
-        env[fname] = lambda struct: struct[field]
+        get = lambda struct: struct[field]
+        getters += [get]
 
         def set(struct, value):
             struct[field] = value
             return struct
+        setters += [set]
+
+    return constructor, getters, setters
+
+
+def __defstruct(env, name, *fields):
+    name_str = symbol_name(name)
+    field_names = [symbol_name(f) for f in fields]
+
+    constructor, getter, setter = Struct(name_str, field_names)
+    env[name_str] = constructor
+    for field, get in zip(field_names, getter):
+        fname = '%s-%s' % (name_str, (field))
+        env[fname] = get
+
+    for field, set in zip(field_names, setter):
         fname = '%s-%s-set' % (name_str, (field))
         env[fname] = set
 
