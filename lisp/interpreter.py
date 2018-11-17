@@ -27,17 +27,29 @@ class Struct:
         return True
 
 
+TYPE = '__type'
+TYPE_T = '__type_t'
+
+
 def __defstruct(env, name, *fields):
+
     name_str = symbol_name(name)
+
+    field_names = [symbol_name(f) for f in fields]
+
+    type = {TYPE: TYPE_T, 'name': name_str, 'fields': field_names}
 
     def constructor(*values):
         assert(len(fields) == len(values))
-        return Struct(name_str, [symbol_name(f) for f in fields], values)
+        r = {TYPE: type}
+        r.update(zip(field_names, values))
+        return r
 
     env[name_str] = constructor
-    for ifield, field in enumerate(fields):
-        fname = '%s-%s' % (name_str, symbol_name(field))
-        env[fname] = lambda struct: getattr(struct, symbol_name(field))
+    for ifield, field in enumerate(field_names):
+        fname = '%s-%s' % (name_str, (field))
+        env[fname] = lambda struct: struct[field]
+
 
     return constructor
 
