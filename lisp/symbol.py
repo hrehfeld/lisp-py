@@ -12,5 +12,6 @@ def intern(s):
 gensym_counter = -1
 
 def gensym(prefix='g'):
+    global gensym_counter
     gensym_counter += 1
     return Symbol(concat(prefix, str(gensym_counter)))
