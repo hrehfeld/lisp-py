@@ -355,7 +355,7 @@ def __call(env, fun, args_forms):
 
     elif macrop(fun):
         fun = macro_get_fun(fun)
-        form = __call_function(env, fun, [env] + args_forms, eval=False)
+        form = __call_function(env, fun, args_forms, eval=False)
         return __eval(env, form)
 
     elif callablep(fun):
