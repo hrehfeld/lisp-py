@@ -405,6 +405,7 @@ class Env:
 
 def base_env(args=[]):
     env = Env()
+
     env['true'] = True
     env['false'] = False
     env['nil'] = None
