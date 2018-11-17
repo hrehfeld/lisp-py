@@ -1,4 +1,4 @@
-from .base import Struct
+from .base import Struct, concat
 
 symbols = {}
 
@@ -9,4 +9,8 @@ def intern(s):
     symbols.setdefault(s, Symbol(s))
     return symbols[s]
 
+gensym_counter = -1
 
+def gensym(prefix='g'):
+    gensym_counter += 1
+    return Symbol(concat(prefix, str(gensym_counter)))
