@@ -6,6 +6,9 @@ import operator
 MACRO = '__macro'
 SPECIAL_FORM = '__special'
 
+variadic_name = '&optional'
+keys_name = '&keys'
+
 
 class Struct:
     def __init__(self, fields, values):
@@ -46,6 +49,10 @@ def special_form(f):
     return (SPECIAL_FORM, f)
 
 
+def special_form_get_fun(f):
+    return f[1]
+
+
 def macrop(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
 
@@ -57,32 +64,88 @@ def Macro(f):
     return (MACRO, f)
 
 
+def macro_get_fun(macro):
+    return macro[1]
+
+
+functions = {}
+
+
+def add_function(f, parameters, defaults, special_names, special_defaults):
+    functions[f] = (parameters, defaults, special_names, special_defaults)
+
+
 def __fn(env, parameters, *body):
-    for i, parameter in enumerate(parameters):
-        assert(symbolp(parameter))
+    def parameter_default(p):
+        return p[1]
 
-    variadic_name_sym = None
-    for i in (1, 2):
-        if len(parameters) >= i and parameters[-i] == intern('&optional'):
-            if i == 2:
-                variadic_name_sym = parameters[-1]
-            parameters = parameters[:-i]
-            break
+    def parameter_with_default_p(p):
+            return isinstance(p, list) and len(p) == 2
 
-    def f(*args):
-        fun_env = Env(parent=env)
+    def simple_parameterp(p):
+        return symbolp(p) and not keywordp(p) and not special_keywordp(p)
 
-        for name_sym, val in zip(parameters, args):
-            fun_env[symbol_name(name_sym)] = val
+    def normal_parameterp(p):
+        return simple_parameterp(p) or parameter_with_default_p(p)
 
-        if variadic_name_sym is not None:
-            var_args = []
-            if len(args) > len(parameters):
-                var_args = args[len(parameters):]
-            fun_env[symbol_name(variadic_name_sym)] = var_args
+    def normal_parameter_name(p):
+        if parameter_with_default_p(p):
+            return p[1]
         else:
-            assert(len(args) == len(parameters))
+            return p
+
+    special_names = {variadic_name: None, keys_name: None}
+    special_defaults = {variadic_name: None, keys_name: None}
+    ilast_special = None
+    i = len(parameters) - 1
+    while i >= 0 and (ilast_special is None or ilast_special - i <= 2):
+        p = parameters[i]
+        if special_keywordp(p):
+            name = symbol_name(p)
+            if name in special_names:
+                assert(special_names[name] is None)
+                nextp = parameters[i + 1] if i + 1 < len(parameters) else None
+                if nextp and normal_parameterp(nextp):
+                    special_names[name] = normal_parameter_name(nextp)
+                    if parameter_with_default_p(nextp):
+                        special_defaults[name] = parameter_default(nextp)
+                else:
+                    special_names[name] = True
+                ilast_special = i
+            else:
+                raise Exception('Unkown special keyword: {s} at position {i}'.format(s=p, i=i))
+        i -= 1
+
+    parameters = parameters[:ilast_special]
+
+    for i, p in enumerate(parameters):
+        assert normal_parameterp(p), p
+
+    # TODO check if parameters with defaults are after normal ones
+    defaults = {}
+    defaults_started = False
+    for i, p in enumerate(parameters):
+        if not symbolp(p):
+            parameters[i] = normal_parameter_name(p)
+            defaults[i] = parameter_default(p)
+            defaults_started = True
+        elif defaults_started:
+            raise Exception('parameters with defaults need to come after normal ones. {ps}'.format(ps=parameters))
+
+    def f(args, varargs, kwargs):
+        fun_env = Env(env)
+        for parameter, arg in zip(parameters, args):
+            fun_env[symbol_name(parameter)] = arg
+
+        varargs_name = special_names[variadic_name]
+        if varargs_name:
+            fun_env[symbol_name(varargs_name)] = varargs
+        keysargs_name = special_names[keys_name]
+        if keysargs_name:
+            fun_env[symbol_name(keysargs_name)] = kwargs
+        
         return __progn(fun_env, *body)
+    add_function(f, parameters, defaults, special_names, special_defaults)
     return f
 
 
@@ -102,21 +165,20 @@ def __defmacro(lexical_env, name, parameters, *body):
         raise Exception('fun %s already declared' % symbol_name(name))
 
     f = __fn(lexical_env, parameters, *body)
-    m = Macro(lambda dynamic_env, *args: f(*args))
+    m = Macro(lambda dynamic_env, *args: __call(dynamic_env, f, args))
     lexical_env[symbol_name(name)] = m
     return m
 
 
 def __funcall(env, f, *args):
     f = __eval(env, f)
-    args = [__eval(env, a) for a in args]
-    return f(*args)
+    return __call(env, f, args)
     
 
 def __apply(env, f, args):
     f = __eval(env, f)
     args = __eval(env, args)
-    return f(*args)
+    return __call(env, f, args)
     
 
 def __let(env, vars, *let_body):
@@ -155,6 +217,10 @@ def keywordp(e):
     return symbolp(e) and symbol_name(e).startswith(':')
 
 
+def special_keywordp(e):
+    return symbolp(e) and symbol_name(e).startswith('&')
+
+
 def listp(e):
     return isinstance(e, list)
 
@@ -189,6 +255,124 @@ def __setq(env, name, *args):
     return __set_var(env, name, args)
 
 
+def __call_function(env, fun, args_forms, eval=True):
+    kw = False
+    args = []
+    varargs = []
+    ilast_normal_arg = -1
+    for iarg, arg in enumerate(args_forms):
+        if keywordp(arg):
+            kw = arg
+        else:
+            if kw:
+                # without :
+                k = symbol_name(kw)[1:]
+                arg = (k, arg)
+            else:
+                ilast_normal_arg = iarg
+            args += [arg]
+    del kw
+
+    if fun not in functions:
+        # python fun
+
+        clean_args = []
+        kwargs = {}
+        for iarg, arg in enumerate(args):
+            if iarg > ilast_normal_arg:
+                k, v = arg
+                kwargs[k] = v
+            else:
+                # TODO hack: we really need to fix our type system
+                if isinstance(arg, tuple) and not symbolp(arg):
+                    k, v = arg
+                else:
+                    v = arg
+                clean_args += [v]
+
+        args = clean_args
+        del clean_args
+
+        if eval:
+            args = [__eval(env, f) for f in args]
+            for k, v in kwargs.items():
+                kwargs[k] = __eval(env, v)
+
+        return fun(*args, **kwargs)
+    else:
+        # self-defined fun
+        (parameters, defaults, special_names, special_defaults) = functions[fun]
+
+        args_dict = dict()
+        args_dict.update(defaults)
+
+
+        def parameter_index(k):
+            for i, p in enumerate(parameters):
+                if symbol_name(p) == k:
+                    return i
+            return -1
+
+        kwargs = {}
+        for iarg, arg in enumerate(args):
+            # TODO we really need a type system to distinguish between symbols and tuples
+            if isinstance(arg, tuple) and not symbolp(arg):
+                k, v = arg
+                i = parameter_index(k)
+                if i == -1:
+                    kwargs[k] = v
+            else:
+                v = arg
+                i = iarg
+            args_dict[i] = v
+
+        for i, p in enumerate(parameters):
+            if not (i in args_dict):
+                raise Exception('function call missing argument #{i} {name}: ({fun} {args})'
+                                .format(i=i, name=symbol_name(p), fun=fun, args=args_forms))
+
+        if kwargs and special_names[keys_name] is None:
+            raise Exception('unknown keyword args: {kws}'.format(kws=kwargs))
+
+        args = []
+        for i, p in enumerate(parameters):
+            args += [args_dict[i]]
+
+        num_args = len(args_dict)
+        if num_args != len(parameters) and special_names[variadic_name] is None:
+            raise Exception('too many arguments for call')
+
+        varargs = []
+        for i in range(len(parameters), num_args):
+            varargs += [arg]
+
+        if eval:
+            args = [__eval(env, f) for f in args]
+            varargs = [__eval(env, f) for f in varargs]
+            for k, v in kwargs.items():
+                kwargs[k] = __eval(env, v)
+
+        return fun(args, varargs, kwargs)
+    
+
+def __call(env, fun, args_forms):
+    if special_formp(fun):
+        fun = special_form_get_fun(fun)
+        return __call_function(env, fun, [env] + args_forms, eval=False)
+
+    elif macrop(fun):
+        fun = macro_get_fun(fun)
+        form = __call_function(env, fun, [env] + args_forms, eval=False)
+        return __eval(env, form)
+
+    elif callablep(fun):
+        return __call_function(env, fun, args_forms)
+
+    else:
+        raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=args_forms if args_forms else ''))
+
+
+
 def __eval(env, form):
     if is_num(form):
         return form
@@ -205,35 +389,8 @@ def __eval(env, form):
             raise Exception('trying to evaluate list of length 0')
         fun = __eval(env, form[0])
         args_forms = form[1:]
-
-        if special_formp(fun):
-            return fun[1](env, *args_forms)
-
-        elif macrop(fun):
-            form = fun[1](env, *args_forms)
-            return __eval(env, form)
-
-        elif not callablep(fun):
-            raise Exception('first el %s of list %s is not callable' % (fun, form))
-
-        else:
-            args_forms = [__eval(env, f) for f in args_forms]
-            # TODO check keywords here or in __fn()?
-            args = []
-            kwargs = {}
-            kw = False
-            for arg in args_forms:
-                if keywordp(arg):
-                    kw = arg
-                else:
-                    if kw:
-                        # without :
-                        k = symbol_name(kw)[1:]
-                        kwargs[k] = arg
-                    else:
-                        args.append(arg)
-
-            return fun(*args, **kwargs)
+        
+        return __call(env, fun, args_forms)
     else:
         raise Exception('unknown form: %s' % form)
         
