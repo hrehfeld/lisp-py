@@ -321,10 +321,12 @@ def __call_function(env, fun, args_forms, eval=True):
                 i = parameter_index(k)
                 if i == -1:
                     kwargs[k] = v
+                else:
+                    args_dict[i] = v
             else:
                 v = arg
                 i = iarg
-            args_dict[i] = v
+                args_dict[i] = v
 
         for i, p in enumerate(parameters):
             if not (i in args_dict):
