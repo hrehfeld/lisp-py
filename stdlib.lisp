@@ -53,3 +53,4 @@
 
 
 (defun head (l) (nth 0 l))
+(defun last (l) (nth (- (length l) 1) l))
