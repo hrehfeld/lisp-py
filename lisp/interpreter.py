@@ -458,7 +458,6 @@ def base_env(args=[]):
         for k in ks:
             r = getattr(r, symbol_name(k))
         return r
-
     env['.'] = special_form(__lookup)
 
     env['quote'] = special_form(lambda env, e: e)
