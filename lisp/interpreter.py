@@ -31,9 +31,11 @@ def __defstruct(env, name, *fields):
         assert(len(fields) == len(values))
         return Struct([symbol_name(f) for f in fields], values)
 
-    env[symbol_name(name)] = constructor
+    name_str = symbol_name(name)
+
+    env[name_str] = constructor
     for ifield, field in enumerate(fields):
-        fname = '%s-%s' % (symbol_name(name), symbol_name(field))
+        fname = '%s-%s' % (name_str, symbol_name(field))
         env[fname] = lambda struct: getattr(struct, symbol_name(field))
 
     return constructor
