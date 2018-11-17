@@ -449,7 +449,7 @@ def base_env(args=[]):
 
     def __while(env, cond, *body):
         while __eval(env, cond):
-            __eval(env, [intern('__progn'), *body])
+            __eval(env, [intern('progn'), *body])
 
     env['while'] = special_form(__while)
 
