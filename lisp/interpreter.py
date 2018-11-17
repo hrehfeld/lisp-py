@@ -437,6 +437,11 @@ def base_env(args=[]):
         return tuple(args)
     env['tuple'] = Tuple
 
+
+    def __assert(cond, msg=''):
+        assert cond, msg
+    env['assert'] = __assert
+    
     def __import(env, *args):
         # TODO 
         pass
