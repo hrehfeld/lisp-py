@@ -9,7 +9,6 @@ SPECIAL_FORM = '__special'
 variadic_name = '&rest'
 keys_name = '&keys'
 
-
 class Struct:
     def __init__(self, name, fields, values):
         self.name = name
