@@ -44,3 +44,9 @@
                    (list 'if test body)))
         (extend ifs oldifs))))
   ifs)
+
+
+(defun reversed (l)
+  (let ((r '()))
+    (dotimes (e l)
+      (append r e))))
