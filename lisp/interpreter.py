@@ -6,7 +6,7 @@ import operator
 MACRO = '__macro'
 SPECIAL_FORM = '__special'
 
-variadic_name = '&optional'
+variadic_name = '&rest'
 keys_name = '&keys'
 
 
