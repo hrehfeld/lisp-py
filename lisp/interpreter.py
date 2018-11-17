@@ -333,7 +333,7 @@ def __call_function(env, fun, args_forms, eval=True):
 
         num_args = len(args_dict)
         if num_args != len(parameters) and special_names[variadic_name] is None:
-            raise Exception('too many arguments for call')
+            raise Exception('too many arguments for call to {fun}'.format(fun=fun))
 
         varargs = []
         for i in range(len(parameters), num_args):
