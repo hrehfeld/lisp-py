@@ -11,7 +11,8 @@ keys_name = '&keys'
 
 
 class Struct:
-    def __init__(self, fields, values):
+    def __init__(self, name, fields, values):
+        self.name = name
         assert(len(fields) == len(values))
         self.__slots__ = fields
         for k, v in zip(fields, values):
@@ -27,11 +28,11 @@ class Struct:
 
 
 def __defstruct(env, name, *fields):
+    name_str = symbol_name(name)
+
     def constructor(*values):
         assert(len(fields) == len(values))
-        return Struct([symbol_name(f) for f in fields], values)
-
-    name_str = symbol_name(name)
+        return Struct(name_str, [symbol_name(f) for f in fields], values)
 
     env[name_str] = constructor
     for ifield, field in enumerate(fields):
