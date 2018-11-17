@@ -156,7 +156,7 @@ def __defmacro(lexical_env, name, parameters, *body):
         raise Exception('fun %s already declared' % symbol_name(name))
 
     f = __fn(lexical_env, parameters, *body)
-    m = Macro(lambda dynamic_env, *args: __call(dynamic_env, f, args))
+    m = Macro(f)
     lexical_env[symbol_name(name)] = m
     return m
 
