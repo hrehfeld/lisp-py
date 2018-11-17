@@ -6,3 +6,18 @@
 ;; (let ((var 0))
 ;;   (while (< var (length l))
 ;;     ,@body))
+
+(defmacro setf (target value)
+  (cond ((symbolp target)
+         (list 'set target value))
+        ((tuplep target)
+         (let ((value-var (gensym))
+               (clauses (map
+                         (fn (e)
+                             (let ((i (head e))
+                                   (v (last e)))
+                               (list 'set v (list 'nth i value-var)))
+                             (enumerate target)))))
+           (extend (list 'let (list (list value-var value)))
+                   clauses)))
+        (else (raise (Exception)))))
