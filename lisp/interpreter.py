@@ -419,6 +419,13 @@ def base_env(args=[]):
             l.append(e)
         return l
     env['append'] = append
+
+    def extend(l, *ls):
+        l = list(l)
+        for e in ls:
+            l += e
+        return l
+    env['extend'] = extend
     env['dict'] = dict
     env['dict-setdefault'] = dict.setdefault
     env['dict-get'] = dict.get
