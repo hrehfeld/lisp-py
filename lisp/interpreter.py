@@ -23,6 +23,13 @@ def sexps_str(form, indent=0):
         r += p(symbol_name(form))
     else:
         r += p(form)
+
+    if len(r) < 80:
+        r = r.replace('\n', ' ')
+        org = None
+        while org != r:
+            org = r
+            r = r.replace('  ', ' ')
     return r
          
 
