@@ -12,7 +12,7 @@ def sexps_str(form, indent=0):
     if isinstance(form, list) or isinstance(form, tuple):
         r += p('(')
         for e in form:
-            r += ps(e, indent + 1)
+            r += sexps_str(e, indent + 1)
         r += p(')')
     elif symbolp(form):
         r += p(symbol_name(form))
