@@ -42,8 +42,8 @@
                        (assert (not ifs))
                        body)
                    (list 'if test body)))
-        (extend ifs oldifs))))
-  ifs)
+        (extend ifs oldifs)))
+    ifs))
 
 
 (defun reversed (l)
