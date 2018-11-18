@@ -48,16 +48,16 @@ def __defstruct(env, name, *fields):
     field_names = [symbol_name(f) for f in fields]
 
     constructor, instancep, getter, setter = Struct(name_str, *field_names)
-    env[name_str] = constructor
+    env_def(env, name_str, constructor)
     fname = '%s?' % (name_str)
-    env[fname] = instancep
+    env_def(env, fname, instancep)
     for field, get in zip(field_names, getter):
         fname = '%s-%s' % (name_str, (field))
-        env[fname] = get
+        env_def(env, fname, get)
 
     for field, set in zip(field_names, setter):
         fname = '%s-%s-set' % (name_str, (field))
-        env[fname] = set
+        env_def(env, fname, set)
 
     return constructor
 
@@ -158,15 +158,14 @@ def __fn(env, parameters, *body):
     def f(args, varargs, kwargs):
         fun_env = Env(env)
         for parameter, arg in zip(parameters, args):
-            fun_env[symbol_name(parameter)] = arg
+            env_def(fun_env, symbol_name(parameter), arg)
 
         varargs_name = special_names[variadic_name]
         if varargs_name:
-            fun_env[symbol_name(varargs_name)] = varargs
+            env_def(fun_env, symbol_name(varargs_name), varargs)
         keysargs_name = special_names[keys_name]
         if keysargs_name:
-            fun_env[symbol_name(keysargs_name)] = kwargs
-        
+            env_def(fun_env, symbol_name(keysargs_name), kwargs)
         return __progn(fun_env, *body)
     add_function(f, parameters, defaults, special_names, special_defaults)
     return f
@@ -174,22 +173,22 @@ def __fn(env, parameters, *body):
 
 def __defun(env, name, parameters, *body):
     assert(symbolp(name))
-    if symbol_name(name) in env:
+    if env_contains(env, symbol_name(name)):
         raise Exception('fun %s already declared' % symbol_name(name))
 
     f = __fn(env, parameters, *body)
-    env[symbol_name(name)] = f
+    env_def(env, symbol_name(name), f)
     return f
 
 
 def __defmacro(lexical_env, name, parameters, *body):
     assert(symbolp(name)), (name, type(name))
-    if symbol_name(name) in lexical_env:
+    if env_contains(lexical_env, symbol_name(name)):
         raise Exception('fun %s already declared' % symbol_name(name))
 
     f = __fn(lexical_env, parameters, *body)
     m = Macro(f)
-    lexical_env[symbol_name(name)] = m
+    env_def(lexical_env, symbol_name(name), m)
     return m
 
 
@@ -214,7 +213,7 @@ def __let(env, vars, *let_body):
     for var in vars:
         name_sym, body = var
         val = __eval(env, body)
-        env[symbol_name(name_sym)] = val
+        env_def(env, symbol_name(name_sym), val)
     return __progn(env, *let_body)
 
 
@@ -257,25 +256,23 @@ def callablep(e):
     return callable(e)
 
 
-def __set_var(env, name, args):
-    assert(len(args) <= 1), len(args)
-    val = __eval(env, args[0]) if args else None
-    env[symbol_name(name)] = val
-    return val
-
-
 def __def(env, name, *args):
     assert(symbolp(name))
     if symbol_name(name) in env:
         raise Exception('var %s already declared' % symbol_name(name))
-    return __set_var(env, name, args)
+    val = __eval(env, args[0]) if args else None
+    env_def(env, symbol_name(name), val)
+    return val
 
 
 def __setq(env, name, *args):
     assert(symbolp(name))
-    if symbol_name(name) not in env:
-        raise Exception('var %s not declared' % symbol_name(name))
-    return __set_var(env, name, args)
+    if not env_contains(env, symbol_name(name)):
+        raise Exception('set: {sym} not declared in {env} ({envp})'
+                        .format(sym=symbol_name(name), env=sexps_str(env.d), envp=sexps_str(env.parent.d)))
+    val = __eval(env, args[0]) if args else None
+    env_change(env, symbol_name(name), val)
+    return val
 
 
 def __call_function(env, fun, args_forms, eval=True):
@@ -406,9 +403,9 @@ def __eval(env, form):
     elif keywordp(form):
         return form
     elif symbolp(form):
-        if not symbol_name(form) in env:
+        if not env_contains(env, symbol_name(form)):
             raise Exception('Symbol "%s" not found in env (Keys: %s => %s)' % (symbol_name(form), ', '.join(env.d.keys()), ', '.join(env.parent.d.keys()) if env.parent else ''))
-        return env[symbol_name(form)]
+        return env_get(env, symbol_name(form))
     elif listp(form):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')
@@ -425,133 +422,153 @@ class Env:
         self.parent = parent
         self.d = {}
 
-    def __setitem__(self, k, v):
-        self.d[k] = v
 
-    def __getitem__(self, k):
-        return self.d[k] if k in self.d else self.parent[k]
+def env_contains(self, k):
+    return k in self.d or (self.parent and env_contains(self.parent, k))
 
-    def __contains__(self, k):
-        return self.d.__contains__(k) or (self.parent and self.parent.__contains__(k))
+
+def env_get(env, k):
+    if k in env.d:
+        return env.d[k]
+    elif env.parent:
+        return env_get(env.parent, k)
+    else:
+        raise KeyError(k)
+
+
+def env_containing_parent(env, k):
+    while env and k not in env.d:
+        env = env.parent
+    return env
+
+
+def env_def(env, k, v):
+    assert not env_contains(env, k)
+    env.d[k] = v
+
+
+def env_change(env, k, v):
+    env = env_containing_parent(env, k) or env
+    env.d[k] = v
 
 
 def base_env(args=[]):
     env = Env()
 
-    env['true'] = True
-    env['false'] = False
-    env['nil'] = None
+    env_def(env, 'true', True)
+    env_def(env, 'false', False)
+    env_def(env, 'nil', None)
     def list_(*args):
         return list(args)
-    env['list'] = list_
+    env_def(env, 'list', list_)
 
     def append(l, *es):
         l = list(l)
         for e in es:
             l.append(e)
         return l
-    env['append'] = append
+    env_def(env, 'append', append)
 
     def extend(l, *ls):
         l = list(l)
         for e in ls:
             l += e
         return l
-    env['extend'] = extend
+    env_def(env, 'extend', extend)
 
-    env['dict'] = dict
-    env['dict-setdefault'] = dict.setdefault
-    env['dict-get'] = dict.get
+    env_def(env, 'dict', dict)
+    env_def(env, 'dict-setdefault', dict.setdefault)
+    env_def(env, 'dict-get', dict.get)
     def dict_set(d, k, v):
         d[k] = v
-    env['dict-set'] = dict_set
+    env_def(env, 'dict-set', dict_set)
 
     def Tuple(*args):
         return tuple(args)
-    env['tuple'] = Tuple
+    env_def(env, 'tuple', Tuple)
 
 
     def __assert(cond, msg=''):
         assert cond, msg
-    env['assert'] = __assert
+    env_def(env, 'assert', __assert)
     
     def __import(env, *args):
         # TODO 
         pass
-    env['import'] = special_form(__import)
+    env_def(env, 'import', special_form(__import))
 
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('progn'), *body])
 
-    env['while'] = special_form(__while)
+    env_def(env, 'while', special_form(__while))
 
     def __lookup(env, obj, *ks):
         r = __eval(env, obj)
         for k in ks:
             r = getattr(r, symbol_name(k))
         return r
-    env['.'] = special_form(__lookup)
+    env_def(env, '.', special_form(__lookup))
 
-    env['quote'] = special_form(lambda env, e: e)
-    env['set'] = special_form(__setq)
-    env['let'] = special_form(__let)
-    env['progn'] = special_form(__progn)
+    env_def(env, 'quote', special_form(lambda env, e: e))
+    env_def(env, 'set', special_form(__setq))
+    env_def(env, 'let', special_form(__let))
+    env_def(env, 'progn', special_form(__progn))
 
-    env['def'] = special_form(__def)
-    env['defun'] = special_form(__defun)
-    env['defmacro'] = special_form(__defmacro)
-    env['fn'] = special_form(__fn)
-    env['call'] = special_form(__funcall)
-    env['apply'] = special_form(__apply)
-    env['if'] = special_form(__if)
+    env_def(env, 'def', special_form(__def))
+    env_def(env, 'defun', special_form(__defun))
+    env_def(env, 'defmacro', special_form(__defmacro))
+    env_def(env, 'fn', special_form(__fn))
+    env_def(env, 'call', special_form(__funcall))
+    env_def(env, 'apply', special_form(__apply))
+    env_def(env, 'if', special_form(__if))
 
-    env['gensym'] = gensym
+    env_def(env, 'gensym', gensym)
 
 
-    env['+'] = operator.__add__
-    env['-'] = operator.__sub__
-    env['*'] = operator.__mul__
-    env['/'] = operator.__truediv__
+    env_def(env, '+', operator.__add__)
+    env_def(env, '-', operator.__sub__)
+    env_def(env, '*', operator.__mul__)
+    env_def(env, '/', operator.__truediv__)
 
-    env['eq'] = operator.__eq__
-    env['neq'] = operator.__ne__
+    env_def(env, 'eq', operator.__eq__)
+    env_def(env, 'neq', operator.__ne__)
 
-    env['not'] = operator.__not__
-    env['and'] = operator.__and__
-    env['or'] = operator.__or__
+    env_def(env, 'not', operator.__not__)
+    env_def(env, 'and', operator.__and__)
+    env_def(env, 'or', operator.__or__)
 
-    env['<'] = operator.__lt__
-    env['<='] = operator.__le__
-    env['>'] = operator.__gt__
-    env['>='] = operator.__ge__
+    env_def(env, '<', operator.__lt__)
+    env_def(env, '<=', operator.__le__)
+    env_def(env, '>', operator.__gt__)
+    env_def(env, '>=', operator.__ge__)
 
     def length(l):
         return len(l)
-    env['length'] = length
+    env_def(env, 'length', length)
 
     def has(l, e):
         return e in l
-    env['contains?'] = has
+    env_def(env, 'contains?', has)
 
     def nth(i, l):
         return l[i]
-    env['nth'] = nth
+    env_def(env, 'nth', nth)
 
     def tail(l):
         return l[1:]
-    env['tail'] = tail
+    env_def(env, 'tail', tail)
     
-    env['defstruct'] = special_form(__defstruct)
+    env_def(env, 'defstruct', special_form(__defstruct))
 
 
     def throw(e):
         raise e
-    env['throw'] = throw
+    env_def(env, 'throw', throw)
 
     def exception(s):
         return Exception(s)
-    env['Exception'] = exception
+    env_def(env, 'Exception', exception)
     
     # sys utils
     def file_open(filename, mode):
