@@ -392,7 +392,7 @@ def __call(env, fun, args_forms):
         return __call_function(env, fun, args_forms)
 
     else:
-        raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=args_forms if args_forms else ''))
+        raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=sexps_str(args_forms) if args_forms else ''))
 
 
 
