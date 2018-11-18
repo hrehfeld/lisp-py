@@ -33,19 +33,8 @@ def sexps_str(form, indent=0):
     return r
          
 
-def ps(form, indent=0):
-    def p(f):
-        print('  ' * indent + str(f))
-
-    if isinstance(form, list):
-        p('(')
-        [ps(e, indent + 1) for e in form]
-        p(')')
-    elif symbolp(form):
-        p(symbol_name(form))
-    else:
-        p(form)
-         
+def ps(form):
+    print(sexps_str(form))
 
 
 MACRO = '__macro'
