@@ -577,19 +577,19 @@ def base_env(args=[]):
         mode = symbol_name(mode)
         return open(filename, mode)
 
-    env['file-open'] = file_open
+    env_def(env, 'file-open', file_open)
     
-    env['argv'] = args
+    env_def(env, 'argv', args)
 
     import pathlib
-    env['make-Path'] = pathlib.Path
+    env_def(env, 'make-Path', pathlib.Path)
 
     def print_(*args):
         s = ' '.join(map(str(args)))
         print(s)
         return s
 
-    env['print'] = print_
+    env_def(env, 'print', print_)
 
     # TODO
     #(infix
