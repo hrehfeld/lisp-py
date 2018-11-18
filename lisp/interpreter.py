@@ -585,10 +585,7 @@ def base_env(args=[]):
     env_def(env, 'make-Path', pathlib.Path)
 
     def print_(*args):
-        s = ' '.join(map(str(args)))
-        print(s)
-        return s
-
+        print(*args)
     env_def(env, 'print', print_)
 
     # TODO
