@@ -9,7 +9,7 @@ def sexps_str(form, indent=0):
         return ('  ' * indent + str(f) + '\n')
 
     r = ''
-    if isinstance(form, list):
+    if isinstance(form, list) or isinstance(form, tuple):
         r += p('(')
         for e in form:
             r += ps(e, indent + 1)
