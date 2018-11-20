@@ -211,13 +211,14 @@ def read_symbol(s):
         
 
 def read_quote_like(s, quote_char, symstr):
-    if stream_next(s) == quote_char:
-        # quote only supports one following exp
-        expr =  read(s, one=True)
-
-        r = [intern(symstr), *expr]
-        return Valid(r)
-    return None
+    for c in quote_char:
+        if stream_next(s) != c:
+            return None
+    # quote only supports one following exp
+    expr =  read(s, one=True)
+    
+    r = [intern(symstr), *expr]
+    return Valid(r)
 
 
 def read_quote(s):
