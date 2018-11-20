@@ -167,6 +167,7 @@ def __fn(env, parameters, *body):
         keysargs_name = special_names[keys_name]
         if keysargs_name:
             env_def(fun_env, symbol_name(keysargs_name), kwargs)
+
         return __progn(fun_env, *body)
     add_function(f, parameters, defaults, special_names, special_defaults)
     return f
