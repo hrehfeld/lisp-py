@@ -542,6 +542,8 @@ def base_env(args=[]):
     env_def(env, 'eq', operator.__eq__)
     env_def(env, 'neq', operator.__ne__)
 
+    env_def(env, 'is', lambda a, *bs: all([a is b for b in bs]))
+
     env_def(env, 'not', operator.__not__)
     env_def(env, 'and', operator.__and__)
     env_def(env, 'or', operator.__or__)
