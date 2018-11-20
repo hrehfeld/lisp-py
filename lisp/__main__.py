@@ -113,6 +113,11 @@ interpreter_tests = [
     , ("(defstruct Foo a) (def v (Foo 1)) (Foo-a v)", 1)
 #    , ("(defstruct Foo a) (def v (Foo 1)) v.a", 1)
     , ("(def symbols (dict :a 1))", dict(a=1))
+    , ("""
+(let ((n 0))
+    (dotimes (i '(0 1 2 3 4))
+      (set n (+ n i)))
+    n)
 ]
 
 
