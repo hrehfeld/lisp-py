@@ -21,7 +21,7 @@ special_chars = dict(n='\n', t='\t')
 
 quote_fun_name = "quote"
 backquote_fun_name = "backquote"
-backquote_splice_fun_name = "backquote_splice"
+backquote_splice_fun_name = "unquote-splice"
 
 
 VALID = '__VALID'
