@@ -1,6 +1,6 @@
 from .base import Struct
 from .symbol import intern, Symbol, symbol_name, symbolp, gensym
-from .reader import read, Stream
+from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
 import operator
 
 
@@ -518,7 +518,7 @@ def base_env(args=[]):
         return r
     env_def(env, '.', special_form(__lookup))
 
-    env_def(env, 'quote', special_form(lambda env, e: e))
+    env_def(env, quote_fun_name, special_form(lambda env, e: e))
     env_def(env, 'set', special_form(__setq))
     env_def(env, 'let', special_form(__let))
     env_def(env, 'progn', special_form(__progn))
