@@ -266,7 +266,7 @@ def callablep(e):
 
 def __def(env, name, *args):
     assert(symbolp(name))
-    if symbol_name(name) in env:
+    if env_contains(env, symbol_name(name)):
         raise Exception('var %s already declared' % symbol_name(name))
     val = __eval(env, args[0]) if args else None
     env_def(env, symbol_name(name), val)
