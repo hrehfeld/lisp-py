@@ -12,6 +12,7 @@ accessor_char = "."
 quote_char = "'"
 backquote_char = "`"
 # clojur style
+backquote_eval_char = "~"
 backquote_splice_char = "~@"
 comment_chars = ";", 
 escape_chars = '\\'
@@ -21,6 +22,7 @@ special_chars = dict(n='\n', t='\t')
 
 quote_fun_name = "quote"
 backquote_fun_name = "backquote"
+backquote_eval_fun_name = "unquote"
 backquote_splice_fun_name = "unquote-splice"
 
 
@@ -226,6 +228,10 @@ def read_backquote(s):
     return read_quote_like(s, backquote_char, backquote_fun_name)
     
 
+def read_backquote_eval(s):
+    return read_quote_like(s, backquote_eval_char, backquote_eval_fun_name)
+    
+
 def read_backquote_splice(s):
     return read_quote_like(s, backquote_splice_char, backquote_splice_fun_name)
     
@@ -236,9 +242,10 @@ readers = [
     , (read_comment)
     , (read_num)
     , (read_str)
+    , (read_backquote_splice)
+    , (read_backquote_eval)
     , (read_quote)
     , (read_backquote)
-    , (read_backquote_splice)
     , (read_symbol)
 ]
 
