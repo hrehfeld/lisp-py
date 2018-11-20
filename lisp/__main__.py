@@ -1,7 +1,7 @@
 from .base import Struct, TYPE, TYPE_T
 from .symbol import intern
-from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_splice_fun_name
-from .interpreter import interpret
+from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
+from .interpreter import interpret, ps
 
 import unittest
 import argparse
@@ -22,6 +22,12 @@ reader_tests = [
     , ("'()", [[intern(quote_fun_name), []]])
     , ("()1", [[], 1])
     , ("'()1", [[intern(quote_fun_name), []], 1])
+    , ("`()", [[intern(backquote_fun_name), []]])
+    , ("`~foo", [[intern(backquote_fun_name), [intern(backquote_eval_fun_name), intern('foo')]]])
+    , ("`(~foo)", [[intern(backquote_fun_name), [[intern(backquote_eval_fun_name), intern('foo')]]]])
+    , ("`(bar ~foo)", [[intern(backquote_fun_name), [intern('bar'), [intern(backquote_eval_fun_name), intern('foo')]]]])
+    , ("`(bar ~foo baz)", [[intern(backquote_fun_name), [intern('bar'), [intern(backquote_eval_fun_name), intern('foo')], intern('baz')]]])
+    , ("`(bar ~@ foo baz)", [[intern(backquote_fun_name), [intern('bar'), [intern(backquote_splice_fun_name), intern('foo')], intern('baz')]]])
     , ("a.b", [[intern('.'), intern('a'), intern('b')]])
     , (";a", [])
     , ("""(;a
