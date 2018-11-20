@@ -2,20 +2,35 @@
   (assert (eq (length iter) 2))
   (let ((var (head iter))
         (l (last iter))
-        (i-var (gensym)))
-    (list 'let (list (list i-var 0))
-          (list 'while (list '< i-var (list 'length l))
-                (list 'let (list (list var (list 'nth i-var l)))
-                      (extend (list 'progn)
-                              body
-                              (list (list 'set i-var (list '+ i-var 1)))
-                              ))))))
+        (i-var (gensym))
+        (iter-list (gensym)))
+    (print "dotimes")
+
+    `(let ((~iter-list ~l)
+           (~i-var 0))
+       (while (< ~i-var (length ~iter-list))
+         (let ((~var (nth ~i-var ~iter-list)))
+           (print ~var)
+           ~@body
+           (set ~i-var (+ ~i-var 1)))))))
+
+;;    (list 'let (list
+;;                (list iter-list l)
+;;                (list i-var 0))
+;;          (list 'while (list '< i-var (list 'length iter-list))
+;;                (list 'let (list (list var (list 'nth i-var iter-list)))
+;;                      (list 'print var)
+;;                      (extend (list 'progn)
+;;                              body
+;;                              (list (list 'set i-var (list '+ i-var 1)))
+;;                              ))))))
 ;; (for x in mylist (progn (print x)))
 ;; (let ((var 0))
 ;;   (while (< var (length l))
 ;;     ,@body))
 
 (defmacro setf (target value)
+  (print)
   (cond ((symbolp target)
          (list 'set target value))
         ((tuplep target)
@@ -32,24 +47,30 @@
 
 
 (defmacro cond (&rest clauses)
+  (print "cond")
+  (assert (> (length clauses) 1))
   (let ((ifs '()))
     (dotimes (clause (reversed clauses))
       (let ((test (head clause))
-            (body (list 'progn (tail clause)))
+            (body (tail clause))
             (oldifs ifs))
+        (print ifs)
         (set ifs (if (is test 'else)
                      (progn
                        (assert (not ifs))
                        body)
-                   (list 'if test body)))
+                   `(if ~test (progn ~@body))))
         (extend ifs oldifs)))
     ifs))
 
 
 (defun reversed (l)
-  (let ((r '()))
-    (dotimes (e l)
-      (append r e))))
+  (let ((r '())
+        (i (- (length l) 1)))
+    (while (>= i 0)
+      (append r (nth i l))
+      (set i (- i 1)))
+    r))
 
 
 (defun head (l) (nth 0 l))
