@@ -30,6 +30,12 @@ def sexps_str(form, indent=0):
         while org != r:
             org = r
             r = r.replace('  ', ' ')
+    paren = '({'
+    for a in paren:
+        r = r.replace(a + ' ', a)
+    paren = '})'
+    for a in paren:
+        r = r.replace(' ' + a, a)
     return r
          
 
