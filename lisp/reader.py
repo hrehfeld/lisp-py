@@ -200,14 +200,18 @@ def read_symbol(s):
     return None
         
 
-def read_quote(s):
+def read_quote_like(s, quote_char, symstr):
     if stream_next(s) == quote_char:
         # quote only supports one following exp
         expr =  read(s, one=True)
 
-        r = [intern('quote'), *expr]
+        r = [intern(symstr), *expr]
         return Valid(r)
     return None
+
+
+def read_quote(s):
+    return read_quote_like(s, quote_char, 'quote')
     
     
 
