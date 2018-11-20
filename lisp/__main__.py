@@ -118,6 +118,12 @@ interpreter_tests = [
     (dotimes (i '(0 1 2 3 4))
       (set n (+ n i)))
     n)
+""", 10)
+    , ("""
+(let ((x 5))
+  (cond ((< x 3) 7)
+    (true 1)))
+""", 1)
 ]
 
 
