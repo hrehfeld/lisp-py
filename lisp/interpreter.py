@@ -24,18 +24,22 @@ def sexps_str(form, indent=0):
     else:
         r += p(form)
 
+    org = None
+    while org != r:
+        org = r
+        r = r.replace('  ', ' ')
     if len(r) < 80:
         r = r.replace('\n', ' ')
-        org = None
-        while org != r:
-            org = r
-            r = r.replace('  ', ' ')
+            
     paren = '({'
+    ws = [' ', '\n']
     for a in paren:
-        r = r.replace(a + ' ', a)
+        for s in ws:
+            r = r.replace(a + s, a)
     paren = '})'
     for a in paren:
-        r = r.replace(' ' + a, a)
+        for s in ws:
+            r = r.replace(s + a, a)
     return r
          
 
