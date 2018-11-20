@@ -1,6 +1,6 @@
 from .base import Struct, TYPE, TYPE_T
 from .symbol import intern
-from .reader import read, Stream
+from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_splice_fun_name
 from .interpreter import interpret
 
 import unittest
@@ -18,15 +18,15 @@ reader_tests = [
     , ('''(1+)''', [[intern('1+')]])
     , ('''(())''', [[[]]])
     , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
-    , ("'a", [[intern('quote'), intern('a')]])
-    , ("'()", [[intern('quote'), []]])
+    , ("'a", [[intern(quote_fun_name), intern('a')]])
+    , ("'()", [[intern(quote_fun_name), []]])
     , ("()1", [[], 1])
-    , ("'()1", [[intern('quote'), []], 1])
+    , ("'()1", [[intern(quote_fun_name), []], 1])
     , ("a.b", [[intern('.'), intern('a'), intern('b')]])
     , (";a", [])
     , ("""(;a
 )""", [[]])
-    , ("'() ;1", [[intern('quote'), []]])
+    , ("'() ;1", [[intern(quote_fun_name), []]])
     , ("(defun foo () (+ 1 2)) (foo)", [[intern('defun'), intern('foo'), [], [intern('+'), 1, 2]], [intern('foo')]])
 ]
 
