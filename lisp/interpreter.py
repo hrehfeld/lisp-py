@@ -402,13 +402,12 @@ def __call(env, fun, args_forms):
         raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=sexps_str(args_forms) if args_forms else ''))
 
 
+def atomp(form):
+    return is_num(form) or is_str(form) or keywordp(form)
+
 
 def __eval(env, form):
-    if is_num(form):
-        return form
-    elif is_str(form):
-        return form
-    elif keywordp(form):
+    if atomp(form):
         return form
     elif symbolp(form):
         if not env_contains(env, symbol_name(form)):
