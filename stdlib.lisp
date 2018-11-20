@@ -14,21 +14,6 @@
            ~@body
            (set ~i-var (+ ~i-var 1)))))))
 
-;;    (list 'let (list
-;;                (list iter-list l)
-;;                (list i-var 0))
-;;          (list 'while (list '< i-var (list 'length iter-list))
-;;                (list 'let (list (list var (list 'nth i-var iter-list)))
-;;                      (list 'print var)
-;;                      (extend (list 'progn)
-;;                              body
-;;                              (list (list 'set i-var (list '+ i-var 1)))
-;;                              ))))))
-;; (for x in mylist (progn (print x)))
-;; (let ((var 0))
-;;   (while (< var (length l))
-;;     ,@body))
-
 (defmacro setf (target value)
   (print)
   (cond ((symbolp target)
