@@ -10,6 +10,9 @@ str_end = '"'
 
 accessor_char = "."
 quote_char = "'"
+backquote_char = "`"
+# clojur style
+backquote_splice_char = "~@"
 comment_chars = ";", 
 escape_chars = '\\'
 
@@ -213,6 +216,13 @@ def read_quote_like(s, quote_char, symstr):
 def read_quote(s):
     return read_quote_like(s, quote_char, 'quote')
     
+
+def read_backquote(s):
+    return read_quote_like(s, backquote_char, 'backquote')
+    
+
+def read_backquote_splice(s):
+    return read_quote_like(s, backquote_splice_char, 'backquote_splice')
     
 
 readers = [
@@ -222,6 +232,8 @@ readers = [
     , (read_num)
     , (read_str)
     , (read_quote)
+    , (read_backquote)
+    , (read_backquote_splice)
     , (read_symbol)
 ]
 
