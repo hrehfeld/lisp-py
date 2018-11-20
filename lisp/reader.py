@@ -266,7 +266,8 @@ def read(s, readers=readers, one=False):
                 stream_pos_set(s, istart)
         if not valid_action(res):
             raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), stream_pos(s)))
-        elif one:
+        # one reads until one actual token is parsed
+        elif r and one:
             break
     return r
 
