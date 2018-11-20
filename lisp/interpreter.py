@@ -474,7 +474,6 @@ def base_env(args=[]):
     env_def(env, 'list', list_)
 
     def append(l, *es):
-        l = list(l)
         for e in es:
             l.append(e)
         return l
