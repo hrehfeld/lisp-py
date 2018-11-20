@@ -19,6 +19,11 @@ escape_chars = '\\'
 special_chars = dict(n='\n', t='\t')
 
 
+quote_fun_name = "quote"
+backquote_fun_name = "backquote"
+backquote_splice_fun_name = "backquote_splice"
+
+
 VALID = '__VALID'
 RETURN = '__RETURN'
 
@@ -214,15 +219,15 @@ def read_quote_like(s, quote_char, symstr):
 
 
 def read_quote(s):
-    return read_quote_like(s, quote_char, 'quote')
+    return read_quote_like(s, quote_char, quote_fun_name)
     
 
 def read_backquote(s):
-    return read_quote_like(s, backquote_char, 'backquote')
+    return read_quote_like(s, backquote_char, backquote_fun_name)
     
 
 def read_backquote_splice(s):
-    return read_quote_like(s, backquote_splice_char, 'backquote_splice')
+    return read_quote_like(s, backquote_splice_char, backquote_splice_fun_name)
     
 
 readers = [
