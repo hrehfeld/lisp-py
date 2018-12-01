@@ -405,7 +405,9 @@ def __call(env, fun, args_forms):
 
     elif macrop(fun):
         fun = macro_get_fun(fun)
+        print('eval macro')
         form = __call_function(env, fun, args_forms, eval=False)
+        ps(form)
         return __eval(env, form)
 
     elif callablep(fun):
