@@ -115,7 +115,7 @@ interpreter_tests = [
     , ("(def symbols (dict :a 1))", dict(a=1))
     , ("""
 (let ((n 0))
-    (dotimes (i '(0 1 2 3 4))
+    (dolist (i '(0 1 2 3 4))
       (set n (+ n i)))
     n)
 """, 10)
