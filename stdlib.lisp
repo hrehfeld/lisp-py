@@ -61,3 +61,7 @@
 
 (defun head (l) (nth 0 l))
 (defun last (l) (nth (- (length l) 1) l))
+
+(defun car (l) (head l))
+(defun cdr (l) (tail l))
+(defun cadr (l) (car (tail l)))
