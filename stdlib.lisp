@@ -28,7 +28,8 @@
                              (enumerate target)))))
            (extend (list 'let (list (list value-var value)))
                    clauses)))
-        (true (raise (Exception)))))
+		
+        (true (raise (Exception "unknown target")))))
 
 
 (defmacro cond (&rest clauses)
