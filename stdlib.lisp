@@ -28,24 +28,22 @@
                              (enumerate target)))))
            (extend (list 'let (list (list value-var value)))
                    clauses)))
-        (else (raise (Exception)))))
+        (true (raise (Exception)))))
 
 
 (defmacro cond (&rest clauses)
   (print "cond")
-  (assert (> (length clauses) 1))
-  (let ((ifs '()))
+  (assert (>= (length clauses) 1) "cond not allowed with only one clause")
+  (let ((ifs nil))
     (dotimes (clause (reversed clauses))
       (let ((test (head clause))
-            (body (tail clause))
-            (oldifs ifs))
-        (print ifs)
-        (set ifs (if (is test 'else)
+            (body (tail clause)))
+        (set ifs (if (is test 'true)
+                    ;; else/true branch skips test
                      (progn
-                       (assert (not ifs))
+                       (assert (not ifs) "else needs to be the last clause")
                        body)
-                   `(if ~test (progn ~@body))))
-        (extend ifs oldifs)))
+                  `(if ~test (progn ~@body) ~ifs)))))
     ifs))
 
 
