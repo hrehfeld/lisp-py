@@ -220,13 +220,13 @@ def __let(env, vars, *let_body):
         assert(listp(var))
         assert(len(var) == 2)
 
-    env = Env(env)
+    let_env = Env(env)
 
     for var in vars:
         name_sym, body = var
-        val = __eval(env, body)
-        env_def(env, symbol_name(name_sym), val)
-    return __progn(env, *let_body)
+        val = __eval(let_env, body)
+        env_def(let_env, symbol_name(name_sym), val)
+    return __progn(let_env, *let_body)
 
 
 # TODO if without else
