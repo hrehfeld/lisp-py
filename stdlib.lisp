@@ -47,6 +47,8 @@
     ifs))
 
 
+(defmacro member (e l) `(contains? ~l ~e))
+
 (defun reversed (l)
   (let ((r '())
         (i (- (length l) 1)))
