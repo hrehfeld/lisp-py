@@ -51,7 +51,7 @@
 (defmacro member (e l) `(contains? ~l ~e))
 
 (defun reversed (l)
-  (let ((r '())
+  (let ((r (list))
         (i (- (length l) 1)))
     (while (>= i 0)
       (append r (nth i l))
