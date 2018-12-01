@@ -385,7 +385,7 @@ def __call_function(env, fun, args_forms, eval=True):
 
         varargs = []
         for i in range(len(parameters), num_args):
-            varargs += [arg]
+            varargs += [args_dict[i]]
 
         if eval:
             args = [__eval(env, f) for f in args]
