@@ -587,6 +587,8 @@ def base_env(args=[]):
 
     env_def(env, 'gensym', gensym)
 
+    env_def(env, 'symbolp', symbolp)
+    env_def(env, 'symbol?', symbolp)
 
     env_def(env, '+', operator.__add__)
     env_def(env, '-', operator.__sub__)
