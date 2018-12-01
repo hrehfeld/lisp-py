@@ -124,6 +124,13 @@ interpreter_tests = [
   (cond ((< x 3) 7)
     (true 1)))
 """, 1)
+    , ("""
+(let ((x 5))
+  (cond 
+    ((< x 3) 7)
+    ((< x 9) 7)
+    (true 1)))
+""", 1)
 ]
 
 
