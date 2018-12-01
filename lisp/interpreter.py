@@ -365,6 +365,7 @@ def __call_function(env, fun, args_forms, eval=True):
                 v = arg
                 i = iarg
                 args_dict[i] = v
+        del arg
 
         for i, p in enumerate(parameters):
             if not (i in args_dict):
