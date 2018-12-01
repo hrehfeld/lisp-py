@@ -286,6 +286,7 @@ def __def(env, name, *args):
 
 
 def __setq(env, name, *args):
+    assert(env is not None)
     assert(symbolp(name))
     if not env_contains(env, symbol_name(name)):
         raise Exception('set: {sym} not declared in {env} ({envp})'
