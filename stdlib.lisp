@@ -4,18 +4,14 @@
         (l (last iter))
         (i-var (gensym))
         (iter-list (gensym)))
-    (print "dotimes")
-
     `(let ((~iter-list ~l)
            (~i-var 0))
        (while (< ~i-var (length ~iter-list))
          (let ((~var (nth ~i-var ~iter-list)))
-           (print ~var)
            ~@body
            (set ~i-var (+ ~i-var 1)))))))
 
 (defmacro setf (target value)
-  (print)
   (cond ((symbolp target)
          (list 'set target value))
         ((tuplep target)
