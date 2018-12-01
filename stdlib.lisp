@@ -29,7 +29,6 @@
 
 
 (defmacro cond (&rest clauses)
-  (print "cond")
   (assert (>= (length clauses) 1) "cond not allowed with only one clause")
   (let ((ifs nil))
     (dolist (clause (reversed clauses))
