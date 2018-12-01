@@ -3,13 +3,19 @@ from .symbol import intern, Symbol, symbol_name, symbolp, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
 import operator
 
+def named_operatorp(form, op):
+    assert(symbolp(op))
+    return listp(form) and form and symbolp(form[0]) and form[0] == op
+
 
 def sexps_str(form, indent=0):
     def p(f):
         return ('  ' * indent + str(f) + '\n')
 
     r = ''
-    if isinstance(form, list) or isinstance(form, tuple):
+    if named_operatorp(form, intern('quote')):
+        r += ' '.join(["'" + sexps_str(f) for f in form[1:]])
+    elif isinstance(form, list) or isinstance(form, tuple):
         r += p('(')
         for e in form:
             r += sexps_str(e, indent + 1)
