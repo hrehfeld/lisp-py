@@ -640,6 +640,10 @@ def base_env(args=[]):
         print(*args)
     env_def(env, 'print', print_)
 
+    def princ(arg):
+        ps(arg)
+    env_def(env, 'princ', princ)
+
     # TODO
     #(infix
 
