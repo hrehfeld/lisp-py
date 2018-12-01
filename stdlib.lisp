@@ -41,7 +41,7 @@
         (set ifs (if (is test 'true)
                     ;; else/true branch skips test
                      (progn
-                       (assert (not ifs) "else needs to be the last clause")
+                       (assert (not ifs) "else/true needs to be the last clause")
                        body)
                   `(if ~test (progn ~@body) ~ifs)))))
     ifs))
