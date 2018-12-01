@@ -349,7 +349,7 @@ def __call_function(env, fun, args_forms, eval=True):
             for i, p in enumerate(parameters):
                 if symbol_name(p) == k:
                     return i
-            return -1
+            return None
 
         kwargs = {}
         for iarg, arg in enumerate(args):
@@ -357,7 +357,7 @@ def __call_function(env, fun, args_forms, eval=True):
             if isinstance(arg, tuple) and not symbolp(arg):
                 k, v = arg
                 i = parameter_index(k)
-                if i == -1:
+                if i is None:
                     kwargs[k] = v
                 else:
                     args_dict[i] = v
