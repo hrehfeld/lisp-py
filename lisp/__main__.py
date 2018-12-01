@@ -176,11 +176,11 @@ args = p.parse_args()
 if args.type is not None and args.num is not None:
     if args.type == 'reader':
         program = reader_tests[args.num][0]
-        print(read(Stream(program, 0)))
+        ps(read(Stream(program, 0)))
     if args.type == 'interpreter':
         program = interpreter_tests[args.num][0]
         print(program)
-        print(interpret(read(Stream(program, 0))))
+        ps(interpret(read(Stream(program, 0))))
 elif args.c:
     for filename in args.c:
         with open(filename, 'r') as f:
