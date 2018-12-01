@@ -36,14 +36,14 @@
   (assert (>= (length clauses) 1) "cond not allowed with only one clause")
   (let ((ifs nil))
     (dotimes (clause (reversed clauses))
-      (let ((test (head clause))
-            (body (tail clause)))
-        (set ifs (if (is test 'true)
+      (let ((test (car clause))
+            (body (cdr clause)))
+        (set ifs (if (eq test 'true)
                     ;; else/true branch skips test
                      (progn
                        (assert (not ifs) "else/true needs to be the last clause")
-                       body)
-                  `(if ~test (progn ~@body) ~ifs)))))
+                       `(progn ~@body))
+                   `(if ~test (progn ~@body) ~ifs)))))
     ifs))
 
 
