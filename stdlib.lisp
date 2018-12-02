@@ -48,6 +48,10 @@
 
 (defmacro member (e l) `(contains? ~l ~e))
 
+(defun break (&rest values)
+  (assert (<= (length values) 1))
+  (return-from nil (when values (head values))))
+
 (defun reversed (l)
   (let ((r (list))
         (i (- (length l) 1)))
