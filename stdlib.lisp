@@ -14,6 +14,10 @@
            ~@body
            (set ~i-var (+ ~i-var 1)))))))
 
+(defun map (f l)
+  (let ((r (list)))
+	(dolist (e l)
+	  (+= r (list (f e))))))
 (defmacro setf (target value)
   (cond ((symbolp target)
          (list 'set target value))
