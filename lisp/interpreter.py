@@ -245,13 +245,15 @@ def __let(env, vars, *let_body):
 
 
 # TODO if without else
-def __if(env, cond, then, *_else):
+def __if(env, cond, then, else_body=None):
     cond = __eval(env, cond)
-    # TODO check trueness test
-    body = then
-    if not cond and _else:
-        body = _else[0]
-    return __progn(env, body)
+    if cond:
+        r = __eval(env, then)
+    elif else_body:
+        r = __progn(env, else_body)
+    else:
+        r = None
+    return r
 
 
 def is_num(f):
