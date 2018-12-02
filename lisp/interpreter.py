@@ -3,6 +3,13 @@ from .symbol import intern, Symbol, symbol_name, symbolp, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
 import operator
 
+class BlockException(Exception):
+    def __init__(self, name, value=None):
+        Exception.__init__(self, name)
+        self.name = name
+        self.value = value
+
+
 def named_operatorp(form, op):
     assert(symbolp(op))
     return listp(form) and form and symbolp(form[0]) and form[0] == op
@@ -524,6 +531,20 @@ def base_env(args=[]):
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('progn'), *body])
+    def block(env, name, *body):
+        try:
+            r = __progn(env, *body)
+        except BlockException as e:
+            if e.name != name:
+                raise e
+            return e.value
+        return r
+    env_def(env, 'block', special_form(block))
+
+    def return_from(env, name, value=None):
+        r = __eval(env, value)
+        raise BlockException(name, r)
+    env_def(env, 'return-from', special_form(return_from))
 
     env_def(env, 'while', special_form(__while))
 

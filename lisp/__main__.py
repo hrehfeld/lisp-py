@@ -131,6 +131,12 @@ interpreter_tests = [
     ((< x 9) 7)
     (true 1)))
 """, 7)
+    , ("""(block nil  (return-from nil nil))""", None)
+    , ("""(block nil  (return-from nil 1))""", 1)
+    , ("""(block test (return-from test nil))""", None)
+    , ("""(block test (return-from test 1))""", 1)
+   , ("""(block nil (break nil))""", None)
+   , ("""(block nil (break 1))""", 1)
 ]
 
 
