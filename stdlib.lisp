@@ -1,3 +1,6 @@
+(defmacro when (test &rest body)
+  `(if ~test (progn ~@body)))
+
 (defmacro dolist (iter &rest body)
   (assert (eq (length iter) 2))
   (let ((var (head iter))
