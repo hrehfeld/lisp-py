@@ -71,3 +71,14 @@
 (defun car (l) (head l))
 (defun cdr (l) (tail l))
 (defun cadr (l) (car (tail l)))
+
+;; TODO support 1 as default
+(defmacro def-setter-op-varargs (name op)
+  `(defmacro ~name (var &rest args)
+	 `(setf ~~var (apply ~op (list ~~var ~~@args)))))
+(def-setter-op-varargs += +)
+(def-setter-op-varargs -= -)
+(def-setter-op-varargs *= *)
+(def-setter-op-varargs /= /)
+
+
