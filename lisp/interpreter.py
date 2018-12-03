@@ -568,27 +568,43 @@ def base_env(args=[]):
 
     env_def(env, quote_fun_name, special_form(lambda env, e: e))
 
+    def backquote_evalp(s):
+        return named_operatorp(s, intern(backquote_eval_fun_name)) or named_operatorp(s, intern(backquote_splice_fun_name))
+    
     def backquote_(env, s, level):
         if atomp(s):
             return [s]
         elif named_operatorp(s, intern(backquote_eval_fun_name)):
-                assert(len(s) == 2)
-                return [__eval(env, nth(1, s))]
+            assert(len(s) == 2)
+            # nested backquote eval
+            if backquote_evalp(s[1]):
+                return [s[1]]
+            return [__eval(env, nth(1, s))]
         elif named_operatorp(s, intern(backquote_splice_fun_name)):
             assert(len(s) == 2)
+            if backquote_evalp(s[1]):
+                return [s[1]]
             return __eval(env, nth(1, s))
+        elif named_operatorp(s, intern(backquote_fun_name)):
+            assert(len(s) > 1)
+            r = backquote_(env, s[1:], level + 1)
+            assert(len(r) == 1)
+            return [[intern(backquote_fun_name)] + r[0]]
         elif listp(s):
             r = []
             for e in s:
-                r += backquote_(env, e, level + 1)
+                r += backquote_(env, e, level)
             return [r]
         else:
             raise Exception(sexps_str(s))
 
     def backquote(env, s):
+        ps(s)
         r = backquote_(env, s, 0)
         assert(len(r) == 1)
-        return r[0]
+        r = r[0]
+        ps(r)
+        return r
 
     env_def(env, backquote_fun_name, special_form(backquote))
     env_def(env, 'eval', special_form(__eval))
