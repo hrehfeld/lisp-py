@@ -631,6 +631,8 @@ def base_env(args=[]):
     env_def(env, 'tuplep', tuplep)
     env_def(env, 'tuple?', tuplep)
 
+    env_def(env, 'named-operator?', named_operatorp)
+
     def numeric_op(op):
         def numeric_op(a, *args):
             r = a
