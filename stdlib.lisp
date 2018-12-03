@@ -37,6 +37,10 @@
 	(map
 	 (wrap-apply  (fn (i el-a) (tuple el-a (nth i b))))
 	 (enumerate a))))
+
+; TODO: test
+(defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
+
 (defmacro setf (target value)
   (cond ((symbolp target)
          (list 'set target value))
