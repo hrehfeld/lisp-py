@@ -569,40 +569,26 @@ def base_env(args=[]):
     env_def(env, quote_fun_name, special_form(lambda env, e: e))
 
     def backquote_(env, s):
-        def normal(s):
-            return s, False
-        def splice(s):
-            return s, True
-
-        def value(s):
-            return s[0]
-
-        def splicep(r):
-            return r[1]
-
         if atomp(s):
-            return normal(s)
+            return [s]
         elif named_operatorp(s, intern(backquote_eval_fun_name)):
                 assert(len(s) == 2)
-                return normal(__eval(env, nth(1, s)))
+                return [__eval(env, nth(1, s))]
         elif named_operatorp(s, intern(backquote_splice_fun_name)):
             assert(len(s) == 2)
-            return splice(__eval(env, nth(1, s)))
+            return __eval(env, nth(1, s))
         elif listp(s):
             r = []
             for e in s:
-                re = backquote_(env, e)
-                v = value(re)
-                if splicep(re):
-                    r += v
-                else:
-                    r += [v]
-            return normal(r)
+                r += backquote_(env, e)
+            return [r]
         else:
             raise Exception(sexps_str(s))
 
     def backquote(env, s):
-        return backquote_(env, s)[0]
+        r = backquote_(env, s)
+        assert(len(r) == 1)
+        return r[0]
 
     env_def(env, backquote_fun_name, special_form(backquote))
     env_def(env, 'set', special_form(__setq))
