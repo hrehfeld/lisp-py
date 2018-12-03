@@ -43,19 +43,20 @@
 
 (defmacro setf (target value)
   (cond ((symbolp target)
-         (list 'set target value))
-        ((tuplep target)
-         (let ((value-var (gensym))
-               (clauses (map
-                         (fn (e)
-                             (let ((i (head e))
-                                   (v (last e)))
-                               (list 'set v (list 'nth i value-var)))
-                             (enumerate target)))))
-           (extend (list 'let (list (list value-var value)))
-                   clauses)))
-		
-        (true (raise (Exception "unknown target")))))
+         `(set ~target ~value))
+		;; lists
+		((listp target)
+		 (let ((values (eval value)))
+		   (assert (eq (length target) (length values))
+				   (+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
+		   (dolist (t (enumerate target))
+			 (apply
+			  (fn (i t)
+				  (setf t (nth values i)))
+			  t))))
+        (true
+		 (princ target)
+		 (throw (Exception (concat "unknown target" (repr target)))))))
 
 
 (defmacro cond (&rest clauses)
