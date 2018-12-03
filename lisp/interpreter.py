@@ -526,7 +526,7 @@ def base_env(args=[]):
     env_def(env, 'extend', extend)
 
     env_def(env, 'str', str)
-    env_def(env, 'repr', repr)
+    env_def(env, 'repr', sexps_str)
 
     env_def(env, 'dict', dict)
     env_def(env, 'dict-setdefault', dict.setdefault)
