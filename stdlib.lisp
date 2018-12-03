@@ -16,7 +16,7 @@
            (set ~i-var (+ ~i-var 1)))))))
 
 (defun wrap-apply (f)
-  (fn (&rest args) (apply f args)))
+  (fn (args) (apply f args)))
 
 (defun map (f l)
   (assert (not (is nil l)) "map: list is None")
