@@ -512,6 +512,10 @@ def base_env(args=[]):
         return list(args)
     env_def(env, 'list', list_)
 
+    def as_list(arg):
+        return list(arg)
+    env_def(env, 'as-list', as_list)
+
     def append(l, *es):
         for e in es:
             l.append(e)
