@@ -35,8 +35,8 @@
 
 (defun zip (a b)
   (let ((n (min (map length (list a b))))
-		(a (slice a n))
-		(b (slice b n)))
+		(a (as-list (slice a n)))
+		(b (as-list (slice b n))))
 	(map
 	 (wrap-apply  (fn (i el-a) (tuple el-a (nth i b))))
 	 (enumerate a))))
