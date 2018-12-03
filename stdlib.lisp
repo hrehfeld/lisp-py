@@ -22,7 +22,8 @@
   (assert (not (is nil l)) "map: list is None")
   (let ((r (list)))
 	(dolist (e l)
-	  (+= r (list (f e))))))
+	  (append r (f e)))
+	r))
 
 ;; TODO: generator
 (defun enumerate (l)
