@@ -57,6 +57,9 @@ interpreter_tests = [
     , ("(let ((foo 3)) `(~foo))", [3])
     , ("(let ((foo 3)) `(bar ~foo))", [intern('bar'), 3])
     , ("(let ((foo 3)) `(bar ~@(list foo 1)))", [intern('bar'), 3, 1])
+    # expected error
+    #, ("(let ((foo 3)) `(bar ,(+ ,foo 1)))", [intern('bar'), [intern('+'), 3, 1]])
+    , ("(let ((foo 3)) `(bar (+ ~foo 1)))", [intern('bar'), [intern('+'), 3, 1]])
     , ("(nth 1 '(1 2 3)", 2)
     , ("(head '(1 2 3)", 1)
     , ("(tail '(1 2 3)", [2, 3])
