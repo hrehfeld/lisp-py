@@ -464,7 +464,7 @@ def __call(env, fun, args_forms):
 def __eval(env, form):
     if symbolp(form):
         if not env_contains(env, symbol_name(form)):
-            raise Exception('Symbol "%s" not found in env (Keys: %s => %s)' % (symbol_name(form), ', '.join(env.d.keys()), ', '.join(env.parent.d.keys()) if env.parent else ''))
+            raise Exception('Symbol "%s" not found in env (Keys: %s => %s)' % (symbol_name(form), ', '.join(env.d.keys()), ', '.join(env.parent.d.values()) if env.parent else ''))
         return env_get(env, symbol_name(form))
     elif atomp(form):
         return form
