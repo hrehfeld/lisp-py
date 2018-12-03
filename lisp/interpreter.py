@@ -606,7 +606,11 @@ def base_env(args=[]):
         return r
 
     env_def(env, backquote_fun_name, special_form(backquote))
-    env_def(env, 'eval', special_form(__eval))
+
+    def source_eval(env, *args):
+        args = [__eval(env, e) for e in args]
+        return __eval(env, args)
+    env_def(env, 'eval', special_form(source_eval))
     env_def(env, 'set', special_form(__setq))
     env_def(env, 'let', special_form(__let))
     env_def(env, 'progn', special_form(__progn))
