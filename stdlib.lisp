@@ -29,8 +29,9 @@
   (let ((r '())
 		(i 0))
 	(dolist (e l)
-	  (+= r (list (tuple i e)))
-	  (+= i 1))))
+	  (append r (tuple i e))
+	  (+= i 1))
+	r))
 
 (defun zip (a b)
   (let ((n (min (map length (list a b))))
