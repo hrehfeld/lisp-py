@@ -402,7 +402,7 @@ def __call_function(env, fun, args_forms, eval=True):
         for i, p in enumerate(parameters):
             if not (i in args_dict):
                 raise Exception('function call missing argument #{i} {name}: ({fun} {args})'
-                                .format(i=i, name=symbol_name(p), fun=fun, args=args_forms))
+                                .format(i=i, name=symbol_name(p), fun=fun, args=sexps_str(args_forms)))
 
         if kwargs and special_names[keys_name] is None:
             raise Exception('unknown keyword args: {kws}'.format(kws=kwargs))
