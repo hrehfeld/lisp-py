@@ -111,6 +111,13 @@ interpreter_tests = [
     , ("(eval 1)", 1)
     , ("(eval '())", [])
     , ("(eval (+ 1 2))", 3)
+    , ("""
+(def foo0)
+(def foo1)
+(def foo3)
+(setf (tuple foo0 foo1 foo) '(0 1 2))
+(tuple foo2 foo1 foo0)
+""", (2, 1, 0))
     , ("(defun foo ()) (foo)", None)
     , ("(defun foo () 1) (foo)", 1)
     , ("(defun foo () (+ 1 2)) (foo)", 3)
