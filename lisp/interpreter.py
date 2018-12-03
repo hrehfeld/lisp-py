@@ -582,25 +582,24 @@ def base_env(args=[]):
 
         if atomp(s):
             return normal(s)
-        elif listp(s):
-            if nth(0, s) is intern(backquote_eval_fun_name):
+        elif named_operatorp(s, intern(backquote_eval_fun_name)):
                 assert(len(s) == 2)
                 return normal(__eval(env, nth(1, s)))
-            elif nth(0, s) is intern(backquote_splice_fun_name):
-                assert(len(s) == 2)
-                return splice(__eval(env, nth(1, s)))
-            else:
-                r = []
-                for e in s:
-                    re = backquote_(env, e)
-                    v = value(re)
-                    if splicep(re):
-                        r += v
-                    else:
-                        r += [v]
-                ps(r)
-                return normal(r)
-        raise Exception(sexps_str(s))
+        elif named_operatorp(s, intern(backquote_splice_fun_name)):
+            assert(len(s) == 2)
+            return splice(__eval(env, nth(1, s)))
+        elif listp(s):
+            r = []
+            for e in s:
+                re = backquote_(env, e)
+                v = value(re)
+                if splicep(re):
+                    r += v
+                else:
+                    r += [v]
+            return normal(r)
+        else:
+            raise Exception(sexps_str(s))
 
     def backquote(env, s):
         return backquote_(env, s)[0]
