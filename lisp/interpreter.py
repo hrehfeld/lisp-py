@@ -1,6 +1,6 @@
 from .base import native, Struct
 from .symbol import intern, Symbol, symbol_name, symbolp, gensym
-from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
+from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char
 import operator
 
 class BlockException(Exception):
@@ -15,18 +15,30 @@ def named_operatorp(form, op):
     return listp(form) and form and symbolp(form[0]) and form[0] == op
 
 
+sexpr_print_operators = {
+    quote_fun_name: quote_char
+    , backquote_fun_name: backquote_char
+    , backquote_eval_fun_name: backquote_eval_char
+    , backquote_splice_fun_name: backquote_splice_char
+}
+
 def sexps_str(form, indent=0):
     def p(f):
         return ('  ' * indent + str(f) + '\n')
 
     r = ''
-    if named_operatorp(form, intern('quote')):
-        r += ' '.join(["'" + sexps_str(f) for f in form[1:]])
-    elif isinstance(form, list) or isinstance(form, tuple):
-        r += p('(')
-        for e in form:
-            r += sexps_str(e, indent + 1)
-        r += p(')')
+    if isinstance(form, list) or isinstance(form, tuple):
+        is_simple = False
+        #for op, char in sexpr_print_operators.items():
+        #    if named_operatorp(form, intern(op)):
+        #        r += ' '.join([char + sexps_str(f) for f in form[1:]])
+        #        is_simple = True
+        #        break
+        if not is_simple:
+            r += p('(')
+            for e in form:
+                r += sexps_str(e, indent + 1)
+            r += p(')')
     elif symbolp(form):
         r += p(symbol_name(form))
     elif isinstance(form, dict):
