@@ -45,11 +45,12 @@
   (cond ((symbolp target)
          `(set ~target ~value))
 		;; lists
-		((listp target)
-		 (let ((values (eval value)))
-		   (assert (eq (length target) (length values))
+		((named-operator? target 'tuple)
+		 (let ((values (eval value))
+			   (targets (slice target 1 (length target))))
+		   (assert (eq (length targets) (length values))
 				   (+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
-		   (dolist (t (enumerate target))
+		   (dolist (t (enumerate targets))
 			 (apply
 			  (fn (i t)
 				  (setf t (nth values i)))
