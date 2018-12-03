@@ -284,6 +284,10 @@ def is_str(f):
     return isinstance(f, str)
 
 
+def atomp(form):
+    return is_num(form) or is_str(form) or keywordp(form) or symbolp(form) or (listp(form) and not len(form))
+
+
 def keywordp(e):
     return symbolp(e) and symbol_name(e).startswith(':')
 
@@ -447,14 +451,8 @@ def __call(env, fun, args_forms):
         raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=sexps_str(args_forms) if args_forms else ''))
 
 
-def atomp(form):
-    return is_num(form) or is_str(form) or keywordp(form)
-
-
 def __eval(env, form):
-    if atomp(form):
-        return form
-    elif symbolp(form):
+    if symbolp(form):
         if not env_contains(env, symbol_name(form)):
             raise Exception('Symbol "%s" not found in env (Keys: %s => %s)' % (symbol_name(form), ', '.join(env.d.keys()), ', '.join(env.parent.d.keys()) if env.parent else ''))
         return env_get(env, symbol_name(form))
@@ -465,6 +463,8 @@ def __eval(env, form):
         args_forms = form[1:]
         
         return __call(env, fun, args_forms)
+    elif atomp(form):
+        return form
     else:
         raise Exception('unknown form: {form}'.format(form=sexps_str(form)))
         
@@ -582,7 +582,7 @@ def base_env(args=[]):
         def splicep(r):
             return r[1]
 
-        if atomp(s) or symbolp(s) or (listp(s) and not len(s)):
+        if atomp(s):
             return normal(s)
         elif listp(s):
             if nth(0, s) is intern(backquote_eval_fun_name):
