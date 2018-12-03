@@ -56,7 +56,7 @@
 			  t))))
         (true
 		 (princ target)
-		 (throw (Exception (concat "unknown target" (repr target)))))))
+		 (throw (Exception (+ "unknown target" (repr target)))))))
 
 
 (defmacro cond (&rest clauses)
