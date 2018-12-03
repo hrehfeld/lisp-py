@@ -1,4 +1,4 @@
-from .base import Struct
+from .base import native, Struct
 from .symbol import intern, Symbol, symbol_name, symbolp, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
 import operator
