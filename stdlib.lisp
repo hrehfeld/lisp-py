@@ -23,6 +23,7 @@
   (let ((r (list)))
 	(dolist (e l)
 	  (append r (f e)))
+	(assert (not (null? r)))
 	r))
 
 ;; TODO: generator
