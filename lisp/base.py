@@ -1,3 +1,6 @@
+def native(f):
+    return f
+
 TYPE = '__type'
 TYPE_T = '__type_t'
 
