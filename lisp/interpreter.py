@@ -670,6 +670,8 @@ def base_env(args=[]):
         return [e] + l
     env_def(env, 'cons', cons)
 
+    env_def(env, 'slice', slice)
+
     def length(l):
         return len(l)
     env_def(env, 'length', length)
