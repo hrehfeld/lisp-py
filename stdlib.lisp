@@ -21,6 +21,14 @@
   (let ((r (list)))
 	(dolist (e l)
 	  (+= r (list (f e))))))
+
+;; TODO: generator
+(defun enumerate (l)
+  (let ((r (list))
+		(i 0))
+	(dolist (e l)
+	  (+= r (list (tuple i e)))
+	  (+= i 1))))
 (defmacro setf (target value)
   (cond ((symbolp target)
          (list 'set target value))
