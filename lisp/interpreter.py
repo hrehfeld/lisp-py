@@ -439,9 +439,7 @@ def __call(env, fun, args_forms):
 
     elif macrop(fun):
         fun = macro_get_fun(fun)
-        print('eval macro')
         form = __call_function(env, fun, args_forms, eval=False)
-        ps(form)
         return __eval(env, form)
 
     elif callablep(fun):
@@ -543,7 +541,7 @@ def base_env(args=[]):
 
 
     def __assert(env, cond, msg=''):
-        ps(cond)
+        msg = '%s: %s' % (sexps_str(cond), msg)
         r = __eval(env, cond)
         assert r, msg
     env_def(env, 'assert', special_form(__assert))
