@@ -14,6 +14,9 @@
            ~@body
            (set ~i-var (+ ~i-var 1)))))))
 
+(defun wrap-apply (f)
+  (fn (&rest args) (apply f args)))
+
 (defun map (f l)
   (let ((r (list)))
 	(dolist (e l)
