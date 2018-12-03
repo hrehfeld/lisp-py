@@ -18,6 +18,7 @@
   (fn (&rest args) (apply f args)))
 
 (defun map (f l)
+  (assert (not (is nil l)) "map: list is None")
   (let ((r (list)))
 	(dolist (e l)
 	  (+= r (list (f e))))))
