@@ -672,6 +672,8 @@ def base_env(args=[]):
 
     env_def(env, 'slice', slice)
 
+
+    @native
     def length(l):
         return len(l)
     env_def(env, 'length', length)
