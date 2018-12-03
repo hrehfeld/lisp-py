@@ -29,6 +29,14 @@
 	(dolist (e l)
 	  (+= r (list (tuple i e)))
 	  (+= i 1))))
+
+(defun zip (a b)
+  (let ((n (min (map length (list a b))))
+		(a (slice a n))
+		(b (slice b n)))
+	(map
+	 (wrap-apply  (fn (i el-a) (tuple el-a (nth i b))))
+	 (enumerate a))))
 (defmacro setf (target value)
   (cond ((symbolp target)
          (list 'set target value))
