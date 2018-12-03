@@ -627,10 +627,18 @@ def base_env(args=[]):
     env_def(env, 'tuplep', tuplep)
     env_def(env, 'tuple?', tuplep)
 
-    env_def(env, '+', operator.__add__)
-    env_def(env, '-', operator.__sub__)
-    env_def(env, '*', operator.__mul__)
-    env_def(env, '/', operator.__truediv__)
+    def numeric_op(op):
+        def numeric_op(a, *args):
+            r = a
+            for b in args:
+                r = op(r, b)
+            return r
+        return numeric_op
+
+    env_def(env, '+', numeric_op(operator.__add__))
+    env_def(env, '-', numeric_op(operator.__sub__))
+    env_def(env, '*', numeric_op(operator.__mul__))
+    env_def(env, '/', numeric_op(operator.__truediv__))
 
     env_def(env, 'eq', operator.__eq__)
     env_def(env, 'neq', operator.__ne__)
