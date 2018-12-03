@@ -76,6 +76,7 @@
 (defmacro def-setter-op-varargs (name op)
   `(defmacro ~name (var &rest args)
 	 `(setf ~~var (apply ~op (list ~~var ~~@args)))))
+;; (defmacro += (var &rest args)  `(setf ~var (apply + (list ~var ~@(eval args)))))
 (def-setter-op-varargs += +)
 (def-setter-op-varargs -= -)
 (def-setter-op-varargs *= *)
