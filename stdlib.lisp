@@ -49,15 +49,18 @@
          `(set ~target ~value))
 		;; lists
 		((named-operator? target 'tuple)
-		 (let ((values (eval value))
-			   (targets (slice target 1 (length target))))
-		   (assert (eq (length targets) (length values))
-				   (+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
-		   (dolist (t (enumerate targets))
-			 (apply
-			  (fn (i t)
-				  (setf t (nth values i)))
-			  t))))
+		 `(progn
+			~@(let ((values (eval value))
+					(targets (as-list (slice target 1 (length target))))
+					(num-targets (-  (length target) 1)))
+				(print (+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
+				(assert (eq num-targets (length values))
+						(+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
+				(map
+				 (wrap-apply
+				  (fn (i t)
+					  `(setf ~~t ~~@(nth values i))))
+				 (enumerate targets)))))
         (true
 		 (princ target)
 		 (throw (Exception (+ "unknown target" (repr target)))))))
