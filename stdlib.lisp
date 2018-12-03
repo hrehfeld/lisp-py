@@ -26,6 +26,7 @@
 ;; TODO: generator
 (defun enumerate (l)
   (let ((r (list))
+  (assert (not (is nil l)) "enumerate: list is None")
 		(i 0))
 	(dolist (e l)
 	  (+= r (list (tuple i e)))
