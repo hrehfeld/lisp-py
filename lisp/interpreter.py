@@ -641,6 +641,8 @@ def base_env(args=[]):
 
     env_def(env, 'gensym', gensym)
 
+    env_def(env, 'null?', lambda *args: all([e is None for e in args]))
+
     env_def(env, 'symbolp', symbolp)
     env_def(env, 'symbol?', symbolp)
 
