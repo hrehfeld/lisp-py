@@ -646,6 +646,11 @@ def base_env(args=[]):
     env_def(env, '>', operator.__gt__)
     env_def(env, '>=', operator.__ge__)
 
+    def cons(e, l):
+        assert listp(l), repr(l)
+        return [e] + l
+    env_def(env, 'cons', cons)
+
     def length(l):
         return len(l)
     env_def(env, 'length', length)
