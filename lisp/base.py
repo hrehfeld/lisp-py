@@ -35,7 +35,8 @@ def Struct(name_str, *field_names):
     return constructor, instancep, getters, setters
 
 
-def concat(start, *rest):
+def concat(*rest):
+    r = ''
     for e in rest:
-        start += e
-    return start
+        r += e
+    return r
