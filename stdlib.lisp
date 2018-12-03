@@ -9,6 +9,7 @@
         (iter-list (gensym)))
     `(let ((~iter-list ~l)
            (~i-var 0))
+	   (assert (not (is nil ~iter-list)) "list is None")
        (while (< ~i-var (length ~iter-list))
          (let ((~var (nth ~i-var ~iter-list)))
            ~@body
