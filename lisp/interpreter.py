@@ -599,11 +599,9 @@ def base_env(args=[]):
             raise Exception(sexps_str(s))
 
     def backquote(env, s):
-        ps(s)
         r = backquote_(env, s, 0)
         assert(len(r) == 1)
         r = r[0]
-        ps(r)
         return r
 
     env_def(env, backquote_fun_name, special_form(backquote))
