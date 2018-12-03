@@ -124,6 +124,23 @@ def add_function(f, parameters, defaults, special_names, special_defaults):
     functions[f] = (parameters, defaults, special_names, special_defaults)
 
 
+@native
+def block(env, name, *body):
+    try:
+        r = __progn(env, *body)
+    except BlockException as e:
+        if e.name != name:
+            raise e
+        return e.value
+    return r
+
+
+@native
+def return_from(env, name, value=None):
+    r = __eval(env, value)
+    raise BlockException(name, r)
+    
+
 def __fn(env, parameters, *body):
     def parameter_default(p):
         return p[1]
@@ -181,8 +198,11 @@ def __fn(env, parameters, *body):
         elif defaults_started:
             raise Exception('parameters with defaults need to come after normal ones. {ps}'.format(ps=parameters))
 
+    block_name = gensym()
     def f(args, varargs, kwargs):
         fun_env = Env(env)
+        env_def(fun_env, 'return', lambda value=None: return_from(fun_env, block_name, value))
+
         for parameter, arg in zip(parameters, args):
             env_def(fun_env, symbol_name(parameter), arg)
 
@@ -193,7 +213,7 @@ def __fn(env, parameters, *body):
         if keysargs_name:
             env_def(fun_env, symbol_name(keysargs_name), kwargs)
 
-        return __progn(fun_env, *body)
+        return block(fun_env, block_name, *body)
     add_function(f, parameters, defaults, special_names, special_defaults)
     return f
 
@@ -533,19 +553,7 @@ def base_env(args=[]):
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('progn'), *body])
-    def block(env, name, *body):
-        try:
-            r = __progn(env, *body)
-        except BlockException as e:
-            if e.name != name:
-                raise e
-            return e.value
-        return r
     env_def(env, 'block', special_form(block))
-
-    def return_from(env, name, value=None):
-        r = __eval(env, value)
-        raise BlockException(name, r)
     env_def(env, 'return-from', special_form(return_from))
 
     env_def(env, 'while', special_form(__while))
