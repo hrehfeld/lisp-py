@@ -674,7 +674,21 @@ def base_env(args=[]):
         return [e] + l
     env_def(env, 'cons', cons)
 
-    env_def(env, 'slice', slice)
+    def _slice(l, istart=None, iend=None, step=None):
+        if step is None:
+            if iend is None:
+                iend = istart
+                istart = 0
+            if iend is None:
+                iend = len(l)
+            return l[istart:iend]
+        else:
+            if istart is None:
+                istart = 0
+            if iend is None:
+                iend = len(l)
+            return [l[i] for i in range(istart, iend, step)]
+    env_def(env, 'slice', _slice)
 
 
     @native
