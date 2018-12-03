@@ -95,6 +95,18 @@
 (defun cdr (l) (tail l))
 (defun cadr (l) (car (tail l)))
 
+(defun min (&rest args)
+  (let ((mi (head args)))
+	(dolist (x (tail args))
+	  (when (< x mi)
+		(set mi x)))))
+
+(defun max (&rest args)
+  (let ((ma (head args)))
+	(dolist (x (tail args))
+	  (when (> x ma)
+		(set ma x)))))
+
 ;; TODO support 1 as default
 (defmacro def-setter-op-varargs (name op)
   `(defmacro ~name (var &rest args)
