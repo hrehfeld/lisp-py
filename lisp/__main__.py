@@ -114,8 +114,8 @@ interpreter_tests = [
     , ("""
 (def foo0)
 (def foo1)
-(def foo3)
-(setf (tuple foo0 foo1 foo) '(0 1 2))
+(def foo2)
+(setf (tuple foo0 foo1 foo2) '(0 1 2))
 (tuple foo2 foo1 foo0)
 """, (2, 1, 0))
     , ("(defun foo ()) (foo)", None)
