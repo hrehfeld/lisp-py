@@ -591,6 +591,7 @@ def base_env(args=[]):
         return r[0]
 
     env_def(env, backquote_fun_name, special_form(backquote))
+    env_def(env, 'eval', special_form(__eval))
     env_def(env, 'set', special_form(__setq))
     env_def(env, 'let', special_form(__let))
     env_def(env, 'progn', special_form(__progn))
