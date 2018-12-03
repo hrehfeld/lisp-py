@@ -493,7 +493,7 @@ def env_containing_parent(env, k):
 
 
 def env_def(env, k, v):
-    assert not env_contains(env, k)
+    assert not k in env.d
     env.d[k] = v
 
 
