@@ -568,7 +568,7 @@ def base_env(args=[]):
 
     env_def(env, quote_fun_name, special_form(lambda env, e: e))
 
-    def backquote_(env, s):
+    def backquote_(env, s, level):
         if atomp(s):
             return [s]
         elif named_operatorp(s, intern(backquote_eval_fun_name)):
@@ -580,13 +580,13 @@ def base_env(args=[]):
         elif listp(s):
             r = []
             for e in s:
-                r += backquote_(env, e)
+                r += backquote_(env, e, level + 1)
             return [r]
         else:
             raise Exception(sexps_str(s))
 
     def backquote(env, s):
-        r = backquote_(env, s)
+        r = backquote_(env, s, 0)
         assert(len(r) == 1)
         return r[0]
 
