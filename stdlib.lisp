@@ -143,3 +143,6 @@
 
 (defun test-name (what) (+ what "?"))
 
+(defmacro isinstance (value type)
+  (list (intern (test-name (symbol-name type)))
+		value))
