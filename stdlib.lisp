@@ -107,9 +107,9 @@
 (defun cdr (l) (tail l))
 (defun cadr (l) (car (tail l)))
 
-(defun min (&rest args)
-  (let ((mi (head args)))
-	(dolist (x (tail args))
+(defun min (a &rest args)
+  (let ((mi a))
+	(dolist (x args)
 	  (when (< x mi)
 		(set mi x)))
 	mi))
