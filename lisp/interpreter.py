@@ -538,7 +538,7 @@ def base_env(args=[]):
     env_def(env, 'extend', extend)
 
     env_def(env, 'str', str)
-    env_def(env, 'repr', sexps_str)
+    env_def(env, 'repr', lambda arg: sexps_str(arg))
 
     env_def(env, 'intern', intern)
     env_def(env, 'symbol-name', symbol_name)
