@@ -562,6 +562,7 @@ def base_env(args=[]):
     def dict_set(d, k, v):
         d[k] = v
     env_def(env, 'dict-set', dict_set)
+    env_def(env, 'dict_set', dict_set)
 
     def Tuple(*args):
         return tuple(args)
