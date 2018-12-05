@@ -167,6 +167,7 @@ interpreter_tests = [
     , ("""(block test (return-from test 1))""", 1)
    , ("""(block nil (break nil))""", None)
    , ("""(block nil (break 1))""", 1)
+    , ("""(map (fn (e) (+ e 1)) '(0 1 2))""", [1, 2, 3])
 ]
 
 
