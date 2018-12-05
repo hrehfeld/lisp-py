@@ -262,6 +262,10 @@ def __apply(env, f, args):
     return __call(env, f, args, do_eval_args=False)
     
 
+def __sub_env(env, *body):
+    sub_env = Env(env)
+    return __progn(sub_env, *body)
+
 def __let(env, vars, *let_body):
     for var in vars:
         assert(listp(var))
@@ -667,6 +671,7 @@ def base_env(args=[]):
         return __eval(env, form)
     env_def(env, 'eval', special_form(source_eval))
     env_def(env, 'set', special_form(__setq))
+    env_def(env, '__sub-env', special_form(__sub_env))
     env_def(env, 'let', special_form(__let))
     env_def(env, 'progn', special_form(__progn))
 
