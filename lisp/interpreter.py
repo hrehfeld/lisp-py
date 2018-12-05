@@ -44,7 +44,7 @@ def sexps_str(form, indent=0):
     elif isinstance(form, dict):
         r += p('{')
         for e, v in form.items():
-            r += sexps_str(e, indent + 1) + ': ' + sexps_str(e, indent + 1)
+            r += sexps_str(e, indent + 1) + ': ' + sexps_str(v, indent + 1)
         r += p('}')
     elif isinstance(form, str):
         r += p('"%s"' % form)
