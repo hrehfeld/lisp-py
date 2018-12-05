@@ -28,8 +28,14 @@
 
 (defun map-apply (f l) (map (wrap-apply f) l))
 
+(defun range (n)
+  (assert (int? n) n)
+  (assert (>= n 0) n)
+  (let ((i 0) (l '()))
+	(while (< i n)
+	  (append l i)
 	  (+= i 1))
-	r))
+	l))
 
 (defun zip (a b)
   (let ((n (min (map length (list a b))))
