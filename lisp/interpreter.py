@@ -706,6 +706,10 @@ def base_env(args=[]):
         return isinstance(v, str)
     env_def(env, 'str?', strp)
 
+    def intp(v):
+        return isinstance(v, int)
+    env_def(env, 'int?', intp)
+
     env_def(env, 'named-operator?', named_operatorp)
 
     def numeric_op(op):
