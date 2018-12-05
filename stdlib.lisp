@@ -111,7 +111,8 @@
   (let ((mi (head args)))
 	(dolist (x (tail args))
 	  (when (< x mi)
-		(set mi x)))))
+		(set mi x)))
+	mi))
 
 (defun max (&rest args)
   (let ((ma (head args)))
