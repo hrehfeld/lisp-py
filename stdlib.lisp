@@ -118,7 +118,8 @@
   (let ((ma (head args)))
 	(dolist (x (tail args))
 	  (when (> x ma)
-		(set ma x)))))
+		(set ma x)))
+	ma))
 
 ;; TODO support 1 as default
 (defmacro def-setter-op-varargs (name op)
