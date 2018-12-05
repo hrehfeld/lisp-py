@@ -26,13 +26,6 @@
 	(assert (not (null? r)))
 	r))
 
-;; TODO: generator
-(defun enumerate (l)
-  (assert (not (is nil l)) "enumerate: list is None")
-  (let ((r '())
-		(i 0))
-	(dolist (e l)
-	  (append r (tuple i e))
 	  (+= i 1))
 	r))
 
@@ -43,6 +36,14 @@
 	(map
 	 (wrap-apply  (fn (i el-a) (tuple el-a (nth i b))))
 	 (enumerate a))))
+;; TODO: generator
+(defun enumerate (l)
+  (let ((i 0)) (map (fn (e)
+						(let ((oldi i))
+						  (+= i 1)
+						  (list oldi e)))
+					l)))
+
 
 ; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
