@@ -702,6 +702,10 @@ def base_env(args=[]):
     env_def(env, 'tuplep', tuplep)
     env_def(env, 'tuple?', tuplep)
 
+    def strp(v):
+        return isinstance(v, str)
+    env_def(env, 'str?', strp)
+
     env_def(env, 'named-operator?', named_operatorp)
 
     def numeric_op(op):
