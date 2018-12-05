@@ -429,7 +429,16 @@ def __call_function(env, fun, args_forms, eval=True):
 
         num_args = len(args_dict)
         if num_args != len(parameters) and special_names[variadic_name] is None:
-            raise Exception('too many arguments for call to {fun}'.format(fun=fun))
+            extra_args = []
+            for k, v in args_dict.items():
+                if not intp(k) or k >= len(parameters):
+                    extra_args.append('{k}={v}'.format(k=k, v=sexps_str(v)))
+            raise Exception('too many arguments for call to ({fun} {params}) [{args} {extra_args}]'
+                            .format(fun=fun
+                                    , params=' '.join(map(sexps_str, parameters))
+                                    , args=' '.join(map(sexps_str, args))
+                                    , extra_args=' '.join(extra_args)
+                            ))
 
         varargs = []
         for i in range(len(parameters), num_args):
