@@ -90,6 +90,8 @@ interpreter_tests = [
     , ("(def foo 2) (call + 1 foo)", 3)
     , ("(call (fn (a) (+ a 2)) 1)", 3)
     , ("(apply (fn (a) (+ a 2)) '(1))", 3)
+    , ("(apply (fn (a) a) (list 'foo))", intern("foo"))
+    , ("(apply (fn (a) a) (list (quote foo))", intern("foo"))
     , ("(call (fn (a &rest b) (+ a 2)) 1)", 3)
     , ("(call (fn (a &rest b) (+ a 2)) 1 2)", 3)
     , ("(call (fn (a &rest b) (if b (head b) a)) 1)", 1)
