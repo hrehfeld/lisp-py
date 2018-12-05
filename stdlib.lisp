@@ -26,6 +26,8 @@
 	(assert (not (null? r)))
 	r))
 
+(defun map-apply (f l) (map (wrap-apply f) l))
+
 	  (+= i 1))
 	r))
 
