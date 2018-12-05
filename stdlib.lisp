@@ -60,20 +60,21 @@
 (defmacro setf (target value)
   (cond ((symbolp target)
          `(set ~target ~value))
-		;; lists
+		;; tuples
 		((named-operator? target 'tuple)
 		 `(progn
 			~@(let ((values (eval value))
-					(targets (as-list (slice target 1 (length target))))
+					(targets (as-list (slice target 1 nil)))
 					(num-targets (-  (length target) 1)))
 				(print (+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
 				(assert (eq num-targets (length values))
 						(+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
-				(map
-				 (wrap-apply
-				  (fn (i t)
-					  `(setf ~~t ~~@(nth values i))))
-				 (enumerate targets)))))
+				(map-apply
+				 (fn (targ value)
+					 (assert (symbolp targ))
+					 ;; generate list of setfs
+					 (list 'setf targ value))
+				 (zip targets values)))))
         (true
 		 (princ target)
 		 (throw (Exception (+ "unknown target" (repr target)))))))
