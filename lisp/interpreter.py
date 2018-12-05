@@ -266,6 +266,7 @@ def __let(env, vars, *let_body):
     for var in vars:
         assert(listp(var))
         assert(len(var) == 2)
+        assert (symbolp(var[0])), sexps_str(var)
 
     let_env = Env(env)
 
