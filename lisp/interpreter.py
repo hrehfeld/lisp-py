@@ -546,6 +546,8 @@ def base_env(args=[]):
     env_def(env, 'repr', sexps_str)
 
     env_def(env, 'intern', intern)
+    env_def(env, 'symbol-name', symbol_name)
+
     env_def(env, 'dict', dict)
     env_def(env, 'dict-setdefault', dict.setdefault)
     env_def(env, 'dict-get', dict.get)
