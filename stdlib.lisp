@@ -141,4 +141,5 @@
 (def-setter-op-varargs *= *)
 (def-setter-op-varargs /= /)
 
+(defun test-name (what) (+ what "?"))
 
