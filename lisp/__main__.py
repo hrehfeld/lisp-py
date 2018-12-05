@@ -168,6 +168,8 @@ interpreter_tests = [
    , ("""(block nil (break nil))""", None)
    , ("""(block nil (break 1))""", 1)
     , ("""(map (fn (e) (+ e 1)) '(0 1 2))""", [1, 2, 3])
+    , ("""(enumerate '(0 1 2))""", [[0, 0], [1, 1], [2, 2]])
+    , ("""(enumerate '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
 ]
 
 
