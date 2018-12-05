@@ -37,13 +37,6 @@
 	  (+= i 1))
 	l))
 
-(defun zip (a b)
-  (let ((n (min (map length (list a b))))
-		(a (as-list (slice a n)))
-		(b (as-list (slice b n))))
-	(map
-	 (wrap-apply  (fn (i el-a) (tuple el-a (nth i b))))
-	 (enumerate a))))
 ;; TODO: generator
 (defun enumerate (l)
   (let ((i 0)) (map (fn (e)
@@ -52,6 +45,14 @@
 						  (list oldi e)))
 					l)))
 
+(defun zip (&rest ls)
+  (let ((n (apply min (map length ls)))
+		(r '()))
+	(dolist (iel (range n))
+	  (append r (map (fn (l) (nth iel l)) ls))
+	  (print "%%%%%%%%%%%%%%%%%%%%%%%%" (repr r))
+	  )
+	  r))
 
 ; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
