@@ -66,7 +66,6 @@
 			~@(let ((values (eval value))
 					(targets (as-list (slice target 1 nil)))
 					(num-targets (-  (length target) 1)))
-				(print (+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
 				(assert (eq num-targets (length values))
 						(+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
 				(map-apply
