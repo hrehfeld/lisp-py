@@ -293,6 +293,10 @@ def __if(env, cond, then, else_body=None):
     return r
 
 
+def intp(v):
+    return isinstance(v, int)
+
+
 def is_num(f):
     return isinstance(f, int) or isinstance(f, float)
 
@@ -711,8 +715,6 @@ def base_env(args=[]):
         return isinstance(v, str)
     env_def(env, 'str?', strp)
 
-    def intp(v):
-        return isinstance(v, int)
     env_def(env, 'int?', intp)
 
     env_def(env, 'named-operator?', named_operatorp)
