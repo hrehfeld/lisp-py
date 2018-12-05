@@ -253,13 +253,13 @@ def __defmacro(lexical_env, name, parameters, *body):
 
 def __funcall(env, f, *args):
     f = __eval(env, f)
-    return __call(env, f, args)
+    return __call(env, f, args, do_eval_args=True)
     
 
 def __apply(env, f, args):
     f = __eval(env, f)
     args = __eval(env, args)
-    return __call(env, f, args)
+    return __call(env, f, args, do_eval_args=False)
     
 
 def __let(env, vars, *let_body):
@@ -380,11 +380,6 @@ def __call_function(env, fun, args_forms, eval=True):
         args = clean_args
         del clean_args
 
-        if eval:
-            args = [__eval(env, f) for f in args]
-            for k, v in kwargs.items():
-                kwargs[k] = __eval(env, v)
-
         return fun(*args, **kwargs)
     else:
         # self-defined fun
@@ -436,16 +431,10 @@ def __call_function(env, fun, args_forms, eval=True):
         for i in range(len(parameters), num_args):
             varargs += [args_dict[i]]
 
-        if eval:
-            args = [__eval(env, f) for f in args]
-            varargs = [__eval(env, f) for f in varargs]
-            for k, v in kwargs.items():
-                kwargs[k] = __eval(env, v)
-
         return fun(args, varargs, kwargs)
     
 
-def __call(env, fun, args_forms):
+def __call(env, fun, args_forms, do_eval_args):
     if special_formp(fun):
         fun = special_form_get_fun(fun)
         return __call_function(env, fun, [env] + args_forms, eval=False)
@@ -456,6 +445,8 @@ def __call(env, fun, args_forms):
         return __eval(env, form)
 
     elif callablep(fun):
+        if do_eval_args:
+            args_forms = [__eval(env, arg) for arg in args_forms]
         return __call_function(env, fun, args_forms)
 
     else:
@@ -475,7 +466,7 @@ def __eval(env, form):
         fun = __eval(env, form[0])
         args_forms = form[1:]
         
-        return __call(env, fun, args_forms)
+        return __call(env, fun, args_forms, do_eval_args=True)
     else:
         raise Exception('unknown form: {form}'.format(form=sexps_str(form)))
         
