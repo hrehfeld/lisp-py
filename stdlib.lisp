@@ -90,13 +90,13 @@
 (defmacro setf (target value)
   (let* ((value-var (gensym value))
 		 (vars (setf-parse target value-var)))
-	`(let* ((~value-var ~value))
-	   ~@(let* ((r (map-apply
-					(fn (var val)
-						(assert (symbol? var))
-						(list 'set var val))
-					vars)))
-		   r))))
+	`(progn
+	   (def ~value-var ~value)
+	   ~@(map-apply
+		  (fn (var val)
+			  (assert (symbol? var))
+			  (list 'set var val))
+		  vars))))
 
 (defmacro let (vars &rest body)
   ;; TODO use fold

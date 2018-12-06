@@ -120,6 +120,7 @@ interpreter_tests = [
     , ("(eval 1)", 1)
     , ("(eval '())", [])
     , ("(eval (+ 1 2))", 3)
+    , ("(setf foo (+ 1 2)) foo", 3)
     , ("""
 (def foo0)
 (def foo1)
