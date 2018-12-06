@@ -568,6 +568,11 @@ def base_env(args=[]):
     env_def(env, 'dict-set', dict_set)
     env_def(env, 'dict_set', dict_set)
 
+    def list_set(l, k, v):
+        l[k] = v
+        return v
+    env_def(env, 'list-set', list_set)
+    
     def Tuple(*args):
         return tuple(args)
     env_def(env, 'tuple', Tuple)
