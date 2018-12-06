@@ -72,6 +72,8 @@ interpreter_tests = [
     , ("(setf target 0) target", 0)
     , ("(setf (tuple targeta targetb) '(1 2)) (list targeta targetb)"
        , [1, 2])
+    , ("(let* ((l (list 1))) (setf (aref l 0) 0) l)", [0])
+    , ("(let* ((l (dict :foo 1))) (setf (aref l :foo) 0) l)", dict(foo=0))
     , ("(let ((foo 3)) foo)", 3)
     , ("(let (((foo bar) (list 0 1))) (list foo bar))", [0, 1])
     # expected error
