@@ -722,6 +722,7 @@ def base_env(args=[]):
     env_def(env, '-', numeric_op(operator.__sub__))
     env_def(env, '*', numeric_op(operator.__mul__))
     env_def(env, '/', numeric_op(operator.__truediv__))
+    env_def(env, 'mod', numeric_op(operator.__mod__))
 
     env_def(env, 'eq', operator.__eq__)
     env_def(env, 'neq', operator.__ne__)
