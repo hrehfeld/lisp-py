@@ -283,12 +283,12 @@ def __let(env, vars, *let_body):
 
 
 # TODO if without else
-def __if(env, cond, then, else_body=None):
+def __if(env, cond, then, *else_body):
     cond = __eval(env, cond)
     if cond:
         r = __eval(env, then)
     elif else_body:
-        r = __progn(env, else_body)
+        r = __progn(env, *else_body)
     else:
         r = None
     return r
