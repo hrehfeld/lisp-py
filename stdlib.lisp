@@ -88,27 +88,35 @@
 	 (list)
 	 (enumerate target))))
 
-(defun setf-parse (target value-evaluated-sym)
-  (cond ((symbolp target)
-		 (list  (list target value-evaluated-sym)))
-		;; tuples
-		((named-operator? target 'tuple)
-		 (destructuring-bind-parse (as-list (slice target 1 nil))
-								   value-evaluated-sym))
-        (true
-		 (princ target)
-		 (throw (Exception (+ "unknown target" (repr target)))))))
-
 (defmacro setf (target value)
-  (let* ((value-var (gensym value))
-		 (vars (setf-parse target value-var)))
+  (let* ((value-var (gensym value)))
 	`(progn
 	   (def ~value-var ~value)
-	   ~@(map-apply
-		  (fn (var val)
-			  (assert (symbol? var) (repr var))
-			  (list 'set var val))
-		  vars))))
+	   ~@(cond
+		  ((symbolp target)
+		   `((set ~target ~value-var)))
+		  ;; tuples
+		  ((named-operator? target 'tuple)
+		   (map-apply
+			(fn (var val)
+				(assert (symbol? var) (repr var))
+				(list 'set var val))
+			(destructuring-bind-parse (as-list (slice target 1 nil))
+									  value-var)))
+		  ((named-operator? target 'aref)
+		   (assert (eq (length target) 3) (repr target))
+		   (let* ((obj (2nd target))
+				  (k (last target)))
+			 (assert (symbol? obj) obj)
+			 (assert (symbol? k) k)
+			 `((if (list? ~obj)
+				   (list-set ~obj ~k ~value-var)
+				 (assert (dict? obj))
+				 (dict-set ~obj ~k ~value-var)
+				 ))))
+		  (true
+		   (princ target)
+		   (throw (Exception (+ "unknown target" (repr target)))))))))
 
 (defmacro let (vars &rest body)
   ;; TODO use fold
