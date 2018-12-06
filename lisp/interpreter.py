@@ -30,11 +30,11 @@ def sexps_str(form, indent=0):
     r = ''
     if isinstance(form, list) or isinstance(form, tuple):
         is_simple = False
-        #for op, char in sexpr_print_operators.items():
-        #    if named_operatorp(form, intern(op)):
-        #        r += ' '.join([char + sexps_str(f) for f in form[1:]])
-        #        is_simple = True
-        #        break
+        for op, char in sexpr_print_operators.items():
+           if named_operatorp(form, intern(op)):
+               r += ' '.join([char + sexps_str(f) for f in form[1:]])
+               is_simple = True
+               break
         if not is_simple:
             r += p('(')
             for e in form:
