@@ -615,7 +615,7 @@ def base_env(args=[]):
             return [s]
         elif named_operatorp(s, intern(backquote_eval_fun_name)):
             assert(len(s) == 2)
-            print('~:', level, sexps_str(s))
+            #print('~:', level, sexps_str(s))
 
             form = s[1]
             nested_level = 0
@@ -625,7 +625,7 @@ def base_env(args=[]):
             if named_operatorp(form, intern(backquote_splice_fun_name)):
                 nested_level += 1
             # sanity check
-            assert(nested_level <= level), '%s is deeper than %s in %s' % (nested_level, level, sexps_str(s))
+            #assert(nested_level <= level), '%s is deeper than %s in %s' % (nested_level, level, sexps_str(s))
 
             # use first level again
             form = s[1]
@@ -633,31 +633,31 @@ def base_env(args=[]):
             r = form
             if nested_level == 0:
                 r = __eval(env, form)
-            print('~:', level, sexps_str(form))
+            #print('~:', level, sexps_str(form))
             return [r]
         elif named_operatorp(s, intern(backquote_splice_fun_name)):
-            print('~@:', level, sexps_str(s))
+            #print('~@:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
             r = __eval(env, form)
-            print('~@:', level, sexps_str(r))
+            #print('~@:', level, sexps_str(r))
             assert(listp(r)), (r, sexps_str(s))
             return r
         elif named_operatorp(s, intern(backquote_fun_name)):
-            print('`:', level, sexps_str(s))
+            #print('`:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
             r = backquote_(env, form, level + 1)
             assert(len(r) == 1)
             r = [[intern(backquote_fun_name)] + r]
-            print('`:', level, sexps_str(r))
+            #print('`:', level, sexps_str(r))
             return r
         elif listp(s):
             r = []
             for e in s:
-                print('----1', sexps_str(e))
                 e = backquote_(env, e, level)
-                print('----2', sexps_str(e))
+                #print('----1', sexps_str(e))
+                #print('----2', sexps_str(e))
                 r += e
             return [r]
         else:
@@ -669,14 +669,14 @@ def base_env(args=[]):
             level = env_get(env, backquote_level_var)
             print('-------', level)
             level += 1
-        print('backquote:', level, sexps_str(s))
         r = backquote_(env, s, level)
+        #print('backquote:', level, sexps_str(s))
         assert(len(r) == 1)
         if level == 0:
             r = r[0]
         else:
             r = [[intern(backquote_fun_name)] + r]
-        print('backquote:', level, sexps_str(r))
+        #print('backquote:', level, sexps_str(r))
         return r
 
     env_def(env, backquote_fun_name, special_form(backquote))
