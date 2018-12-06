@@ -39,7 +39,7 @@
 (defun range (n)
   (assert (int? n) n)
   (assert (>= n 0) n)
-  (let* ((i 0) (l '()))
+  (let* ((i 0) (l (list)))
 	(while (< i n)
 	  (append l i)
 	  (+= i 1))
