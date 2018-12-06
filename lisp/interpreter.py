@@ -604,13 +604,7 @@ def base_env(args=[]):
 
     backquote_level_var = '*__backquote_level*'
 
-    def backquote_(env, s, level=None):
-        if level is None:
-            level = env_get(env, backquote_level_var)
-            
-        env = Env(env)
-        env_def(env, backquote_level_var, level)
-
+    def backquote_(env, s):
         if atomp(s):
             return [s]
         elif named_operatorp(s, intern(backquote_eval_fun_name)):
@@ -647,7 +641,7 @@ def base_env(args=[]):
             #print('`:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
-            r = backquote_(env, form, level + 1)
+            r = backquote_(env, form)
             assert(len(r) == 1)
             r = [[intern(backquote_fun_name)] + r]
             #print('`:', level, sexps_str(r))
@@ -655,8 +649,8 @@ def base_env(args=[]):
         elif listp(s):
             r = []
             for e in s:
-                e = backquote_(env, e, level)
                 #print('----1', sexps_str(e))
+                e = backquote_(env, e)
                 #print('----2', sexps_str(e))
                 r += e
             return [r]
@@ -664,18 +658,10 @@ def base_env(args=[]):
             raise Exception(sexps_str(s))
 
     def backquote(env, s):
-        level = 0
-        if env_contains(env, backquote_level_var):
-            level = env_get(env, backquote_level_var)
-            print('-------', level)
-            level += 1
-        r = backquote_(env, s, level)
         #print('backquote:', level, sexps_str(s))
+        r = backquote_(env, s)
         assert(len(r) == 1)
-        if level == 0:
-            r = r[0]
-        else:
-            r = [[intern(backquote_fun_name)] + r]
+        r = r[0]
         #print('backquote:', level, sexps_str(r))
         return r
 
