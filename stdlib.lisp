@@ -117,7 +117,7 @@
 			   (let* ((target (head target-value))
 					  (value (last target-value))
 					  (value-var (gensym value))
-					  (r (setf-parse target value-var)))
+					  (r (destructuring-bind-parse target value-var)))
 				 (+ vars `((~value-var ~value)) r)
 				 ))
 		   (list) vars)))
