@@ -176,7 +176,7 @@ interpreter_tests = [
     , ("(defstruct Foo a) (Foo 1)", {TYPE: {TYPE: TYPE_T, 'name': 'Foo', 'fields':tuple('a')}, 'a': 1})
     , ("(defstruct Foo a) (def v (Foo 1)) (Foo-a v)", 1)
 #    , ("(defstruct Foo a) (def v (Foo 1)) v.a", 1)
-    , ("(def symbols (dict :a 1))", dict(a=1))
+    , ("(def foo (dict :a 1))", dict(a=1))
     , ("""(let ((n 0)) (dolist (i '(0 1 2 3 4)) (set n (+ n i))) n)""", 10)
     , ("""(let ((n 3)) (dolist (i '()) (set n (+ n i))) n)""", 3)
     , ("""
