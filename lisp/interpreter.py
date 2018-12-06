@@ -23,6 +23,7 @@ sexpr_print_operators = {
 }
 
 def sexps_str(form, indent=0):
+    assert(isinstance(indent, int)), indent
     def p(f):
         return ('  ' * indent + str(f) + '\n')
 
