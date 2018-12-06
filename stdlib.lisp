@@ -82,6 +82,7 @@
 		 (let* ((itarg (head targ))
 				(targ (last targ)))
 		   (assert (int? itarg))
+		   ;; TODO assert when value was not exhausted
 		   (+ binds
 			  (destructuring-bind-parse targ `(nth ~itarg ~value-evaluated-form)))))
 	 (list)
