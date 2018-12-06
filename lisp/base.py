@@ -4,11 +4,20 @@ def native(f):
 TYPE = '__type'
 TYPE_T = '__type_t'
 
+def make_dict(*args):
+    assert (len(args) % 2 == 0), args
+    kwargs = {}
+    for i in range(0, len(args), 2):
+        k = args[i]
+        v = args[i + 1]
+        kwargs[k] = v
+    return kwargs
+        
 
 def Struct(name_str, *field_names):
     for n in field_names:
         assert(isinstance(n, str))
-    type = {TYPE: TYPE_T, 'name': name_str, 'fields': field_names}
+    type = make_dict(TYPE, TYPE_T, 'name', name_str, 'fields', field_names)
 
     def constructor(*values):
         assert(len(field_names) == len(values))
