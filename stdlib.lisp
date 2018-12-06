@@ -111,7 +111,7 @@
 			 (assert (or (keyword? k) (num? k)) k)
 			 `((if (list? ~obj)
 				   (list-set ~obj ~k ~value-var)
-				 (assert (dict? obj))
+				 (assert (dict? ~obj))
 				 (dict-set ~obj ~k ~value-var)
 				 ))))
 		  (true
