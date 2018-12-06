@@ -35,6 +35,9 @@ def Struct(name_str, *field_names):
     return constructor, instancep, getters, setters
 
 
+def is_struct(obj):
+    return isinstance(obj, dict) and TYPE in obj
+
 def concat(*rest):
     r = ''
     for e in rest:
