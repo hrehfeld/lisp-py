@@ -20,7 +20,7 @@
 
 (defun map (f l)
   (assert (not (is nil l)) "map: list is None")
-  (let* ((r '()))
+  (let* ((r (list)))
 	(dolist (e l)
 	  (append r (f e)))
 	(assert (not (null? r)))
