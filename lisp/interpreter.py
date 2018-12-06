@@ -694,6 +694,8 @@ def base_env(args=[]):
     env_def(env, 'symbolp', symbolp)
     env_def(env, 'symbol?', symbolp)
 
+    env_def(env, 'keyword?', keywordp)
+
     env_def(env, 'listp', listp)
     env_def(env, 'list?', listp)
 
