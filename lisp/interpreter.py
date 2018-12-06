@@ -699,6 +699,8 @@ def base_env(args=[]):
     env_def(env, 'listp', listp)
     env_def(env, 'list?', listp)
 
+    env_def(env, 'num?', is_num)
+
     def tuplep(v):
         return isinstance(v, tuple)
     env_def(env, 'tuplep', tuplep)
