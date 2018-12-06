@@ -269,7 +269,7 @@ def __sub_env(env, *body):
 
 def __let(env, vars, *let_body):
     for var in vars:
-        assert(listp(var))
+        assert(listp(var)), sexps_str(var)
         assert(len(var) == 2)
         assert (symbolp(var[0])), sexps_str(var)
 
