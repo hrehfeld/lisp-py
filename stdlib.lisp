@@ -55,7 +55,7 @@
 
 (defun zip (&rest ls)
   (let* ((n (apply min (map length ls)))
-		 (r '()))
+		 (r (list)))
 	(dolist (iel (range n))
 	  (append r (map (fn (l) (nth iel l)) ls))
 	  (print "%%%%%%%%%%%%%%%%%%%%%%%%" (repr r))
