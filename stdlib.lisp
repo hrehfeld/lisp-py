@@ -102,6 +102,27 @@
 		   (print "setf-result:" (repr r))
 		   r))))
 
+(defmacro let (vars &rest body)
+  ;; TODO use fold
+  (let* ((var-defs
+		  (fold
+		   (fn (vars target-value)
+			   (let* ((target (head target-value))
+					  (value (last target-value))
+					  (value-var (gensym value))
+					  (r (setf-parse target value-var)))
+				 (+ vars `((~value-var ~value)) r)
+				 ))
+		   (list) vars)))
+	(let* ((r `(progn
+				 (let*
+					 (~@(map-apply
+						 (fn (var val)
+							 (list var val))
+						 var-defs))
+						~@body))))
+	  r)))
+
 (defmacro cond (&rest clauses)
   (assert (>= (length clauses) 1) "cond not allowed with only one clause")
   (let* ((ifs nil))
