@@ -352,7 +352,7 @@ def __setq(env, name, *args):
 
 
 def __call_function(env, fun, args_forms, eval=True):
-    kw = False
+    kw = None
     args = []
     varargs = []
     ilast_normal_arg = -1
