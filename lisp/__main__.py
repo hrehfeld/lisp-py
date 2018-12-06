@@ -58,6 +58,17 @@ interpreter_tests = [
     , ("(let* ((foo 3)) `(~foo))", [3])
     , ("(let* ((foo 3)) `(bar ~foo))", [intern('bar'), 3])
     , ("(let* ((foo 3)) `(bar ~@(list foo 1)))", [intern('bar'), 3, 1])
+    , ("(destructuring-bind-parse 'target 0", [[intern('target'), 0]])
+    , ("(destructuring-bind-parse '(targeta targetb) 'value)", [[intern('targeta'), [intern('nth'), 0, intern('value')]]
+                                                                , [intern('targetb'), [intern('nth'), 1, intern('value')]]])
+    , ("(destructuring-bind-parse '(targeta (targetb targetc)) 'value)"
+       , [[intern('targeta'), [intern('nth'), 0, intern('value')]]
+          , [intern('targetb'), [intern('nth'), 0, [intern('nth'), 1, intern('value')]]]
+          , [intern('targetc'), [intern('nth'), 1, [intern('nth'), 1, intern('value')]]]])
+    , ("(destructuring-bind-parse '((targeta targetb) targetc) 'value)"
+       , [[intern('targeta'), [intern('nth'), 0, [intern('nth'), 0, intern('value')]]]
+          , [intern('targetb'), [intern('nth'), 1, [intern('nth'), 0, intern('value')]]]
+          , [intern('targetc'), [intern('nth'), 1, intern('value')]]])
     # expected error
     #, ("(let ((foo 3)) `(bar ,(+ ,foo 1)))", [intern('bar'), [intern('+'), 3, 1]])
     , ("(let ((foo 3)) `(bar (+ ~foo 1)))", [intern('bar'), [intern('+'), 3, 1]])
