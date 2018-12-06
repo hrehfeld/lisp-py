@@ -80,9 +80,9 @@
   (cond ((symbolp target)
 		 (list  (list target value-evaluated-sym)))
 		;; tuples
-		((named-operator? target 'tuple) (destructuring-bind-parse
-										  (as-list (slice target 1 nil))
-										  value-evaluated-sym))
+		((named-operator? target 'tuple)
+		 (destructuring-bind-parse (as-list (slice target 1 nil))
+								   value-evaluated-sym))
         (true
 		 (princ target)
 		 (throw (Exception (+ "unknown target" (repr target)))))))
