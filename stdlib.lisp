@@ -108,7 +108,7 @@
 		   (let* ((obj (2nd target))
 				  (k (last target)))
 			 (assert (symbol? obj) obj)
-			 (assert (symbol? k) k)
+			 (assert (or (keyword? k) (num? k)) k)
 			 `((if (list? ~obj)
 				   (list-set ~obj ~k ~value-var)
 				 (assert (dict? obj))
