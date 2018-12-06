@@ -358,6 +358,7 @@ def __call_function(env, fun, args_forms, eval=True):
     ilast_normal_arg = -1
     for iarg, arg in enumerate(args_forms):
         is_last_arg = iarg + 1 >= len(args_forms)
+        # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
         if keywordp(arg) and not (is_last_arg or kw):
             kw = arg
         else:
