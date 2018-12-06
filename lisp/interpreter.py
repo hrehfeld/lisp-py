@@ -698,7 +698,7 @@ def base_env(args=[]):
     env_def(env, 'apply', special_form(__apply))
     env_def(env, 'if', special_form(__if))
 
-    env_def(env, 'gensym', gensym)
+    env_def(env, 'gensym', special_form(lambda env, *args: gensym(*args)))
 
     env_def(env, 'null?', lambda *args: all([e is None for e in args]))
 
