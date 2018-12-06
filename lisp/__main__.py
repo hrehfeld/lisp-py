@@ -38,6 +38,7 @@ reader_tests = [
 
 interpreter_tests = [
     ('''''', None)
+    # TODO check if ending ) is checked
     , ('1', 1)
     , ('1.0', 1.0)
     , ('nil', None)
