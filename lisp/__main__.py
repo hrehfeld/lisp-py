@@ -73,6 +73,11 @@ interpreter_tests = [
     , ("(setf-parse '(tuple targeta targetb) 'value)", [[intern('targeta'), [intern('nth'), 0, intern('value')]]
                                                                 , [intern('targetb'), [intern('nth'), 1, intern('value')]]])
     , ("(let ((foo 3)) foo)", 3)
+    , ("(let (((foo bar) (list 0 1))) (list foo bar))", [0, 1])
+    # expected error
+    #, ("(let (((foo bar baz) (list 0 1))) (list foo bar))", [0, 1])
+    # expected error
+    #, ("(let (((foo) (list 0 1))) foo)", 0)
     # expected error
     #, ("(let ((foo 3)) `(bar ,(+ ,foo 1)))", [intern('bar'), [intern('+'), 3, 1]])
     , ("(let ((foo 3)) `(bar (+ ~foo 1)))", [intern('bar'), [intern('+'), 3, 1]])
