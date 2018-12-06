@@ -29,10 +29,8 @@
 (defun map-apply (f l) (map (wrap-apply f) l))
 
 (defun fold (f start l)
-  (print f start l)
   (let* ((r start))
 	(dolist (e l)
-	  (print e l)
 	  (set r (f r e)))
 	r))
 
@@ -59,7 +57,6 @@
 	(dolist (iel (range n))
 	  (append r (map (fn (l) (nth iel l)) ls))
 	  (assert (< iel n) (list iel n))
-	  (print "%%%%%%%%%%%%%%%%%%%%%%%%" (repr r))
 	  )
 	  r))
 
@@ -93,14 +90,12 @@
 (defmacro setf (target value)
   (let* ((value-var (gensym value))
 		 (vars (setf-parse target value-var)))
-	(print "setf: vars: " (repr vars))
 	`(let* ((~value-var ~value))
 	   ~@(let* ((r (map-apply
 					(fn (var val)
 						(assert (symbol? var))
 						(list 'set var val))
 					vars)))
-		   (print "setf-result:" (repr r))
 		   r))))
 
 (defmacro let (vars &rest body)
