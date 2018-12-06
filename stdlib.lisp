@@ -3,24 +3,24 @@
 
 (defmacro dolist (iter &rest body)
   (assert (eq (length iter) 2))
-  (let ((var (head iter))
+  (let* ((var (head iter))
         (l (last iter))
         (i-var (gensym))
         (iter-list (gensym)))
-    `(let ((~iter-list ~l)
+    `(let* ((~iter-list ~l)
            (~i-var 0))
 	   (assert (not (is nil ~iter-list)) "list is None")
        (while (< ~i-var (length ~iter-list))
-         (let ((~var (nth ~i-var ~iter-list)))
            ~@body
            (set ~i-var (+ ~i-var 1)))))))
+         (let* ((~var (nth ~i-var ~iter-list)))
 
 (defun wrap-apply (f)
   (fn (args) (apply f args)))
 
 (defun map (f l)
   (assert (not (is nil l)) "map: list is None")
-  (let ((r (list)))
+  (let* ((r '()))
 	(dolist (e l)
 	  (append r (f e)))
 	(assert (not (null? r)))
@@ -31,7 +31,7 @@
 (defun range (n)
   (assert (int? n) n)
   (assert (>= n 0) n)
-  (let ((i 0) (l '()))
+  (let* ((i 0) (l '()))
 	(while (< i n)
 	  (append l i)
 	  (+= i 1))
@@ -39,15 +39,15 @@
 
 ;; TODO: generator
 (defun enumerate (l)
-  (let ((i 0)) (map (fn (e)
-						(let ((oldi i))
+  (let* ((i 0)) (map (fn (e)
+						(let* ((oldi i))
 						  (+= i 1)
 						  (list oldi e)))
 					l)))
 
 (defun zip (&rest ls)
-  (let ((n (apply min (map length ls)))
-		(r '()))
+  (let* ((n (apply min (map length ls)))
+		 (r '()))
 	(dolist (iel (range n))
 	  (append r (map (fn (l) (nth iel l)) ls))
 	  (print "%%%%%%%%%%%%%%%%%%%%%%%%" (repr r))
@@ -63,7 +63,7 @@
 		;; tuples
 		((named-operator? target 'tuple)
 		 `(progn
-			~@(let ((values (eval value))
+			~@(let* ((values value)
 					(targets (as-list (slice target 1 nil)))
 					(num-targets (-  (length target) 1)))
 				(assert (eq num-targets (length values))
@@ -81,9 +81,9 @@
 
 (defmacro cond (&rest clauses)
   (assert (>= (length clauses) 1) "cond not allowed with only one clause")
-  (let ((ifs nil))
+  (let* ((ifs nil))
     (dolist (clause (reversed clauses))
-      (let ((test (car clause))
+      (let* ((test (car clause))
             (body (cdr clause)))
         (set ifs (if (eq test 'true)
                     ;; else/true branch skips test
@@ -101,7 +101,7 @@
   (return-from nil (when values (head values))))
 
 (defun reversed (l)
-  (let ((r (list))
+  (let* ((r (list))
         (i (- (length l) 1)))
     (while (>= i 0)
       (append r (nth i l))
@@ -117,14 +117,14 @@
 (defun cadr (l) (car (tail l)))
 
 (defun min (a &rest args)
-  (let ((mi a))
+  (let* ((mi a))
 	(dolist (x args)
 	  (when (< x mi)
 		(set mi x)))
 	mi))
 
 (defun max (&rest args)
-  (let ((ma (head args)))
+  (let* ((ma (head args)))
 	(dolist (x (tail args))
 	  (when (> x ma)
 		(set ma x)))
