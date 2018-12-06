@@ -357,13 +357,15 @@ def __call_function(env, fun, args_forms, eval=True):
     varargs = []
     ilast_normal_arg = -1
     for iarg, arg in enumerate(args_forms):
-        if keywordp(arg):
+        is_last_arg = iarg + 1 >= len(args_forms)
+        if keywordp(arg) and not (is_last_arg or kw):
             kw = arg
         else:
             if kw:
                 # without :
                 k = symbol_name(kw)[1:]
                 arg = (k, arg)
+                kw = None
             else:
                 ilast_normal_arg = iarg
             args += [arg]
