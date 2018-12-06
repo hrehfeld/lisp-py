@@ -16,4 +16,4 @@ def gensym(prefix='g'):
         prefix = symbol_name(prefix)
     global gensym_counter
     gensym_counter += 1
-    return Symbol(concat(prefix, str(gensym_counter)))
+    return Symbol('__' + prefix + str(gensym_counter))
