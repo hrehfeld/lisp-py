@@ -28,6 +28,14 @@
 
 (defun map-apply (f l) (map (wrap-apply f) l))
 
+(defun fold (f start l)
+  (print f start l)
+  (let* ((r start))
+	(dolist (e l)
+	  (print e l)
+	  (set r (f r e)))
+	r))
+
 (defun range (n)
   (assert (int? n) n)
   (assert (>= n 0) n)
