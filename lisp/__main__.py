@@ -203,6 +203,12 @@ interpreter_tests = [
     , ("""(range 1 5 3)""", [1, 4])
     , ("""(enumerate '(0 1 2))""", [[0, 0], [1, 1], [2, 2]])
     , ("""(enumerate '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ("""(zip '(0 1 2) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ("""(zip '(0 1 2 3 4) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ("""(zip '(0 1 2 3) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ("""(zip (range 3) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ("""(zip (range 5) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ("""(zip (range 3) '(foo bar baz biz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
 ]
 
 
