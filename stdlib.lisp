@@ -162,6 +162,11 @@
 
 
 (defun head (l) (nth 0 l))
+(defun 1st (l) (nth 0 l))
+(defun 2nd (l) (nth 1 l))
+(defun 3rd (l) (nth 2 l))
+(defun 4th (l) (nth 3 l))
+(defun 5th (l) (nth 4 l))
 (defun last (l) (nth (- (length l) 1) l))
 
 (defun car (l) (head l))
