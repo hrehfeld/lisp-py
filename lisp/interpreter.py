@@ -701,6 +701,8 @@ def base_env(args=[]):
 
     env_def(env, 'num?', is_num)
 
+    env_def(env, 'dict?', lambda d: isinstance(d, dict) and not is_struct(d))
+
     def tuplep(v):
         return isinstance(v, tuple)
     env_def(env, 'tuplep', tuplep)
