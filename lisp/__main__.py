@@ -69,9 +69,9 @@ interpreter_tests = [
        , [[intern('targeta'), [intern('nth'), 0, [intern('nth'), 0, intern('value')]]]
           , [intern('targetb'), [intern('nth'), 1, [intern('nth'), 0, intern('value')]]]
           , [intern('targetc'), [intern('nth'), 1, intern('value')]]])
-    , ("(setf-parse 'target 0", [[intern('target'), 0]])
-    , ("(setf-parse '(tuple targeta targetb) 'value)", [[intern('targeta'), [intern('nth'), 0, intern('value')]]
-                                                                , [intern('targetb'), [intern('nth'), 1, intern('value')]]])
+    , ("(setf target 0) target", 0)
+    , ("(setf (tuple targeta targetb) '(1 2)) (list targeta targetb)"
+       , [1, 2])
     , ("(let ((foo 3)) foo)", 3)
     , ("(let (((foo bar) (list 0 1))) (list foo bar))", [0, 1])
     # expected error
