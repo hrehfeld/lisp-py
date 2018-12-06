@@ -63,18 +63,18 @@
 ; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
 
-(defun destructuring-bind-parse (targets value-evaluated-sym)
-  (if (symbol? targets)
-	  (list (list targets value-evaluated-sym))
-	(let* ((num-targets (length targets)))
-	  (map-apply
-	   (fn (itarg targ)
+(defun destructuring-bind-parse (target value-evaluated-form)
+  (if (symbol? target)
+	  `((~target ~value-evaluated-form))
+	(fold
+	 (fn (binds targ)
+		 (let* ((itarg (head targ))
+				(targ (last targ)))
 		   (assert (int? itarg))
-		   (assert (symbol? targ))
-		   ;; return list of tuples
-		   ;; TODO: recursive calls to setf-parse
-		   (list targ (list 'nth itarg value-evaluated-sym)))
-	   (enumerate targets)))))
+		   (+ binds
+			  (destructuring-bind-parse targ `(nth ~itarg ~value-evaluated-form)))))
+	 (list)
+	 (enumerate target))))
 
 (defun setf-parse (target value-evaluated-sym)
   (cond ((symbolp target)
