@@ -65,27 +65,42 @@
 ; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
 
-(defmacro setf (target value)
+(defun destructuring-bind-parse (targets value-evaluated-sym)
+  (if (symbol? targets)
+	  (list (list targets value-evaluated-sym))
+	(let* ((num-targets (length targets)))
+	  (map-apply
+	   (fn (itarg targ)
+		   (assert (int? itarg))
+		   (assert (symbol? targ))
+		   ;; return list of tuples
+		   ;; TODO: recursive calls to setf-parse
+		   (list targ (list 'nth itarg value-evaluated-sym)))
+	   (enumerate targets)))))
+
+(defun setf-parse (target value-evaluated-sym)
   (cond ((symbolp target)
-         `(set ~target ~value))
+		 (list  (list target value-evaluated-sym)))
 		;; tuples
-		((named-operator? target 'tuple)
-		 `(progn
-			~@(let* ((values value)
-					(targets (as-list (slice target 1 nil)))
-					(num-targets (-  (length target) 1)))
-				(assert (eq num-targets (length values))
-						(+ "\n" (repr target) "\n" (repr values) "\n" (repr value)))
-				(map-apply
-				 (fn (targ value)
-					 (assert (symbolp targ))
-					 ;; generate list of setfs
-					 (list 'setf targ value))
-				 (zip targets values)))))
+		((named-operator? target 'tuple) (destructuring-bind-parse
+										  (as-list (slice target 1 nil))
+										  value-evaluated-sym))
         (true
 		 (princ target)
 		 (throw (Exception (+ "unknown target" (repr target)))))))
 
+(defmacro setf (target value)
+  (let* ((value-var (gensym value))
+		 (vars (setf-parse target value-var)))
+	(print "setf: vars: " (repr vars))
+	`(let* ((~value-var ~value))
+	   ~@(let* ((r (map-apply
+					(fn (var val)
+						(assert (symbol? var))
+						(list 'set var val))
+					vars)))
+		   (print "setf-result:" (repr r))
+		   r))))
 
 (defmacro cond (&rest clauses)
   (assert (>= (length clauses) 1) "cond not allowed with only one clause")
