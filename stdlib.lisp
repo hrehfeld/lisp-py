@@ -105,7 +105,7 @@
 	   (def ~value-var ~value)
 	   ~@(map-apply
 		  (fn (var val)
-			  (assert (symbol? var))
+			  (assert (symbol? var) (repr var))
 			  (list 'set var val))
 		  vars))))
 
