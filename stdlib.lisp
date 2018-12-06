@@ -58,6 +58,7 @@
 		 (r (list)))
 	(dolist (iel (range n))
 	  (append r (map (fn (l) (nth iel l)) ls))
+	  (assert (< iel n) (list iel n))
 	  (print "%%%%%%%%%%%%%%%%%%%%%%%%" (repr r))
 	  )
 	  r))
