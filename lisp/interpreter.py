@@ -313,6 +313,12 @@ def strp(v):
     return isinstance(v, str)
 
 
+def keyword(s):
+    if symbolp(s):
+        s = symbol_name(s)
+    assert(strp(s))
+    return intern(keyword_start + s)
+    
 
 def keywordp(e):
     return symbolp(e) and symbol_name(e).startswith(keyword_start)
@@ -566,6 +572,8 @@ def base_env(args=[]):
 
     env_def(env, 'intern', intern)
     env_def(env, 'symbol-name', symbol_name)
+
+    env_def(env, 'keyword', keyword)
 
     env_def(env, 'dict', dict)
     env_def(env, 'dict-setdefault', dict.setdefault)
