@@ -309,6 +309,10 @@ def is_str(f):
 def atomp(form):
     return is_num(form) or is_str(form) or keywordp(form) or symbolp(form) or (listp(form) and not len(form))
 
+def strp(v):
+    return isinstance(v, str)
+
+
 
 def keywordp(e):
     return symbolp(e) and symbol_name(e).startswith(':')
@@ -720,8 +724,6 @@ def base_env(args=[]):
     env_def(env, 'tuplep', tuplep)
     env_def(env, 'tuple?', tuplep)
 
-    def strp(v):
-        return isinstance(v, str)
     env_def(env, 'str?', strp)
 
     env_def(env, 'int?', intp)
