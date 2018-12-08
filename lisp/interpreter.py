@@ -798,6 +798,7 @@ def base_env(args=[]):
     env_def(env, 'contains?', has)
 
     def nth(i, l):
+        assert (not symbolp(l) or isinstance(l, dict)),  sexps_str(l)
         return l[i]
     env_def(env, 'nth', nth)
 
