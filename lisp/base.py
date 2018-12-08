@@ -33,7 +33,8 @@ def defstruct(name_str, *field_names):
     setters = []
     for ifield, field in enumerate(field_names):
         fname = '%s-%s' % (name_str, (field))
-        get = lambda struct: struct[field]
+        def get(struct):
+            return struct[field]
         getters += [get]
 
         def set(struct, value):
