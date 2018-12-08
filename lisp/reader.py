@@ -4,6 +4,7 @@ whitespace = ' \t\n'
 newlines = '\n' #TODO add windows mac shit
 token_end_chars = whitespace + ')'
 
+keyword_start = ':'
 floating_point = '.'
 str_start = '"'
 str_end = '"'
