@@ -1,4 +1,4 @@
-from .base import Struct, TYPE, TYPE_T
+from .base import TYPE, TYPE_T
 from .symbol import intern
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
 from .interpreter import interpret, ps
