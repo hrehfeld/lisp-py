@@ -116,7 +116,7 @@
 					   (assert (num? ~key) (repr ~key))
 					   (list-set ~obj ~key ~value-var))
 				   (assert (str? ~key) (+ ~key " " (repr (quote ~target))))
-				   (assert (dict? ~obj))
+				   (assert (dict? ~obj) (repr ~obj))
 				   (dict-set ~obj (keyword ~key) ~value-var))
 				 ))))
 		  (true
