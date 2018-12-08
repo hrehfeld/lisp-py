@@ -580,6 +580,8 @@ def base_env(args=[]):
     env_def(env, 'aref', lambda l, k: l[k])
 
     def list_set(l, k, v):
+        assert(listp(l))
+        assert(intp(k))
         l[k] = v
         return v
     env_def(env, 'list-set', list_set)
