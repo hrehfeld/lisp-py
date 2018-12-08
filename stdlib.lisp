@@ -109,7 +109,6 @@
 			 (let* ((obj (1st target))
 					(key (2nd target)))
 			   (assert (symbol? obj) (repr obj))
-			   (assert (or (symbol? key) (num? key)) (repr key))
 			   `(
 				 (if (list? ~obj)
 					 (progn
