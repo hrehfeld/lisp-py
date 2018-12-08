@@ -1,4 +1,4 @@
-from .base import defstruct, concat
+from .base import defstruct
 
 symbols = {}
 
