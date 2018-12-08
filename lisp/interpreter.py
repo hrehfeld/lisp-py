@@ -321,7 +321,7 @@ def keyword(s):
     
 def keyword_name(s):
     assert(keywordp(s)), s
-    return symbol_name(s)[1:]
+    return symbol_name(s)[len(keyword_start):]
 
 def keywordp(e):
     return symbolp(e) and symbol_name(e).startswith(keyword_start)
