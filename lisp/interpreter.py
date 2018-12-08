@@ -344,15 +344,15 @@ def __def(env, name, *args):
     return val
 
 
-def __setq(env, name, *args):
+def __setq(env, name, value):
     assert(env is not None)
     assert(symbolp(name))
     if not env_contains(env, symbol_name(name)):
         raise Exception('set: {sym} not declared in {env} ({envp})'
                         .format(sym=symbol_name(name), env=sexps_str(env.d), envp=sexps_str(env.parent.d) if env.parent else '{}'))
-    val = __eval(env, args[0]) if args else None
-    env_change(env, symbol_name(name), val)
-    return val
+    value = __eval(env, value)
+    env_change(env, symbol_name(name), value)
+    return value
 
 
 def __call_function(env, fun, args_forms, eval=True):
