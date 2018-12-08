@@ -26,7 +26,7 @@ def defstruct(name_str, *field_names):
             r[k] = v
         return r
 
-    def instancep(obj):
+    def is_instance(obj):
         return isinstance(obj, dict) and obj.get(TYPE, None) == type
 
     getters = []
@@ -42,7 +42,7 @@ def defstruct(name_str, *field_names):
             return struct
         setters += [set]
 
-    return constructor, instancep, getters, setters
+    return constructor, is_instance, getters, setters
 
 
 def is_struct(obj):

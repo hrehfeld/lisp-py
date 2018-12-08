@@ -2,7 +2,7 @@ from .base import defstruct, concat
 
 symbols = {}
 
-Symbol, symbolp, (symbol_name, ), _symbol_setters = defstruct('symbol', 'name')
+Symbol, is_symbol, (symbol_name, ), _symbol_setters = defstruct('symbol', 'name')
 
 
 def intern(s):
@@ -12,7 +12,7 @@ def intern(s):
 gensym_counter = -1
 
 def gensym(prefix='g'):
-    if symbolp(prefix):
+    if is_symbol(prefix):
         prefix = symbol_name(prefix)
     global gensym_counter
     gensym_counter += 1

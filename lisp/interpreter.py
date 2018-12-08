@@ -1,5 +1,5 @@
 from .base import native, defstruct, is_struct, TYPE
-from .symbol import intern, Symbol, symbol_name, symbolp, gensym
+from .symbol import intern, Symbol, symbol_name, is_symbol, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
 
@@ -10,9 +10,9 @@ class BlockException(Exception):
         self.value = value
 
 
-def named_operatorp(form, op):
-    assert(symbolp(op))
-    return listp(form) and form and symbolp(form[0]) and form[0] == op
+def is_named_operator(form, op):
+    assert(is_symbol(op))
+    return is_list(form) and form and is_symbol(form[0]) and form[0] == op
 
 
 sexpr_print_operators = {
@@ -31,7 +31,7 @@ def sexps_str(form, indent=0):
     if isinstance(form, list) or isinstance(form, tuple):
         is_simple = False
         for op, char in sexpr_print_operators.items():
-           if named_operatorp(form, intern(op)):
+           if is_named_operator(form, intern(op)):
                r += ' '.join([char + sexps_str(f) for f in form[1:]])
                is_simple = True
                break
@@ -40,7 +40,7 @@ def sexps_str(form, indent=0):
             for e in form:
                 r += sexps_str(e, indent + 1)
             r += p(')')
-    elif symbolp(form):
+    elif is_symbol(form):
         r += p(symbol_name(form))
     elif isinstance(form, dict):
         r += p('{')
@@ -86,10 +86,10 @@ def __defstruct(env, name, *fields):
     name_str = symbol_name(name)
     field_names = [symbol_name(f) for f in fields]
 
-    constructor, instancep, getter, setter = defstruct(name_str, *field_names)
+    constructor, is_instance, getter, setter = defstruct(name_str, *field_names)
     env_def(env, name_str, constructor)
     fname = '%s?' % (name_str)
-    env_def(env, fname, instancep)
+    env_def(env, fname, is_instance)
     for field, get in zip(field_names, getter):
         fname = '%s-%s' % (name_str, (field))
         env_def(env, fname, get)
@@ -101,12 +101,12 @@ def __defstruct(env, name, *fields):
     return constructor
 
 
-def special_formp(e):
+def is_special_form(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == SPECIAL_FORM
 
 
 def special_form(f):
-    if not callablep(f):
+    if not is_callable(f):
         raise Exception('%s is not callable' % (f))
     return (SPECIAL_FORM, f)
 
@@ -115,12 +115,12 @@ def special_form_get_fun(f):
     return f[1]
 
 
-def macrop(e):
+def is_macro(e):
     return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
 
 
 def Macro(f):
-    if not callablep(f):
+    if not is_callable(f):
         raise Exception('%s is not callable' % (f))
 
     return (MACRO, f)
@@ -158,17 +158,17 @@ def __fn(env, parameters, *body):
     def parameter_default(p):
         return p[1]
 
-    def parameter_with_default_p(p):
+    def is_parameter_with_default_(p):
             return isinstance(p, list) and len(p) == 2
 
-    def simple_parameterp(p):
-        return symbolp(p) and not keywordp(p) and not special_keywordp(p)
+    def is_simple_parameter(p):
+        return is_symbol(p) and not is_keyword(p) and not is_special_keyword(p)
 
-    def normal_parameterp(p):
-        return simple_parameterp(p) or parameter_with_default_p(p)
+    def is_normal_parameter(p):
+        return is_simple_parameter(p) or is_parameter_with_default_(p)
 
     def normal_parameter_name(p):
-        if parameter_with_default_p(p):
+        if is_parameter_with_default_(p):
             return p[1]
         else:
             return p
@@ -179,15 +179,15 @@ def __fn(env, parameters, *body):
     i = len(parameters) - 1
     while i >= 0 and (ilast_special is None or ilast_special - i <= 2):
         p = parameters[i]
-        if special_keywordp(p):
+        if is_special_keyword(p):
             name = symbol_name(p)
             if name in special_names:
                 assert(special_names[name] is None)
-                nextp = parameters[i + 1] if i + 1 < len(parameters) else None
-                if nextp and normal_parameterp(nextp):
-                    special_names[name] = normal_parameter_name(nextp)
-                    if parameter_with_default_p(nextp):
-                        special_defaults[name] = parameter_default(nextp)
+                is_next = parameters[i + 1] if i + 1 < len(parameters) else None
+                if is_next and is_normal_parameter(is_next):
+                    special_names[name] = normal_parameter_name(is_next)
+                    if is_parameter_with_default_(is_next):
+                        special_defaults[name] = parameter_default(is_next)
                 else:
                     special_names[name] = True
                 ilast_special = i
@@ -198,13 +198,13 @@ def __fn(env, parameters, *body):
     parameters = parameters[:ilast_special]
 
     for i, p in enumerate(parameters):
-        assert normal_parameterp(p), p
+        assert is_normal_parameter(p), p
 
     # TODO check if parameters with defaults are after normal ones
     defaults = {}
     defaults_started = False
     for i, p in enumerate(parameters):
-        if not symbolp(p):
+        if not is_symbol(p):
             parameters[i] = normal_parameter_name(p)
             defaults[i] = parameter_default(p)
             defaults_started = True
@@ -232,7 +232,7 @@ def __fn(env, parameters, *body):
 
 
 def __defun(env, name, parameters, *body):
-    assert(symbolp(name))
+    assert(is_symbol(name))
     if env_contains(env, symbol_name(name)):
         raise Exception('fun %s already declared' % symbol_name(name))
 
@@ -242,7 +242,7 @@ def __defun(env, name, parameters, *body):
 
 
 def __defmacro(lexical_env, name, parameters, *body):
-    assert(symbolp(name)), (name, type(name))
+    assert(is_symbol(name)), (name, type(name))
     if env_contains(lexical_env, symbol_name(name)):
         raise Exception('fun %s already declared' % symbol_name(name))
 
@@ -269,9 +269,9 @@ def __sub_env(env, *body):
 
 def __let(env, vars, *let_body):
     for var in vars:
-        assert(listp(var)), sexps_str(var)
+        assert(is_list(var)), sexps_str(var)
         assert(len(var) == 2)
-        assert (symbolp(var[0])), sexps_str(var)
+        assert (is_symbol(var[0])), sexps_str(var)
 
     let_env = Env(env)
 
@@ -294,7 +294,7 @@ def __if(env, cond, then, *else_body):
     return r
 
 
-def intp(v):
+def is_int(v):
     return isinstance(v, int)
 
 
@@ -306,32 +306,32 @@ def is_str(f):
     return isinstance(f, str)
 
 
-def atomp(form):
-    return is_num(form) or is_str(form) or keywordp(form) or symbolp(form) or (listp(form) and not len(form))
+def is_atom(form):
+    return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or (is_list(form) and not len(form))
 
-def strp(v):
+def is_str(v):
     return isinstance(v, str)
 
 
 def keyword(s):
-    if symbolp(s):
+    if is_symbol(s):
         s = symbol_name(s)
-    assert(strp(s))
+    assert(is_str(s))
     return intern(keyword_start + s)
     
 def keyword_name(s):
-    assert(keywordp(s)), s
+    assert(is_keyword(s)), s
     return symbol_name(s)[len(keyword_start):]
 
-def keywordp(e):
-    return symbolp(e) and symbol_name(e).startswith(keyword_start)
+def is_keyword(e):
+    return is_symbol(e) and symbol_name(e).startswith(keyword_start)
 
 
-def special_keywordp(e):
-    return symbolp(e) and symbol_name(e).startswith('&')
+def is_special_keyword(e):
+    return is_symbol(e) and symbol_name(e).startswith('&')
 
 
-def listp(e):
+def is_list(e):
     return isinstance(e, list)
 
 
@@ -340,12 +340,12 @@ def length(e):
     return len(e)
 
 
-def callablep(e):
+def is_callable(e):
     return callable(e)
 
 
 def __def(env, name, *args):
-    assert(symbolp(name))
+    assert(is_symbol(name))
     if env_contains(env, symbol_name(name)):
         raise Exception('var %s already declared' % symbol_name(name))
     val = __eval(env, args[0]) if args else None
@@ -355,10 +355,10 @@ def __def(env, name, *args):
 
 def __setq(env, name, value):
     assert(env is not None)
-    assert(symbolp(name))
-    if not env_contains(env, symbol_name(name)):
-        raise Exception('set: {sym} not declared in {env} ({envp})'
-                        .format(sym=symbol_name(name), env=sexps_str(env.d), envp=sexps_str(env.parent.d) if env.parent else '{}'))
+    assert(is_symbol(name))
+    #if not env_contains(env, symbol_name(name)):
+    #    raise Exception('set: {sym} not declared in {env} ({is_env})'
+    #                    .format(sym=symbol_name(name), env=sexps_str(env.d), is_env=sexps_str(env.parent.d) if env.parent else '{}'))
     value = __eval(env, value)
     env_change(env, symbol_name(name), value)
     return value
@@ -372,7 +372,7 @@ def __call_function(env, fun, args_forms, eval=True):
     for iarg, arg in enumerate(args_forms):
         is_last_arg = iarg + 1 >= len(args_forms)
         # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
-        if keywordp(arg) and not (is_last_arg or kw):
+        if is_keyword(arg) and not (is_last_arg or kw):
             kw = arg
         else:
             if kw:
@@ -396,7 +396,7 @@ def __call_function(env, fun, args_forms, eval=True):
                 kwargs[k] = v
             else:
                 # TODO hack: we really need to fix our type system
-                if isinstance(arg, tuple) and not symbolp(arg):
+                if isinstance(arg, tuple) and not is_symbol(arg):
                     k, v = arg
                 else:
                     v = arg
@@ -423,7 +423,7 @@ def __call_function(env, fun, args_forms, eval=True):
         kwargs = {}
         for iarg, arg in enumerate(args):
             # TODO we really need a type system to distinguish between symbols and tuples
-            if isinstance(arg, tuple) and not symbolp(arg):
+            if isinstance(arg, tuple) and not is_symbol(arg):
                 k, v = arg
                 i = parameter_index(k)
                 if i is None:
@@ -452,7 +452,7 @@ def __call_function(env, fun, args_forms, eval=True):
         if num_args != len(parameters) and special_names[variadic_name] is None:
             extra_args = []
             for k, v in args_dict.items():
-                if not intp(k) or k >= len(parameters):
+                if not is_int(k) or k >= len(parameters):
                     extra_args.append('{k}={v}'.format(k=k, v=sexps_str(v)))
             raise Exception('too many arguments for call to ({fun} {params}) [{args} {extra_args}]'
                             .format(fun=fun
@@ -469,16 +469,16 @@ def __call_function(env, fun, args_forms, eval=True):
     
 
 def __call(env, fun, args_forms, do_eval_args):
-    if special_formp(fun):
+    if is_special_form(fun):
         fun = special_form_get_fun(fun)
         return __call_function(env, fun, [env] + args_forms, eval=False)
 
-    elif macrop(fun):
+    elif is_macro(fun):
         fun = macro_get_fun(fun)
         form = __call_function(env, fun, args_forms, eval=False)
         return __eval(env, form)
 
-    elif callablep(fun):
+    elif is_callable(fun):
         if do_eval_args:
             args_forms = [__eval(env, arg) for arg in args_forms]
         return __call_function(env, fun, args_forms)
@@ -488,16 +488,16 @@ def __call(env, fun, args_forms, do_eval_args):
 
 
 def __eval(env, form):
-    if symbolp(form) and not keywordp(form):
+    if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
             raise Exception('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'
                             .format(sym=symbol_name(form)
                                     , keys=', '.join(sorted(env.d.keys()))
                                     , pkeys=', '.join(map(str, sorted(env.parent.d.keys()))) if env.parent else ''))
         return env_get(env, symbol_name(form))
-    elif atomp(form):
+    elif is_atom(form):
         return form
-    elif listp(form):
+    elif is_list(form):
         if not length(form):
             raise Exception('trying to evaluate list of length 0')
         fun = __eval(env, form[0])
@@ -592,8 +592,8 @@ def base_env(args=[]):
     env_def(env, 'aref', lambda l, k: l[k])
 
     def list_set(l, k, v):
-        assert(listp(l))
-        assert(intp(k))
+        assert(is_list(l))
+        assert(is_int(k))
         l[k] = v
         return v
     env_def(env, 'list-set', list_set)
@@ -634,24 +634,31 @@ def base_env(args=[]):
 
     env_def(env, quote_fun_name, special_form(lambda env, e: e))
 
-    def backquote_evalp(s):
-        return named_operatorp(s, intern(backquote_eval_fun_name)) or named_operatorp(s, intern(backquote_splice_fun_name))
+    def is_backquote_eval(s):
+        return is_named_operator(s, intern(backquote_eval_fun_name)) or is_named_operator(s, intern(backquote_splice_fun_name))
 
     backquote_level_var = '*__backquote_level*'
 
     def backquote_(env, s):
-        if atomp(s):
+        if is_atom(s):
             return [s]
-        elif named_operatorp(s, intern(backquote_eval_fun_name)):
+        elif is_named_operator(s, intern(backquote_eval_fun_name)):
+            arg = s[1]
+            if is_symbol(arg) and symbol_name(arg) == 'k':
+                print(sexps_str(s))
+                print(sexps_str(env_get(env, 'k')))
+                print(sexps_str(env.d))
+                print(sexpenv(env.parent.d))
+                
             assert(len(s) == 2)
             #print('~:', level, sexps_str(s))
 
             form = s[1]
             nested_level = 0
-            while named_operatorp(form, intern(backquote_eval_fun_name)):
+            while is_named_operator(form, intern(backquote_eval_fun_name)):
                 nested_level += 1
                 form = form[1]
-            if named_operatorp(form, intern(backquote_splice_fun_name)):
+            if is_named_operator(form, intern(backquote_splice_fun_name)):
                 nested_level += 1
             # sanity check
             #assert(nested_level <= level), '%s is deeper than %s in %s' % (nested_level, level, sexps_str(s))
@@ -664,15 +671,15 @@ def base_env(args=[]):
                 r = __eval(env, form)
             #print('~:', level, sexps_str(form))
             return [r]
-        elif named_operatorp(s, intern(backquote_splice_fun_name)):
+        elif is_named_operator(s, intern(backquote_splice_fun_name)):
             #print('~@:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
             r = __eval(env, form)
             #print('~@:', level, sexps_str(r))
-            assert(listp(r)), (r, sexps_str(s))
+            assert(is_list(r)), (r, sexps_str(s))
             return r
-        elif named_operatorp(s, intern(backquote_fun_name)):
+        elif is_named_operator(s, intern(backquote_fun_name)):
             #print('`:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
@@ -681,7 +688,7 @@ def base_env(args=[]):
             r = [[intern(backquote_fun_name)] + r]
             #print('`:', level, sexps_str(r))
             return r
-        elif listp(s):
+        elif is_list(s):
             r = []
             for e in s:
                 #print('----1', sexps_str(e))
@@ -723,28 +730,28 @@ def base_env(args=[]):
 
     env_def(env, 'null?', lambda *args: all([e is None for e in args]))
 
-    env_def(env, 'symbolp', symbolp)
-    env_def(env, 'symbol?', symbolp)
+    env_def(env, 'symbolp', is_symbol)
+    env_def(env, 'symbol?', is_symbol)
 
-    env_def(env, 'keyword?', keywordp)
+    env_def(env, 'keyword?', is_keyword)
 
-    env_def(env, 'listp', listp)
-    env_def(env, 'list?', listp)
+    env_def(env, 'listp', is_list)
+    env_def(env, 'list?', is_list)
 
     env_def(env, 'num?', is_num)
 
     env_def(env, 'dict?', lambda d: isinstance(d, dict) and not is_struct(d))
 
-    def tuplep(v):
+    def is_tuple(v):
         return isinstance(v, tuple)
-    env_def(env, 'tuplep', tuplep)
-    env_def(env, 'tuple?', tuplep)
+    env_def(env, 'tuplep', is_tuple)
+    env_def(env, 'tuple?', is_tuple)
 
-    env_def(env, 'str?', strp)
+    env_def(env, 'str?', is_str)
 
-    env_def(env, 'int?', intp)
+    env_def(env, 'int?', is_int)
 
-    env_def(env, 'named-operator?', named_operatorp)
+    env_def(env, 'named-operator?', is_named_operator)
 
     def numeric_op(op):
         def numeric_op(a, *args):
@@ -775,7 +782,7 @@ def base_env(args=[]):
     env_def(env, '>=', operator.__ge__)
 
     def cons(e, l):
-        assert listp(l), repr(l)
+        assert is_list(l), repr(l)
         return [e] + l
     env_def(env, 'cons', cons)
 
@@ -814,7 +821,7 @@ def base_env(args=[]):
     env_def(env, 'contains?', has)
 
     def nth(i, l):
-        assert (not symbolp(l) or isinstance(l, dict)),  sexps_str(l)
+        assert (not is_symbol(l) or isinstance(l, dict)),  sexps_str(l)
         return l[i]
     env_def(env, 'nth', nth)
 
@@ -835,7 +842,7 @@ def base_env(args=[]):
     
     # sys utils
     def file_open(filename, mode):
-        assert(symbolp(mode))
+        assert(is_symbol(mode))
         mode = symbol_name(mode)
         return open(filename, mode)
 
