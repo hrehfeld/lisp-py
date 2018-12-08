@@ -592,9 +592,11 @@ def base_env(args=[]):
 
 
     def __assert(env, cond, msg=''):
-        msg = __eval(env, msg)
-        msg = '%s: %s' % (sexps_str(cond), msg)
         r = __eval(env, cond)
+        if not r:
+            msg = __eval(env, msg)
+            msg = '%s: %s' % (sexps_str(cond), msg)
+            
         assert r, msg
     env_def(env, 'assert', special_form(__assert))
     
