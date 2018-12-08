@@ -1,8 +1,8 @@
-from .base import Struct, concat
+from .base import defstruct, concat
 
 symbols = {}
 
-Symbol, symbolp, (symbol_name, ), _symbol_setters = Struct('symbol', 'name')
+Symbol, symbolp, (symbol_name, ), _symbol_setters = defstruct('symbol', 'name')
 
 
 def intern(s):

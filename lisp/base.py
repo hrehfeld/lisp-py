@@ -14,7 +14,7 @@ def make_dict(*args):
     return kwargs
         
 
-def Struct(name_str, *field_names):
+def defstruct(name_str, *field_names):
     for n in field_names:
         assert(isinstance(n, str))
     type = make_dict(TYPE, TYPE_T, 'name', name_str, 'fields', field_names)

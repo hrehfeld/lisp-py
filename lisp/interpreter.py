@@ -1,4 +1,4 @@
-from .base import native, Struct, is_struct
+from .base import native, defstruct, is_struct, TYPE
 from .symbol import intern, Symbol, symbol_name, symbolp, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
@@ -86,7 +86,7 @@ def __defstruct(env, name, *fields):
     name_str = symbol_name(name)
     field_names = [symbol_name(f) for f in fields]
 
-    constructor, instancep, getter, setter = Struct(name_str, *field_names)
+    constructor, instancep, getter, setter = defstruct(name_str, *field_names)
     env_def(env, name_str, constructor)
     fname = '%s?' % (name_str)
     env_def(env, fname, instancep)
