@@ -703,5 +703,6 @@ def __progn(env, *forms):
 def interpret(forms, env=None, args=[]):
     if env is None:
         env = base_env(args)
+    env_def(env, '__name__', '<self>')
     return __progn(env, *forms)
     
