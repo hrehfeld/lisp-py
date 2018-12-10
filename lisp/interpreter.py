@@ -21,7 +21,6 @@ def __defstruct(env, name, *fields):
     # FIXME: for bootstrapping
     if is_str(name):
         name = intern(name)
-
     fields = [intern(f) if is_str(f) else f for f in fields]
 
     assert(is_symbol(name)), name
