@@ -689,7 +689,6 @@ def base_env(args=[]):
     env = make_env(env)
     with open('stdlib.lisp', 'r') as f:
         interpret(read(Stream(f.read(), 0)), env)
-
     env = make_env(env)
     return env
 
