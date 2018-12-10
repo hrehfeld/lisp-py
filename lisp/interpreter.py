@@ -472,12 +472,6 @@ def base_env(args=[]):
             return [s]
         elif is_named_operator(s, intern(backquote_eval_fun_name)):
             arg = s[1]
-            if is_symbol(arg) and symbol_name(arg) == 'k':
-                print(sexps_str(s))
-                print(sexps_str(env_get(env, 'k')))
-                print(sexps_str(env.d))
-                print(sexpenv(env.parent.d))
-                
             assert(len(s) == 2)
             #print('~:', level, sexps_str(s))
 
