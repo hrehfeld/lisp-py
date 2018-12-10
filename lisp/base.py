@@ -14,6 +14,7 @@ def make_dict(*args):
     return kwargs
         
 
+@native
 def defstruct(name_str, *field_names):
     for n in field_names:
         assert(isinstance(n, str))
