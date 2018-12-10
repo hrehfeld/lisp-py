@@ -250,6 +250,7 @@ def __call_function(env, fun, args_forms, eval=True):
 
     if fun not in functions:
         # python fun
+        # we don't support named normal args -- would need reflection
 
         clean_args = []
         kwargs = {}
