@@ -690,6 +690,7 @@ def base_env(args=[]):
     with open('stdlib.lisp', 'r') as f:
         interpret(read(Stream(f.read(), 0)), env)
 
+    env = Env(env)
     return env
 
 
@@ -703,6 +704,5 @@ def __progn(env, *forms):
 def interpret(forms, env=None, args=[]):
     if env is None:
         env = base_env(args)
-    env = Env(env)
     return __progn(env, *forms)
     
