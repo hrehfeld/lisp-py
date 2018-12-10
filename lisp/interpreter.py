@@ -1,4 +1,5 @@
 from .base import native, defstruct, is_struct, TYPE
+from .base import keyword, keyword_name, is_keyword, special_form, is_special_form, is_list, is_num, is_str, is_int, is_atom, is_callable, length, special_form_get_fun, is_special_keyword, Macro, is_macro, macro_get_fun
 from .symbol import intern, Symbol, symbol_name, is_symbol, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
@@ -75,9 +76,6 @@ def ps(form):
     print(sexps_str(form))
 
 
-MACRO = '__macro'
-SPECIAL_FORM = '__special'
-
 variadic_name = '&rest'
 keys_name = '&keys'
 
@@ -99,35 +97,6 @@ def __defstruct(env, name, *fields):
         env_def(env, fname, set)
 
     return constructor
-
-
-def is_special_form(e):
-    return isinstance(e, tuple) and len(e) == 2 and e[0] == SPECIAL_FORM
-
-
-def special_form(f):
-    if not is_callable(f):
-        raise Exception('%s is not callable' % (f))
-    return (SPECIAL_FORM, f)
-
-
-def special_form_get_fun(f):
-    return f[1]
-
-
-def is_macro(e):
-    return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
-
-
-def Macro(f):
-    if not is_callable(f):
-        raise Exception('%s is not callable' % (f))
-
-    return (MACRO, f)
-
-
-def macro_get_fun(macro):
-    return macro[1]
 
 
 functions = {}
@@ -292,56 +261,6 @@ def __if(env, cond, then, *else_body):
     else:
         r = None
     return r
-
-
-def is_int(v):
-    return isinstance(v, int)
-
-
-def is_num(f):
-    return isinstance(f, int) or isinstance(f, float)
-
-
-def is_str(f):
-    return isinstance(f, str)
-
-
-def is_atom(form):
-    return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or (is_list(form) and not len(form))
-
-def is_str(v):
-    return isinstance(v, str)
-
-
-def keyword(s):
-    if is_symbol(s):
-        s = symbol_name(s)
-    assert(is_str(s))
-    return intern(keyword_start + s)
-    
-def keyword_name(s):
-    assert(is_keyword(s)), s
-    return symbol_name(s)[len(keyword_start):]
-
-def is_keyword(e):
-    return is_symbol(e) and symbol_name(e).startswith(keyword_start)
-
-
-def is_special_keyword(e):
-    return is_symbol(e) and symbol_name(e).startswith('&')
-
-
-def is_list(e):
-    return isinstance(e, list)
-
-
-def length(e):
-    assert(isinstance(e, list))
-    return len(e)
-
-
-def is_callable(e):
-    return callable(e)
 
 
 def __def(env, name, *args):
