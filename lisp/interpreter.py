@@ -790,6 +790,7 @@ def base_env(args=[]):
     # TODO
     #(infix
 
+    env = Env(env)
     with open('stdlib.lisp', 'r') as f:
         interpret(read(Stream(f.read(), 0)), env)
 
