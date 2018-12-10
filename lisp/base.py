@@ -1,6 +1,66 @@
 def native(f):
     return f
 
+def sexps_str(form, indent=0):
+    sexpr_print_operators = {
+        quote_fun_name: quote_char
+        , backquote_fun_name: backquote_char
+        , backquote_eval_fun_name: backquote_eval_char
+        , backquote_splice_fun_name: backquote_splice_char
+    }
+
+    assert(isinstance(indent, int)), indent
+    def p(f):
+        return ('  ' * indent + str(f) + '\n')
+
+    r = ''
+    if isinstance(form, list) or isinstance(form, tuple):
+        is_simple = False
+        for op, char in sexpr_print_operators.items():
+           if is_named_operator(form, intern(op)):
+               r += ' '.join([char + sexps_str(f) for f in form[1:]])
+               is_simple = True
+               break
+        if not is_simple:
+            r += p('(')
+            for e in form:
+                r += sexps_str(e, indent + 1)
+            r += p(')')
+    elif is_symbol(form):
+        r += p(symbol_name(form))
+    elif isinstance(form, dict):
+        r += p('{')
+        for e, v in form.items():
+            r += sexps_str(e, indent + 1) + ': ' + sexps_str(v, indent + 1)
+        r += p('}')
+    elif isinstance(form, str):
+        r += p('"%s"' % form)
+    else:
+        r += p(form)
+
+    org = None
+    while org != r:
+        org = r
+        r = r.replace('  ', ' ')
+    if len(r) < 80:
+        r = r.replace('\n', ' ')
+            
+    paren = '({'
+    ws = [' ', '\n']
+    for a in paren:
+        for s in ws:
+            r = r.replace(a + s, a)
+    paren = '})'
+    for a in paren:
+        for s in ws:
+            r = r.replace(s + a, a)
+    return r
+         
+
+def ps(form):
+    print(sexps_str(form))
+
+
 TYPE = '__type'
 TYPE_T = '__type_t'
 
@@ -57,6 +117,10 @@ def concat(*rest):
     for e in rest:
         r += e
     return r
+def is_named_operator(form, op):
+    assert(is_symbol(op))
+    return is_list(form) and form and is_symbol(form[0]) and form[0] == op
+
 
 MACRO = '__macro'
 SPECIAL_FORM = '__special'
@@ -109,6 +173,9 @@ def is_atom(form):
     return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or (is_list(form) and not len(form))
 
 from .reader import keyword_start
+from .reader import quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char
+
+
 
 def __keyword(s):
     if is_symbol(s):
@@ -150,3 +217,46 @@ def length(*args, **kwargs):
     
 def is_callable(e):
     return callable(e)
+
+
+make_env, is_env, (env_d, env_parent), _env_setters = defstruct('Env', 'd', 'parent')
+
+
+def Env(parent=None):
+    return make_env({}, parent)
+
+
+def env_contains(env, k):
+    assert(is_env(env))
+    return k in env_d(env) or (env_parent(env) and env_contains(env_parent(env), k))
+
+
+def env_get(env, k):
+    assert(is_env(env))
+    if k in env_d(env):
+        return env_d(env)[k]
+    elif env_parent(env):
+        return env_get(env_parent(env), k)
+    else:
+        raise KeyError(k)
+
+
+def env_containing_parent(env, k):
+    assert(is_env(env))
+    while env and k not in env_d(env):
+        env = env_parent(env)
+    return env
+
+
+def env_def(env, k, v):
+    assert(is_env(env))
+    d = env_d(env)
+    assert not k in d, '{k} in {d}'.format(k=k, d=env_d(env))
+    print('~~~~~~~~env_def:', k, '=', sexps_str(v))
+    env_d(env)[k] = v
+
+
+def env_change(env, k, v):
+    env = env_containing_parent(env, k) or env
+    #print('        env_change:', k, '=', sexps_str(v), env_d(env).keys())
+    env_d(env)[k] = v

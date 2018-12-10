@@ -1,5 +1,7 @@
 from .base import native, defstruct, is_struct, TYPE
 from .base import keyword, keyword_name, is_keyword, special_form, is_special_form, is_list, is_num, is_str, is_int, is_atom, is_callable, length, special_form_get_fun, is_special_keyword, Macro, is_macro, macro_get_fun
+from .base import Env, env_contains, env_get, env_def, env_change, env_d, env_parent
+from .base import sexps_str, ps, is_named_operator
 from .symbol import intern, Symbol, symbol_name, is_symbol, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
@@ -9,71 +11,6 @@ class BlockException(Exception):
         Exception.__init__(self, name)
         self.name = name
         self.value = value
-
-
-def is_named_operator(form, op):
-    assert(is_symbol(op))
-    return is_list(form) and form and is_symbol(form[0]) and form[0] == op
-
-
-sexpr_print_operators = {
-    quote_fun_name: quote_char
-    , backquote_fun_name: backquote_char
-    , backquote_eval_fun_name: backquote_eval_char
-    , backquote_splice_fun_name: backquote_splice_char
-}
-
-def sexps_str(form, indent=0):
-    assert(isinstance(indent, int)), indent
-    def p(f):
-        return ('  ' * indent + str(f) + '\n')
-
-    r = ''
-    if isinstance(form, list) or isinstance(form, tuple):
-        is_simple = False
-        for op, char in sexpr_print_operators.items():
-           if is_named_operator(form, intern(op)):
-               r += ' '.join([char + sexps_str(f) for f in form[1:]])
-               is_simple = True
-               break
-        if not is_simple:
-            r += p('(')
-            for e in form:
-                r += sexps_str(e, indent + 1)
-            r += p(')')
-    elif is_symbol(form):
-        r += p(symbol_name(form))
-    elif isinstance(form, dict):
-        r += p('{')
-        for e, v in form.items():
-            r += sexps_str(e, indent + 1) + ': ' + sexps_str(v, indent + 1)
-        r += p('}')
-    elif isinstance(form, str):
-        r += p('"%s"' % form)
-    else:
-        r += p(form)
-
-    org = None
-    while org != r:
-        org = r
-        r = r.replace('  ', ' ')
-    if len(r) < 80:
-        r = r.replace('\n', ' ')
-            
-    paren = '({'
-    ws = [' ', '\n']
-    for a in paren:
-        for s in ws:
-            r = r.replace(a + s, a)
-    paren = '})'
-    for a in paren:
-        for s in ws:
-            r = r.replace(s + a, a)
-    return r
-         
-
-def ps(form):
-    print(sexps_str(form))
 
 
 variadic_name = '&rest'
@@ -284,7 +221,7 @@ def __setq(env, name, value):
     assert(is_symbol(name))
     #if not env_contains(env, symbol_name(name)):
     #    raise Exception('set: {sym} not declared in {env} ({is_env})'
-    #                    .format(sym=symbol_name(name), env=sexps_str(env.d), is_env=sexps_str(env.parent.d) if env.parent else '{}'))
+    #                    .format(sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
     env_change(env, symbol_name(name), value)
     return value
@@ -418,8 +355,8 @@ def __eval(env, form):
         if not env_contains(env, symbol_name(form)):
             raise Exception('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'
                             .format(sym=symbol_name(form)
-                                    , keys=', '.join(sorted(env.d.keys()))
-                                    , pkeys=', '.join(map(str, sorted(env.parent.d.keys()))) if env.parent else ''))
+                                    , keys=', '.join(sorted(env_d(env).keys()))
+                                    , pkeys=', '.join(map(str, sorted(env_d(env_parent(env)).keys()))) if env_parent(env) else ''))
         return env_get(env, symbol_name(form))
     elif is_atom(form):
         return form
@@ -433,41 +370,6 @@ def __eval(env, form):
     else:
         raise Exception('unknown form: {form}'.format(form=sexps_str(form)))
         
-
-class Env:
-    def __init__(self, parent=None):
-        self.parent = parent
-        self.d = {}
-
-
-def env_contains(self, k):
-    return k in self.d or (self.parent and env_contains(self.parent, k))
-
-
-def env_get(env, k):
-    if k in env.d:
-        return env.d[k]
-    elif env.parent:
-        return env_get(env.parent, k)
-    else:
-        raise KeyError(k)
-
-
-def env_containing_parent(env, k):
-    while env and k not in env.d:
-        env = env.parent
-    return env
-
-
-def env_def(env, k, v):
-    assert not k in env.d, '{k} in {d}'.format(k=k, d=env.d)
-    env.d[k] = v
-
-
-def env_change(env, k, v):
-    env = env_containing_parent(env, k) or env
-    env.d[k] = v
-
 
 def base_env(args=[]):
     env = Env()
