@@ -160,7 +160,9 @@
     ifs))
 
 
-(defmacro member (e l) `(contains? ~l ~e))
+(defmacro not-in? (l e) `(not  (contains? ~l ~e)))
+(defmacro member? (e l) `(contains? ~l ~e))
+(defmacro not-member? (e l) `(not  (contains? ~l ~e)))
 
 (defun break (&rest values)
   (assert (<= (length values) 1))
