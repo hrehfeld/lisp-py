@@ -2,7 +2,7 @@ from .base import native, defstruct, is_struct, TYPE
 from .base import keyword, keyword_name, is_keyword, special_form, is_special_form, is_list, is_num, is_str, is_int, is_atom, is_callable, length, special_form_get_fun, is_special_keyword, Macro, is_macro, macro_get_fun
 from .base import make_env, env_contains, env_get, env_def, env_change, env_d, env_parent
 from .base import sexps_str, ps, is_named_operator
-from .symbol import intern, Symbol, symbol_name, is_symbol, gensym
+from .symbol import intern, symbol_name, is_symbol, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
 

@@ -1,6 +1,30 @@
 def native(f):
     return f
 
+@native
+def destructure(names, values):
+    r = []
+    for k, v in zip(names, values):
+        if isinstance(k, str):
+            r += [(k, v)]
+        else:
+            r += destructure(k, v)
+    return r
+            
+
+# non-native code only
+def py_bind_env(names, values, module):
+    pass
+
+
+@native
+def py_bind_env(names, values, module):
+    import sys
+    for k, v in destructure(names, values):
+        setattr(sys.modules[module], k, v)
+        print('binding ', k, v, 'in', module)
+
+
 def sexps_str(form, indent=0):
     sexpr_print_operators = {
         quote_fun_name: quote_char
@@ -216,21 +240,8 @@ def is_callable(e):
     return callable(e)
 
 
-env_funs = defstruct('Env', 'd', 'parent')
-
-
-def bind_env_funs(env_funs):
-    pass
-
-@native
-def bind_env_funs(env_funs):
-    make_env, is_env, (env_d, env_parent), _env_setters = env_funs
-    globals()['Env'] = make_env
-    globals()['is_env'] = is_env
-    globals()['env_d'] = env_d
-    globals()['env_parent'] = env_parent
     
-bind_env_funs(env_funs)
+py_bind_env(['Env', 'is_env', ['env_d', 'env_parent'], '_'], defstruct('Env', 'd', 'parent'), __name__)
 
 
 def make_env(parent=None):
