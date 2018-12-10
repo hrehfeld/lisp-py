@@ -89,7 +89,7 @@
 	 (enumerate target))))
 
 (defmacro setf (target value)
-  (let* ((value-var (gensym value)))
+  (let* ((value-var (gensym setf-value)))
 	`(progn
 	   (def ~value-var ~value)
 	   ~@(cond
