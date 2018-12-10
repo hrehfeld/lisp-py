@@ -145,8 +145,8 @@ def __fn(env, parameters, *body):
 
 def __defun(env, name, parameters, *body):
     assert(is_symbol(name))
-    if env_contains(env, symbol_name(name)):
-        raise Exception('fun %s already declared' % symbol_name(name))
+    #if env_contains(env, symbol_name(name)):
+    #    raise Exception('fun %s already declared' % symbol_name(name))
 
     f = __fn(env, parameters, *body)
     env_def(env, symbol_name(name), f)
