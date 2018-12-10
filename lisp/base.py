@@ -34,6 +34,7 @@ def defstruct(name_str, *field_names):
     for ifield, field in enumerate(field_names):
         fname = '%s-%s' % (name_str, (field))
         def get(struct):
+            assert(is_instance(struct)), str(struct) + repr(struct)
             return struct[field]
         getters += [get]
 
