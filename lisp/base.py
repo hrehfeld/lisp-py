@@ -216,11 +216,25 @@ def is_callable(e):
     return callable(e)
 
 
-make_env, is_env, (env_d, env_parent), _env_setters = defstruct('Env', 'd', 'parent')
+env_funs = defstruct('Env', 'd', 'parent')
 
 
-def Env(parent=None):
-    return make_env({}, parent)
+def bind_env_funs(env_funs):
+    pass
+
+@native
+def bind_env_funs(env_funs):
+    make_env, is_env, (env_d, env_parent), _env_setters = env_funs
+    globals()['Env'] = make_env
+    globals()['is_env'] = is_env
+    globals()['env_d'] = env_d
+    globals()['env_parent'] = env_parent
+    
+bind_env_funs(env_funs)
+
+
+def make_env(parent=None):
+    return Env({}, parent)
 
 
 def env_contains(env, k):
