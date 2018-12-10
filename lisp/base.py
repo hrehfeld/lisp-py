@@ -112,11 +112,6 @@ def is_struct(obj):
 
 from .symbol import is_symbol, symbol_name, intern
 
-def concat(*rest):
-    r = ''
-    for e in rest:
-        r += e
-    return r
 def is_named_operator(form, op):
     assert(is_symbol(op))
     return is_list(form) and form and is_symbol(form[0]) and form[0] == op
