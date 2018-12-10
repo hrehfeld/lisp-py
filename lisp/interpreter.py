@@ -81,6 +81,7 @@ keys_name = '&keys'
 
 
 def __defstruct(env, name, *fields):
+    assert(is_symbol(name)), name
     name_str = symbol_name(name)
     field_names = [symbol_name(f) for f in fields]
 
