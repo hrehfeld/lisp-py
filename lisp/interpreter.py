@@ -6,6 +6,7 @@ from .symbol import intern, symbol_name, is_symbol, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
 
+@native
 class BlockException(Exception):
     def __init__(self, name, value=None):
         Exception.__init__(self, name)
