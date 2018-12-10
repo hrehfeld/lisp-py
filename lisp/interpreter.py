@@ -238,14 +238,14 @@ def __call_function(env, fun, args_forms, eval=True):
         if is_keyword(arg) and not (is_last_arg or kw):
             kw = arg
         else:
+            k = iarg
             if kw:
                 # without :
                 k = symbol_name(kw)[1:]
-                arg = (k, arg)
                 kw = None
             else:
                 ilast_normal_arg = iarg
-            args += [arg]
+            args += [(k, arg)]
     del kw
 
     if fun not in functions:
@@ -285,19 +285,16 @@ def __call_function(env, fun, args_forms, eval=True):
             return None
 
         kwargs = {}
-        for iarg, arg in enumerate(args):
+        for (key, arg) in args:
             # TODO we really need a type system to distinguish between symbols and tuples
-            if isinstance(arg, tuple) and not is_symbol(arg):
-                k, v = arg
-                i = parameter_index(k)
+            if not is_int(key):
+                i = parameter_index(key)
                 if i is None:
-                    kwargs[k] = v
+                    kwargs[key] = arg
                 else:
-                    args_dict[i] = v
+                    args_dict[i] = arg
             else:
-                v = arg
-                i = iarg
-                args_dict[i] = v
+                args_dict[key] = arg
             del arg
 
         for i, p in enumerate(parameters):
