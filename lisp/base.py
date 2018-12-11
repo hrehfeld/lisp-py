@@ -120,7 +120,7 @@ def defstruct(name_str, *field_names):
         fname = '%s-%s' % (name_str, (field))
         def make_getter(field):
             def get(struct):
-                assert(is_instance(struct)), str(struct) + repr(struct)
+                assert(is_instance(struct)), str(struct) + ' ' + repr(struct)
                 return struct[field]
             return get
         getters += [make_getter(field)]
