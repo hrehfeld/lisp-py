@@ -274,7 +274,7 @@ def env_def(env, k, v):
     assert(is_env(env))
     d = env_d(env)
     assert not k in d, '{k} in {d}'.format(k=k, d=env_d(env))
-    print('~~~~~~~~env_def:', k, '=', sexps_str(v))
+    #print('~~~~~~~~env_def:', k, '=', sexps_str(v), sexps_str(env_d(env)))
     env_d(env)[k] = v
 
 
