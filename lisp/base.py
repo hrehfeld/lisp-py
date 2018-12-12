@@ -206,8 +206,8 @@ def __keyword(s):
 
 
 @native
-def keyword(*args, **kwargs):
-    return __keyword(*args, **kwargs)
+def keyword(s):
+    return __keyword(s)
     
     
 def keyword_name(s):
