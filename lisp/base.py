@@ -232,8 +232,8 @@ def __length(e):
 
 
 @native
-def length(*args, **kwargs):
-    return __length(*args, **kwargs)
+def length(l):
+    return __length(l)
     
     
 def is_callable(e):
