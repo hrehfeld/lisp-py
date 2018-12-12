@@ -46,8 +46,8 @@ def __defstruct(env, name, *fields):
 functions = {}
 
 
-def add_function(f, parameters, defaults, special_names, special_defaults):
-    functions[f] = (parameters, defaults, special_names, special_defaults)
+def add_function(f, *args):
+    functions[f] = args
 
 
 @native
