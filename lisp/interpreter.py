@@ -16,6 +16,7 @@ class BlockException(Exception):
 
 variadic_name = '&rest'
 keys_name = '&keys'
+nokeys_name = '&nokeys'
 
 
 def __defstruct(env, name, *fields):
@@ -67,80 +68,117 @@ def return_from(env, name, value=None):
     raise BlockException(name, r)
     
 
-def __fn(env, parameters, *body):
-    def parameter_default(p):
+def parameter_default(p):
+    return p[1]
+
+
+def is_parameter_with_default_(p):
+        return isinstance(p, list) and len(p) == 2 and keywordp(p[0])
+
+
+def is_simple_parameter(p):
+    return is_symbol(p) and not is_keyword(p) and not is_special_keyword(p)
+
+
+def is_normal_parameter(p):
+    return is_simple_parameter(p) or is_parameter_with_default_(p)
+
+
+def normal_parameter_name(p):
+    if is_parameter_with_default_(p):
         return p[1]
+    else:
+        return p
 
-    def is_parameter_with_default_(p):
-            return isinstance(p, list) and len(p) == 2
 
-    def is_simple_parameter(p):
-        return is_symbol(p) and not is_keyword(p) and not is_special_keyword(p)
+def __fn(env, parameters, *body):
 
-    def is_normal_parameter(p):
-        return is_simple_parameter(p) or is_parameter_with_default_(p)
+    specials = {variadic_name, keys_name, nokeys_name}
+    special_allows_next = {variadic_name, keys_name}
+    # TODO support start_only specials
+    special_end_only = {variadic_name, keys_name}
+    special_once_only = {variadic_name, keys_name, nokeys_name}
 
-    def normal_parameter_name(p):
-        if is_parameter_with_default_(p):
-            return p[1]
-        else:
-            return p
+    parsed_parameters = []
+    special_used = set()
 
-    special_names = {variadic_name: None, keys_name: None}
-    special_defaults = {variadic_name: None, keys_name: None}
-    ilast_special = None
-    i = len(parameters) - 1
-    while i >= 0 and (ilast_special is None or ilast_special - i <= 2):
-        p = parameters[i]
-        if is_special_keyword(p):
-            name = symbol_name(p)
-            if name in special_names:
-                assert(special_names[name] is None)
-                is_next = parameters[i + 1] if i + 1 < len(parameters) else None
-                if is_next and is_normal_parameter(is_next):
-                    special_names[name] = normal_parameter_name(is_next)
-                    if is_parameter_with_default_(is_next):
-                        special_defaults[name] = parameter_default(is_next)
-                else:
-                    special_names[name] = True
-                ilast_special = i
-            else:
+    special_params = {variadic_name: None, keys_name: None}
+
+    varargs_param = False
+    kwargs_param = False
+
+    used_names = set()
+    i = 0
+    end = False
+    while i < len(parameters):
+        iparam = i
+        param = parameters[i]
+        param_name = None
+        param_default = None
+        param_special = None
+
+        is_last = i + 1 >= len(parameters)
+        next_param = parameters[i + 1] if not is_last else None
+        has_normal_next = not is_last and next_param and is_normal_parameter(next_param)
+        if is_special_keyword(param):
+            param_special = symbol_name(param)
+            param = None
+            if param_special not in specials:
                 raise Exception('Unkown special keyword: {s} at position {i}'.format(s=p, i=i))
-        i -= 1
+            if param_special in special_params:
+                special_params[param_special] = True
+            if param_special in special_allows_next:
+                if has_normal_next:
+                    # skip next parameter which we just parsed
+                    i += 1
+                    if param_special in special_params:
+                        special_params[param_special] = next_param
+                
+            if param_special in special_once_only and param_special in special_used:
+                raise Exception('{special} parameter defined more than once'.format(special=param_special))
+            if param_special in special_end_only:
+                end = True
+            elif end:
+                raise Exception('{special} parameters must be defined after normal ones'.format(special=param_special))
 
-    parameters = parameters[:ilast_special]
+            if param_special is not None:
+                special_used.add(param_special)
 
-    for i, p in enumerate(parameters):
-        assert is_normal_parameter(p), p
-
-    # TODO check if parameters with defaults are after normal ones
-    defaults = {}
-    defaults_started = False
-    for i, p in enumerate(parameters):
-        if not is_symbol(p):
-            parameters[i] = normal_parameter_name(p)
-            defaults[i] = parameter_default(p)
-            defaults_started = True
-        elif defaults_started:
-            raise Exception('parameters with defaults need to come after normal ones. {ps}'.format(ps=parameters))
+        if param:
+            param_name = normal_parameter_name(param)
+            if is_parameter_with_default_(param):
+                param_default = parameter_default(param)
+        if param_name:
+            if symbol_name(param_name) in used_names:
+                raise Exception('Duplicate parameter {name}'.format(name=n))
+            used_names.add(symbol_name(param_name))
+            
+            parsed_parameters.append((param_name, param_default))
+        i += 1
 
     block_name = gensym()
     def f(args, varargs, kwargs):
         fun_env = make_env(env)
         env_def(fun_env, 'return', lambda value=None: return_from(fun_env, block_name, value))
 
-        for parameter, arg in zip(parameters, args):
+        for (parameter, default), arg in zip(parsed_parameters, args):
+            assert(is_symbol(parameter)), parameter
             env_def(fun_env, symbol_name(parameter), arg)
 
-        varargs_name = special_names[variadic_name]
-        if varargs_name:
+        varargs_name = special_params[variadic_name]
+        if is_symbol(varargs_name):
             env_def(fun_env, symbol_name(varargs_name), varargs)
-        keysargs_name = special_names[keys_name]
-        if keysargs_name:
+        keysargs_name = special_params[keys_name]
+        if is_symbol(keysargs_name):
             env_def(fun_env, symbol_name(keysargs_name), kwargs)
 
         return block(fun_env, block_name, *body)
-    add_function(f, parameters, defaults, special_names, special_defaults)
+    #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
+    add_function(f, parsed_parameters
+                 , nokeys_name in special_used
+                 , variadic_name in special_used
+                 , keys_name in special_used
+    )
     return f
 
 
@@ -228,29 +266,29 @@ def __setq(env, name, value):
 
 
 def __call_function(env, fun, args_forms, eval=True):
-    kw = None
-    args = []
-    varargs = []
-    ilast_normal_arg = -1
-    for iarg, arg in enumerate(args_forms):
-        is_last_arg = iarg + 1 >= len(args_forms)
-        # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
-        if is_keyword(arg) and not (is_last_arg or kw):
-            kw = arg
-        else:
-            k = iarg
-            if kw:
-                # without :
-                k = symbol_name(kw)[1:]
-                kw = None
-            else:
-                ilast_normal_arg = iarg
-            args += [(k, arg)]
-    del kw
-
     if fun not in functions:
         # python fun
         # we don't support named normal args -- would need reflection
+
+        kw = None
+        args = []
+        varargs = []
+        ilast_normal_arg = -1
+        for iarg, arg in enumerate(args_forms):
+            is_last_arg = iarg + 1 >= len(args_forms)
+            # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
+            if is_keyword(arg) and not (is_last_arg or kw):
+                kw = arg
+            else:
+                k = iarg
+                if kw:
+                    # without :
+                    k = symbol_name(kw)[1:]
+                    kw = None
+                else:
+                    ilast_normal_arg = iarg
+                args += [(k, arg)]
+        del kw
 
         clean_args = []
         kwargs = {}
@@ -272,60 +310,57 @@ def __call_function(env, fun, args_forms, eval=True):
         return fun(*args, **kwargs)
     else:
         # self-defined fun
-        (parameters, defaults, special_names, special_defaults) = functions[fun]
+        (parameters, nokeys, set_varargs, set_kwargs) = functions[fun]
 
-        args_dict = dict()
-        args_dict.update(defaults)
-
-
-        def parameter_index(k):
-            for i, p in enumerate(parameters):
-                if symbol_name(p) == k:
-                    return i
-            return None
-
+        #(param_name, param_default, param_special) = parameters[iparam]
+        iparam = 0
+        args = []
         kwargs = {}
-        for (key, arg) in args:
-            # TODO we really need a type system to distinguish between symbols and tuples
-            if not is_int(key):
-                i = parameter_index(key)
-                if i is None:
-                    kwargs[key] = arg
-                else:
-                    args_dict[i] = arg
+
+        remaining_args = args_forms
+        keywords_started = False
+        while remaining_args:
+            arg = remaining_args.pop(0)
+
+            if is_keyword(arg) and remaining_args and not nokeys:
+                keywords_started = True
+                key = keyword_name(arg)
+                arg = remaining_args.pop(0)
+                kwargs[key] = arg
             else:
-                args_dict[key] = arg
+                if keywords_started:
+                    raise Exception('positional argument follows keyword argument')
+
+                if not set_varargs and len(args) >= len(parameters):
+                    raise Exception('too many arguments for function call: ({fun} {args})'
+                                        .format(name=param_name, fun=fun, args=sexps_str(args_forms)))
+                
+                args.append(arg)
             del arg
 
-        for i, p in enumerate(parameters):
-            if not (i in args_dict):
-                raise Exception('function call missing argument #{i} {name}: ({fun} {args})'
-                                .format(i=i, name=symbol_name(p), fun=fun, args=sexps_str(args_forms)))
+        if len(args) < len(parameters) and kwargs:
+            for i, p in enumerate(parameters[len(args):]):
+                assert(isinstance(p, tuple)), p
+                (param_name, param_default) = p
+                n = symbol_name(param_name)
+                if n not in kwargs:
+                    raise Exception('function call missing argument {name}: ({fun} {args})'
+                                        .format(name=n, fun=fun, args=sexps_str(args_forms)))
+                args.append(kwargs[n])
+                del kwargs[n]
+                    
+        if len(parameters) > len(args):
+            raise Exception('function call missing argument #{i}: ({fun} {args})'
+                                .format(i=len(args), fun=fun, args=sexps_str(args_forms)))
 
-        if kwargs and special_names[keys_name] is None:
-            raise Exception('unknown keyword args: {kws}'.format(kws=kwargs))
-
-        args = []
-        for i, p in enumerate(parameters):
-            args += [args_dict[i]]
-
-        num_args = len(args_dict)
-        if num_args != len(parameters) and special_names[variadic_name] is None:
-            extra_args = []
-            for k, v in args_dict.items():
-                if not is_int(k) or k >= len(parameters):
-                    extra_args.append('{k}={v}'.format(k=k, v=sexps_str(v)))
-            raise Exception('too many arguments for call to ({fun} {params}) [{args} {extra_args}]'
-                            .format(fun=fun
-                                    , params=' '.join(map(sexps_str, parameters))
-                                    , args=' '.join(map(sexps_str, args))
-                                    , extra_args=' '.join(extra_args)
-                            ))
+        if not set_kwargs and kwargs:
+            raise Exception('Unexpected keyword arguments for function call: ({fun} {args})'
+                            .format(fun=fun, args=sexps_str(args_forms)))
 
         varargs = []
-        for i in range(len(parameters), num_args):
-            varargs += [args_dict[i]]
-
+        if set_varargs and len(args) > len(parameters):
+            varargs = args[len(parameters):]
+            args = args[:len(parameters)]
         return fun(args, varargs, kwargs)
     
 
