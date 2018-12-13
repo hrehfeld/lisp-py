@@ -207,6 +207,8 @@ interpreter_tests = [
    , ("""(block nil (break nil))""", None)
    , ("""(block nil (break 1))""", 1)
     , ("""(map (fn (e) (+ e 1)) '(0 1 2))""", [1, 2, 3])
+    , ("""(list :a)""", [intern(':a')])
+    , ("""(list :a 0)""", [intern(':a'), 0])
     , ("""(range 4)""", [0, 1, 2, 3])
     , ("""(range 0 4)""", [0, 1, 2, 3])
     , ("""(range 1 4)""", [1, 2, 3])
