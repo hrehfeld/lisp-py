@@ -283,47 +283,65 @@ def py_get_param_names(obj):
             args.append(p.name)
     return args, varargs, varkwargs, False
 
+
+py_functions = dict()
+
+
+def py_set_nokeys(fun, nokeys):
+    #parameters = py_get_param_names(fun)
+    py_functions[fun] = nokeys
+
+
 def __call_function(env, fun, args_forms, eval=True):
     if fun not in functions:
         # python fun
-        # we don't support named normal args -- would need reflection
+        
+        if fun not in py_functions:
+            #parameters = py_get_param_names(fun)
+            nokeys = False
+            py_functions[fun] = False
+        else:
+            nokeys = py_functions[fun]
 
-        kw = None
-        args = []
-        varargs = []
-        ilast_normal_arg = -1
-        for iarg, arg in enumerate(args_forms):
-            is_last_arg = iarg + 1 >= len(args_forms)
-            # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
-            if is_keyword(arg) and not (is_last_arg or kw):
-                kw = arg
-            else:
-                k = iarg
-                if kw:
-                    # without :
-                    k = symbol_name(kw)[1:]
-                    kw = None
-                else:
-                    ilast_normal_arg = iarg
-                args += [(k, arg)]
-        del kw
-
-        clean_args = []
         kwargs = {}
-        for iarg, arg in enumerate(args):
-            if iarg > ilast_normal_arg:
-                k, v = arg
-                kwargs[k] = v
-            else:
-                # TODO hack: we really need to fix our type system
-                if isinstance(arg, tuple) and not is_symbol(arg):
-                    k, v = arg
+        if nokeys:
+            args = args_forms
+        else:
+            kw = None
+            args = []
+            varargs = []
+            ilast_normal_arg = -1
+            for iarg, arg in enumerate(args_forms):
+                is_last_arg = iarg + 1 >= len(args_forms)
+                # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
+                if is_keyword(arg) and not (is_last_arg or kw):
+                    kw = arg
                 else:
-                    v = arg
-                clean_args += [v]
+                    k = iarg
+                    if kw:
+                        # without :
+                        k = symbol_name(kw)[1:]
+                        kw = None
+                    else:
+                        ilast_normal_arg = iarg
+                    args += [(k, arg)]
+            del kw
 
-        args = clean_args
-        del clean_args
+            clean_args = []
+            for iarg, arg in enumerate(args):
+                if iarg > ilast_normal_arg:
+                    k, v = arg
+                    kwargs[k] = v
+                else:
+                    # TODO hack: we really need to fix our type system
+                    if isinstance(arg, tuple) and not is_symbol(arg):
+                        k, v = arg
+                    else:
+                        v = arg
+                    clean_args += [v]
+
+            args = clean_args
+            del clean_args
 
         return fun(*args, **kwargs)
     else:
