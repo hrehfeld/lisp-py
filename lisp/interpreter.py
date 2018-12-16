@@ -6,6 +6,8 @@ from .symbol import intern, symbol_name, is_symbol, gensym
 from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char, keyword_start
 import operator
 
+import inspect
+
 @native
 class BlockException(Exception):
     def __init__(self, name, value=None):
@@ -264,6 +266,22 @@ def __setq(env, name, value):
     env_change(env, symbol_name(name), value)
     return value
 
+
+def py_get_param_names(obj):
+    sig = inspect.Signature.from_callable(obj)
+    P = inspect.Parameter
+
+    args = []
+    varargs = False
+    varkwargs = False
+    for p in sig.parameters.values():
+        if p.kind == P.VAR_POSITIONAL:
+            varargs = p.name
+        elif p.kind == P.VAR_KEYWORD:
+            varkwargs = p.name
+        else:
+            args.append(p.name)
+    return args, varargs, varkwargs, False
 
 def __call_function(env, fun, args_forms, eval=True):
     if fun not in functions:
