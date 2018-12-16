@@ -73,7 +73,7 @@ def parameter_default(p):
 
 
 def is_parameter_with_default_(p):
-        return isinstance(p, list) and len(p) == 2 and keywordp(p[0])
+        return isinstance(p, list) and len(p) == 2 and is_keyword(p[0])
 
 
 def is_simple_parameter(p):
