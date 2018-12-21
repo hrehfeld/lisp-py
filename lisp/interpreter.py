@@ -448,6 +448,7 @@ def base_env(args=[]):
     env_def(env, 'nil', None)
     def list_(*args):
         return list(args)
+    py_set_nokeys(list_, True)
     env_def(env, 'list', list_)
 
     def as_list(arg):

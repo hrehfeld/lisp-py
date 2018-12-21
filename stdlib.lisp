@@ -218,3 +218,4 @@
 (defmacro isinstance (value type)
   (list (intern (test-name (symbol-name type)))
 		value))
+
