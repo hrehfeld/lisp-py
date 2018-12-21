@@ -208,6 +208,9 @@ def read_symbol(s):
             if token == accessor_char:
                 return resp()
             accessors = token.split(accessor_char)
+            # we have something like ..foo
+            if any([a == '' for a in accessors]):
+                return resp()
             accessors = [a for a in accessors if a]
             
             return Valid([intern(s) for s in [accessor_char, *accessors]])
