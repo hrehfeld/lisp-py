@@ -411,6 +411,7 @@ def __call(env, fun, args_forms, do_eval_args):
         return __eval(env, form)
 
     elif is_callable(fun):
+        # apply might already have evaled arguments
         if do_eval_args:
             args_forms = [__eval(env, arg) for arg in args_forms]
         return __call_function(env, fun, args_forms)
