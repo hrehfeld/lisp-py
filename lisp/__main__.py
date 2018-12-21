@@ -34,6 +34,7 @@ reader_tests = [
 )""", [[]])
     , ("'() ;1", [[intern(quote_fun_name), []]])
     , ("(defun foo () (+ 1 2)) (foo)", [[intern('defun'), intern('foo'), [], [intern('+'), 1, 2]], [intern('foo')]])
+    , ("""(set p ((. a b)))""", [[intern('set'), intern('p'), [[intern('.'), intern('a'), intern('b')]]]])
 ]
 
 interpreter_tests = [
