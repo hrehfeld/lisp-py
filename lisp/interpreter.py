@@ -524,6 +524,45 @@ def base_env(args=[]):
         pass
     env_def(env, 'import', special_form(__import))
 
+    def py_import(env, *args):
+        import importlib
+        for module in args:
+            if is_symbol(module):
+                module_name = symbol_name(module)
+                module = importlib.import_module(module_name)
+                env_def(env, module_name, module)
+            elif is_list(module):
+                first = module[0]
+                assert(is_symbol(first)), sexps_str(module)
+                first_name = symbol_name(first)
+                level = 0
+                if all([c == '.' for c in first_name]):
+                    level = len(first_name)
+                    assert(len(module) > 1), sexps_str(module)
+                    module = module[1:]
+                    assert(False), 'relative imports from lisp not allowed'
+                if len(module) > 1:
+                    module, *froms = module
+
+                assert(is_symbol(module))
+                assert(is_list(froms))
+                for f in froms:
+                    # TODO support (:alias name)
+                    assert(is_symbol(f))
+
+                module_name = symbol_name(module)
+                module = importlib.__import__(module_name, fromlist=fromlist)
+                if froms:
+                    fromlist = [symbol_name(f) for f in froms]
+                    for from_name in fromlist:
+                        env_def(env, from_name, getattr(module, from_name))
+                    else:
+                        env_def(env, module_name, module)
+            else:
+                assert(False), sexps_str(module)
+        pass
+    env_def(env, 'py-import', special_form(py_import))
+
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('progn'), *body])
