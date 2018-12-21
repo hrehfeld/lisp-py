@@ -535,6 +535,7 @@ def base_env(args=[]):
     def __lookup(env, obj, *ks):
         r = __eval(env, obj)
         for k in ks:
+            assert(is_symbol(k)), sexps_str(k)
             r = getattr(r, symbol_name(k))
         return r
     env_def(env, '.', special_form(__lookup))
