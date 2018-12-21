@@ -292,12 +292,22 @@ def py_set_nokeys(fun, nokeys):
     py_functions[fun] = nokeys
 
 
-def __call_function(env, fun, args_forms, eval=True):
+def __call_function(env, fun, args_forms, eval):
+    nokeys = False
+
+    first_arg = args_forms[0] if args_forms else None
+    if is_symbol(first_arg) and first_arg == intern(nokeys_name):
+        nokeys = True
+        args_forms.pop(0)
+
+    # apply might already have evaled arguments
+    if eval:
+        args_forms = [__eval(env, arg) for arg in args_forms]
+
     # python fun
     if fun not in functions:
         if fun not in py_functions:
             #parameters = py_get_param_names(fun)
-            nokeys = False
             py_functions[fun] = False
         else:
             nokeys = py_functions[fun]
@@ -345,7 +355,8 @@ def __call_function(env, fun, args_forms, eval=True):
         return fun(*args, **kwargs)
     else:
         # self-defined fun
-        (parameters, nokeys, set_varargs, set_kwargs) = functions[fun]
+        (parameters, nokeys_def, set_varargs, set_kwargs) = functions[fun]
+        nokeys = nokeys or nokeys_def
 
         #(param_name, param_default, param_special) = parameters[iparam]
         iparam = 0
@@ -410,16 +421,14 @@ def __call(env, fun, args_forms, do_eval_args):
         return __eval(env, form)
 
     elif is_callable(fun):
-        # apply might already have evaled arguments
-        if do_eval_args:
-            args_forms = [__eval(env, arg) for arg in args_forms]
-        return __call_function(env, fun, args_forms)
+        return __call_function(env, fun, args_forms, do_eval_args)
 
     else:
         raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=sexps_str(args_forms) if args_forms else ''))
 
 
 def __eval(env, form):
+    #print('******** eval:', sexps_str(form))
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
             raise Exception('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'

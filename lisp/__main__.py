@@ -209,6 +209,8 @@ interpreter_tests = [
     , ("""(map (fn (e) (+ e 1)) '(0 1 2))""", [1, 2, 3])
     , ("""(list :a)""", [intern(':a')])
     , ("""(list :a 0)""", [intern(':a'), 0])
+    , ("""(defun foo (a) a) (foo :a)""", intern(':a'))
+    , ("""(defun foo (a b) a) (foo &nokeys :a 0)""", intern(':a'))
     , ("""(range 4)""", [0, 1, 2, 3])
     , ("""(range 0 4)""", [0, 1, 2, 3])
     , ("""(range 1 4)""", [1, 2, 3])
