@@ -165,7 +165,7 @@ interpreter_tests = [
     , ("(defun foo (a) a) (foo :a 1)", 1)
     , ("(defun foo (a) a) (foo :a :b)", intern(':b'))
     , ("(defun foo (a) a) (foo :a :a)", intern(':a'))
-    , ("(defun foo (a b) (list a b)) (foo :a 0)", [intern(':a'), 0])
+    , ("(defun foo (&nokeys a b) (list a b)) (foo :a 0)", [intern(':a'), 0])
     , ("(defun foo (&keys ks) ks) (foo :a 1)", dict(a=1))
     , ("(defun foo (&keys ks) ks) (foo :a 1 :b 2 :c 3)", dict(a=1, b=2, c=3))
     , ("(defun foo (a &keys ks) (tuple a ks)) (foo 1 :b 2)", (1, dict(b=2)))
