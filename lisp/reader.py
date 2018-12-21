@@ -201,11 +201,12 @@ def read_symbol(s):
         parsed = True
     if parsed:
         token = stream_token(s, istart, stream_pos(s))
+        resp = lambda: Valid(intern(token))
         if accessor_char not in token:
-            return Valid(intern(token))
+            return resp()
         else:
             if token == accessor_char:
-                return Valid(intern(token))
+                return resp()
             accessors = token.split(accessor_char)
             accessors = [a for a in accessors if a]
             
