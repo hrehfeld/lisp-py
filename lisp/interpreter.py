@@ -88,7 +88,7 @@ def is_normal_parameter(p):
 
 def normal_parameter_name(p):
     if is_parameter_with_default_(p):
-        return p[1]
+        return p[0]
     else:
         return p
 
