@@ -293,9 +293,8 @@ def py_set_nokeys(fun, nokeys):
 
 
 def __call_function(env, fun, args_forms, eval=True):
+    # python fun
     if fun not in functions:
-        # python fun
-        
         if fun not in py_functions:
             #parameters = py_get_param_names(fun)
             nokeys = False
