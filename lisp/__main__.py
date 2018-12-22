@@ -811,11 +811,6 @@ def __defmacro(lexical_env, name, parameters, *body):
     return m
 
 
-def __funcall(env, f, *args):
-    f = __eval(env, f)
-    return __call(env, f, args, do_eval_args=True)
-    
-
 def __apply(env, f, args):
     f = __eval(env, f)
     args = __eval(env, args)
@@ -1270,7 +1265,6 @@ def base_env(args=[]):
     env_def(env, 'defun', special_form(__defun))
     env_def(env, 'defmacro', special_form(__defmacro))
     env_def(env, 'fn', special_form(__fn))
-    env_def(env, 'call', special_form(__funcall))
     env_def(env, 'apply', special_form(__apply))
     env_def(env, 'if', special_form(__if))
 
@@ -1571,24 +1565,22 @@ interpreter_tests = [
     , ('''(when 1 1)''', 1)
     , ('''(def b '()) (if b b 3)''', 3)
     , ("((fn (a) (+ a 2)) 1)", 3)
-    , ("(call + 1 2)", 3)
-    , ("(def foo 2) (call + 1 foo)", 3)
-    , ("(call (fn (a) (+ a 2)) 1)", 3)
     , ("(apply (fn (a) (+ a 2)) '(1))", 3)
     , ("(apply (fn (a) a) (list 'foo))", intern("foo"))
     , ("(apply (fn (a) a) (list (quote foo))", intern("foo"))
-    , ("(call (fn (a &rest b) (+ a 2)) 1)", 3)
-    , ("(call (fn (a &rest b) (+ a 2)) 1 2)", 3)
-    , ("(call (fn (a &rest b) (if b (head b) a)) 1)", 1)
-    , ("(call (fn (a &rest b) (if b (head b) a)) 1 2)", 2)
+    , ("((fn (a) (+ a 2)) 1)", 3)
+    , ("((fn (a &rest b) (+ a 2)) 1)", 3)
+    , ("((fn (a &rest b) (+ a 2)) 1 2)", 3)
+    , ("((fn (a &rest b) (if b (head b) a)) 1)", 1)
+    , ("((fn (a &rest b) (if b (head b) a)) 1 2)", 2)
     , ("""
-(call 
+(
   (fn (a &rest b)
     (+ a (if b (head b) 2)))
   1 2)""", 3)
-    , ("(call (fn (a) a) (+ 1 2))", 3)
-    , ("(call (fn (a) a) (head '(3 2 1)))", 3)
-    , ("(call (fn (a) a) (tail '(3 2 1)))", [2, 1])
+    , ("((fn (a) a) (+ 1 2))", 3)
+    , ("((fn (a) a) (head '(3 2 1)))", 3)
+    , ("((fn (a) a) (tail '(3 2 1)))", [2, 1])
     , ("(def foo 2) (set foo 1)", 1)
     , ("(def foo 1)", 1)
     , ("(def foo 1) foo", 1)
