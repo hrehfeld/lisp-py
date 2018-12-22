@@ -1322,8 +1322,23 @@ def base_env(args=[]):
     env_def(env, 'is', lambda a, *bs: all([a is b for b in bs]))
 
     env_def(env, 'not', operator.__not__)
-    env_def(env, 'and', operator.__and__)
-    env_def(env, 'or', operator.__or__)
+
+    def _and(env, *tests):
+        r = None
+        for test in tests:
+            r = __eval(env, test)
+            if not r:
+                return None
+        return r
+    env_def(env, 'and', special_form(_and))
+    def _or(env, *tests):
+        r = None
+        for test in tests:
+            r = __eval(env, test)
+            if r:
+                return r
+        return None
+    env_def(env, 'or', special_form(_or))
 
     env_def(env, '<', operator.__lt__)
     env_def(env, '<=', operator.__le__)
