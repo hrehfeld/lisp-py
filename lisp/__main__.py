@@ -814,7 +814,8 @@ def __defmacro(lexical_env, name, parameters, *body):
 def __apply(env, f, args):
     f = __eval(env, f)
     args = __eval(env, args)
-    return __call(env, f, args, do_eval_args=False)
+    r =  __call(env, f, args, do_eval_args=False)
+    return r
     
 
 def __sub_env(env, *body):
@@ -1049,7 +1050,8 @@ def __eval(env, form):
         fun = __eval(env, form[0])
         args_forms = form[1:]
         
-        return __call(env, fun, args_forms, do_eval_args=True)
+        r = __call(env, fun, args_forms, do_eval_args=True)
+        return r
     else:
         raise Exception('unknown form: {form}'.format(form=sexps_str(form)))
         
