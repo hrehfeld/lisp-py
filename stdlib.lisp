@@ -219,3 +219,4 @@
   (list (intern (test-name (symbol-name type)))
 		value))
 
+(defun is-not (&rest xs) (not (apply is xs)))
