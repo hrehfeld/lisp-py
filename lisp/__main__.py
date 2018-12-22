@@ -158,7 +158,7 @@ def is_special_form(e):
 
 def special_form(f):
     if not is_callable(f):
-        raise Exception('%s is not callable' % (f))
+        raise Exception(make_error_msg('{f} is not callable', f=f))
     return (SPECIAL_FORM, f)
 
 
@@ -172,7 +172,7 @@ def is_macro(e):
 
 def Macro(f):
     if not is_callable(f):
-        raise Exception('%s is not callable' % (f))
+        raise Exception(make_error_msg('{f} is not callable', f=f))
 
     return (MACRO, f)
 
@@ -612,6 +612,10 @@ keys_name = '&keys'
 nokeys_name = '&nokeys'
 
 
+def make_error_msg(msg, **kwargs):
+    return msg=msg.format(**kwargs)
+    
+
 def __defstruct(env, name, *fields):
     # FIXME: for bootstrapping
     if is_str(name):
@@ -723,7 +727,7 @@ def __fn(env, parameters, *body):
             param_special = symbol_name(param)
             param = None
             if param_special not in specials:
-                raise Exception('Unkown special keyword: {s} at position {i}'.format(s=p, i=i))
+                raise Exception(make_error_msg('Unkown special keyword: {s} at position {i}', s=p, i=i))
             if param_special in special_params:
                 special_params[param_special] = True
             if param_special in special_allows_next:
@@ -734,11 +738,11 @@ def __fn(env, parameters, *body):
                         special_params[param_special] = next_param
                 
             if param_special in special_once_only and param_special in special_used:
-                raise Exception('{special} parameter defined more than once'.format(special=param_special))
+                raise Exception(make_error_msg('{special} parameter defined more than once', special=param_special))
             if param_special in special_end_only:
                 end = True
             elif end:
-                raise Exception('{special} parameters must be defined after normal ones'.format(special=param_special))
+                raise Exception(make_error_msg('{special} parameters must be defined after normal ones', special=param_special))
 
             if param_special is not None:
                 special_used.add(param_special)
@@ -754,7 +758,7 @@ def __fn(env, parameters, *body):
                 param_default = make_default_constructor(param_default)
         if param_name:
             if symbol_name(param_name) in used_names:
-                raise Exception('Duplicate parameter {name}'.format(name=n))
+                raise Exception(make_error_msg('Duplicate parameter {name}', name=n))
             used_names.add(symbol_name(param_name))
             
             parsed_parameters.append((param_name, param_default))
@@ -791,7 +795,7 @@ def __fn(env, parameters, *body):
 def __defun(env, name, parameters, *body):
     assert(is_symbol(name))
     #if env_contains(env, symbol_name(name)):
-    #    raise Exception('fun %s already declared' % symbol_name(name))
+    #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     name = symbol_name(name)
     f = __fn(env, parameters, *body)
@@ -803,7 +807,7 @@ def __defun(env, name, parameters, *body):
 def __defmacro(lexical_env, name, parameters, *body):
     assert(is_symbol(name)), (name, type(name))
     if env_contains(lexical_env, symbol_name(name)):
-        raise Exception('fun %s already declared' % symbol_name(name))
+        raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     f = __fn(lexical_env, parameters, *body)
     m = Macro(f)
@@ -852,7 +856,7 @@ def __if(env, cond, then, *else_body):
 def __def(env, name, *args):
     assert(is_symbol(name))
     if env_contains(env, symbol_name(name)):
-        raise Exception('var %s already declared' % symbol_name(name))
+        raise Exception(make_error_msg('var {var} already declared', var=symbol_name(name)))
     val = __eval(env, args[0]) if args else None
     env_def(env, symbol_name(name), val)
     return val
@@ -862,8 +866,8 @@ def __setq(env, name, value):
     assert(env is not None)
     assert(is_symbol(name))
     #if not env_contains(env, symbol_name(name)):
-    #    raise Exception('set: {sym} not declared in {env} ({is_env})'
-    #                    .format(sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
+    #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
+    #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
     env_change(env, symbol_name(name), value)
     return value
@@ -979,11 +983,11 @@ def __call_function(env, fun, args_forms, eval):
                 kwargs[key] = arg
             else:
                 if keywords_started:
-                    raise Exception('positional argument follows keyword argument')
+                    raise Exception(make_error_msg('positional argument follows keyword argument'))
 
                 if not set_varargs and len(args) >= len(parameters):
-                    raise Exception('too many arguments for function call: ({fun} {args})'
-                                        .format(name=args, fun=function_repr, args=sexps_str(args_forms)))
+                    raise Exception(make_error_msg('too many arguments for function call: ({fun} {args})'
+                                                   , name=args, fun=function_repr, args=sexps_str(args_forms)))
                 
                 args.append(arg)
             del arg
@@ -995,19 +999,19 @@ def __call_function(env, fun, args_forms, eval):
                 n = symbol_name(param_name)
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
-                    raise Exception('function call missing argument {name} {default}: ({fun} {args})'
-                                        .format(name=n, fun=function_repr, default=param_default() if param_default else '', args=sexps_str(args_forms)))
+                    raise Exception(make_error_msg('function call missing argument {name} {default}: ({fun} {args})'
+                                                   , name=n, fun=function_repr, default=param_default() if param_default else '', args=sexps_str(args_forms)))
                 args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
                     
         if len(parameters) > len(args):
-            raise Exception('function call missing argument "{i}": ({fun} {args})'
-                                .format(i=symbol_name(parameters[len(args)][0]), fun=function_repr, args=sexps_str(args_forms)))
+            raise Exception(make_error_msg('function call missing argument "{i}": ({fun} {args})'
+                                           , i=symbol_name(parameters[len(args)][0]), fun=function_repr, args=sexps_str(args_forms)))
 
         if not set_kwargs and kwargs:
-            raise Exception('Unexpected keyword arguments for function call: ({fun} {args})'
-                            .format(fun=function_repr, args=sexps_str(args_forms)))
+            raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {args})'
+                                           , fun=function_repr, args=sexps_str(args_forms)))
 
         varargs = []
         if set_varargs and len(args) > len(parameters):
@@ -1030,15 +1034,15 @@ def __call(env, fun, args_forms, do_eval_args):
         return __call_function(env, fun, args_forms, do_eval_args)
 
     else:
-        raise Exception('({fun} {args}) is not callable'.format(fun=fun, args=sexps_str(args_forms) if args_forms else ''))
+        raise Exception(make_error_msg('({fun} {args}) is not callable', fun=fun, args=sexps_str(args_forms) if args_forms else ''))
 
 
 def __eval(env, form):
     #print('******** eval:', sexps_str(form))
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
-            raise Exception('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'
-                            .format(sym=symbol_name(form)
+            raise Exception(make_error_msg('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'
+                                           , sym=symbol_name(form)
                                     , keys=', '.join(sorted(env_d(env).keys()))
                                     , pkeys=', '.join(map(str, sorted(env_d(env_parent(env)).keys()))) if env_parent(env) else ''))
         return env_get(env, symbol_name(form))
@@ -1046,14 +1050,14 @@ def __eval(env, form):
         return form
     elif is_list(form):
         if not length(form):
-            raise Exception('trying to evaluate list of length 0')
+            raise Exception(make_error_msg('trying to evaluate list of length 0'))
         fun = __eval(env, form[0])
         args_forms = form[1:]
         
         r = __call(env, fun, args_forms, do_eval_args=True)
         return r
     else:
-        raise Exception('unknown form: {form}'.format(form=sexps_str(form)))
+        raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
         
 
 def base_env(args=[]):
@@ -1244,7 +1248,7 @@ def base_env(args=[]):
                 r += e
             return [r]
         else:
-            raise Exception(sexps_str(s))
+            raise Exception(make_error_msg(sexps_str(s)))
 
     def backquote(env, s):
         #print('backquote:', level, sexps_str(s))
