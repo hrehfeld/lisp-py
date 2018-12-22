@@ -1406,8 +1406,9 @@ def base_env(args=[]):
     
     # sys utils
     def file_open(filename, mode):
-        assert(is_symbol(mode))
-        mode = symbol_name(mode)
+        if is_symbol(mode):
+            mode = symbol_name(mode)
+        assert(is_str(mode))
         return open(filename, mode)
 
     env_def(env, 'file-open', file_open)
