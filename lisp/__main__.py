@@ -620,7 +620,11 @@ def callstack_str():
 
 
 def make_error_msg(msg, **kwargs):
-    return msg=msg.format(**kwargs)
+    s = '''Traceback (most recent call last):
+{stack}
+{msg}'''
+
+    return s.format(stack=callstack_str(), msg=msg.format(**kwargs))
     
 
 def __defstruct(env, name, *fields):
