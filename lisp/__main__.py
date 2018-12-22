@@ -1062,23 +1062,6 @@ def __call(env, fun, args_forms, do_eval_args):
         raise Exception(make_error_msg('({fun} {args}) is not callable', fun=fun, args=sexps_str(args_forms) if args_forms else ''))
 
 
-# FIXME
-# noop for lisp conversion so we don't need to support try
-def py_wrap_error(f):
-    return f()
-
-
-@native
-def py_wrap_error(f):
-    try:
-        r = f()
-    except BlockException as e:
-        raise e
-    except Exception as e:
-        raise Exception(make_error_msg('{e}', e=str(e)))
-    return r
-    
-
 def __eval(env, form):
     #print('******** eval:', sexps_str(form))
     if is_symbol(form) and not is_keyword(form):
@@ -1096,7 +1079,7 @@ def __eval(env, form):
         fun = __eval(env, form[0])
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
-        r = py_wrap_error(lambda: __call(env, fun, args_forms, do_eval_args=True))
+        r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
         return r
     else:
@@ -1506,11 +1489,21 @@ def __progn(env, *forms):
     return r
 
 
-def interpret(forms, env=None, args=[]):
+def _interpret(forms, env=None, args=[]):
     if env is None:
         env = base_env(args)
     env_def(env, '__name__', '<self>')
     return __progn(env, *forms)
+
+interpret = _interpret
+
+# TODO:
+@native
+def interpret(*args, **kwargs):
+    try:
+        return _interpret(*args, **kwargs)
+    except Exception as e:
+        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
     
 # from .base import TYPE, TYPE_T
 # from .symbol import intern
