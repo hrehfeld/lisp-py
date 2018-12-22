@@ -617,9 +617,18 @@ callstack = []
 
 
 def callstack_str():
-    stack_str = ['----({fun} {args})'.format(fun=sexps_str(f), args=' '.join([sexps_str(a) for a in args])) for f, args in callstack]
-    r = '\n'.join(stack_str)
-
+    max_n = 50
+    long = len(callstack) > max_n
+    partial_callstack = reversed(list(reversed(callstack))[:max_n]) if long else callstack
+    def stack_line(f, args):
+        return '----({fun} {args})'.format(
+            fun=sexps_str(f)
+            , args=' '.join([sexps_str(a) for a in args])
+        )
+    stack_strs = [stack_line(*line) for line in partial_callstack]
+    r = '\n'.join(stack_strs)
+    if long:
+        r = '<truncated {num} entries>\n'.format(num=len(callstack) - max_n) + r
     return r
 
 def make_error_msg(msg, **kwargs):
