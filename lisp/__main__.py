@@ -680,7 +680,7 @@ def block(env, name, *body):
 
 @native
 def return_from(env, name, value=None):
-    r = __eval(env, value)
+    r = __eval(env, value) if value is not None else None
     raise BlockException(name, r)
     
 
