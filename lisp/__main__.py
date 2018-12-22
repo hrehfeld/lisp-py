@@ -995,11 +995,13 @@ def __call_function(env, fun, args_forms, eval):
                 assert(isinstance(p, tuple)), p
                 (param_name, param_default) = p
                 n = symbol_name(param_name)
-                if n not in kwargs:
-                args.append(kwargs[n])
-                del kwargs[n]
+                in_kwargs = n in kwargs
+                if not in_kwargs and param_default is None:
                     raise Exception('function call missing argument {name} {default}: ({fun} {args})'
                                         .format(name=n, fun=function_name or fun, default=param_default() if param_default else '', args=sexps_str(args_forms)))
+                args.append(kwargs[n] if in_kwargs else param_default())
+                if in_kwargs:
+                    del kwargs[n]
                     
         if len(parameters) > len(args):
             raise Exception('function call missing argument "{i}": ({fun} {args})'
