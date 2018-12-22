@@ -1428,6 +1428,10 @@ def base_env(args=[]):
     # TODO
     #(infix
 
+    ## python interop
+
+    env_def(env, 'int', int)
+    env_def(env, 'float', float)
     env_def(env, 'str', str)
     env = make_env(env)
     with open('stdlib.lisp', 'r') as f:
