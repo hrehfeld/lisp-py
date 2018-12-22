@@ -1451,6 +1451,20 @@ def base_env(args=[]):
     env_def(env, 'int', int)
     env_def(env, 'float', float)
     env_def(env, 'str', str)
+
+    def py_with(env, _with, *body):
+        assert is_list(_with)
+        assert len(_with) == 1
+        _with = _with[0]
+        if is_list(_with):
+            assert len(_with) == 2
+            var, _with = _with
+            assert(is_symbol(var))
+        with __eval(env, _with) as f:
+            env_def(env, symbol_name(var), f)
+            __progn(env, *body)
+    env_def(env, 'py-with', special_form(py_with))
+
     env = make_env(env)
     with open('stdlib.lisp', 'r') as f:
         interpret(read(Stream(f.read(), 0)), env)
