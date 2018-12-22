@@ -1085,7 +1085,6 @@ def base_env(args=[]):
         return l
     env_def(env, 'extend', extend)
 
-    env_def(env, 'str', str)
     env_def(env, 'repr', lambda arg: sexps_str(arg))
 
     env_def(env, 'intern', intern)
@@ -1429,6 +1428,7 @@ def base_env(args=[]):
     # TODO
     #(infix
 
+    env_def(env, 'str', str)
     env = make_env(env)
     with open('stdlib.lisp', 'r') as f:
         interpret(read(Stream(f.read(), 0)), env)
