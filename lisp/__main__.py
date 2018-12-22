@@ -1412,7 +1412,7 @@ def base_env(args=[]):
     env_def(env, 'contains?', has)
 
     def nth(i, l):
-        assert (is_list(l) or is_tuple(l)),  sexps_str(l)
+        assert (is_list(l) or is_tuple(l) or is_str(l)),  'nth: {i} {l}'.format(i=sexps_str(i), l=sexps_str(l))
         return l[i]
     env_def(env, 'nth', nth)
 
