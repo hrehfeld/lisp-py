@@ -959,6 +959,8 @@ def __call_function(env, fun, args_forms, eval):
         (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = functions[fun]
         nokeys = nokeys or nokeys_def
 
+        function_repr = function_name or 'lambda'
+
         #(param_name, param_default, param_special) = parameters[iparam]
         iparam = 0
         args = []
@@ -980,7 +982,7 @@ def __call_function(env, fun, args_forms, eval):
 
                 if not set_varargs and len(args) >= len(parameters):
                     raise Exception('too many arguments for function call: ({fun} {args})'
-                                        .format(name=args, fun=function_name or fun, args=sexps_str(args_forms)))
+                                        .format(name=args, fun=function_repr, args=sexps_str(args_forms)))
                 
                 args.append(arg)
             del arg
@@ -993,18 +995,18 @@ def __call_function(env, fun, args_forms, eval):
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
                     raise Exception('function call missing argument {name} {default}: ({fun} {args})'
-                                        .format(name=n, fun=function_name or fun, default=param_default() if param_default else '', args=sexps_str(args_forms)))
+                                        .format(name=n, fun=function_repr, default=param_default() if param_default else '', args=sexps_str(args_forms)))
                 args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
                     
         if len(parameters) > len(args):
             raise Exception('function call missing argument "{i}": ({fun} {args})'
-                                .format(i=symbol_name(parameters[len(args)][0]), fun=function_name or fun, args=sexps_str(args_forms)))
+                                .format(i=symbol_name(parameters[len(args)][0]), fun=function_repr, args=sexps_str(args_forms)))
 
         if not set_kwargs and kwargs:
             raise Exception('Unexpected keyword arguments for function call: ({fun} {args})'
-                            .format(fun=function_name or fun, args=sexps_str(args_forms)))
+                            .format(fun=function_repr, args=sexps_str(args_forms)))
 
         varargs = []
         if set_varargs and len(args) > len(parameters):
