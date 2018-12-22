@@ -618,7 +618,8 @@ callstack = []
 
 
 def callstack_str():
-    return '\n'.join(['----({fun} {args})'.format(fun=sexps_str(f), args=' '.join([sexps_str(a) for a in args])) for f, args in callstack])
+    stack_str = ['----({fun} {args})'.format(fun=sexps_str(f), args=' '.join([sexps_str(a) for a in args])) for f, args in callstack]
+    r = '\n'.join(stack_str)
 
 
 def make_error_msg(msg, **kwargs):
