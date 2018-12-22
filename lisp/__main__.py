@@ -337,6 +337,7 @@ backquote_fun_name = "backquote"
 backquote_eval_fun_name = "unquote"
 backquote_splice_fun_name = "unquote-splice"
 
+return_name = 'return'
 
 VALID = '__VALID'
 RETURN = '__RETURN'
@@ -779,7 +780,7 @@ def __fn(env, parameters, *body):
     block_name = gensym()
     def f(args, varargs, kwargs):
         fun_env = make_env(env)
-        env_def(fun_env, 'return', lambda value=None: return_from(fun_env, block_name, value))
+        env_def(fun_env, return_name, lambda value=None: return_from(fun_env, block_name, value))
 
         for (parameter, default), arg in zip(parsed_parameters, args):
             assert(is_symbol(parameter)), parameter
