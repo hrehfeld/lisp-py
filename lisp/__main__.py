@@ -612,6 +612,13 @@ keys_name = '&keys'
 nokeys_name = '&nokeys'
 
 
+callstack = []
+
+
+def callstack_str():
+    return '\n'.join(['    ({fun} {args})'.format(fun=sexps_str(f), args=sexps_str(args)) for f, args in callstack])
+
+
 def make_error_msg(msg, **kwargs):
     return msg=msg.format(**kwargs)
     
@@ -815,10 +822,12 @@ def __defmacro(lexical_env, name, parameters, *body):
     return m
 
 
-def __apply(env, f, args):
-    f = __eval(env, f)
+def __apply(env, f_form, args):
+    callstack.append((f_form, args))
+    f = __eval(env, f_form)
     args = __eval(env, args)
     r =  __call(env, f, args, do_eval_args=False)
+    callstack.pop()
     return r
     
 
@@ -1053,8 +1062,9 @@ def __eval(env, form):
             raise Exception(make_error_msg('trying to evaluate list of length 0'))
         fun = __eval(env, form[0])
         args_forms = form[1:]
-        
+        callstack.append((form[0], args_forms))
         r = __call(env, fun, args_forms, do_eval_args=True)
+        callstack.pop()
         return r
     else:
         raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
