@@ -894,6 +894,8 @@ def __setq(env, name, value):
     #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
     #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
+    if callable(value) and value in functions:
+        patch_function_name(value, symbol_name(name))
     env_change(env, symbol_name(name), value)
     return value
 
