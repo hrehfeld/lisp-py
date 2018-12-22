@@ -644,6 +644,12 @@ def add_function(f, *args):
     functions[f] = args
 
 
+def patch_function_name(f, name):
+    assert(f in functions), '{f}\n{fs}'.format(fs=functions, f=f)
+    args = functions[f]
+    functions[f] = name, *args[1:]
+
+
 @native
 def block(env, name, *body):
     try:
@@ -767,7 +773,9 @@ def __fn(env, parameters, *body):
 
         return block(fun_env, block_name, *body)
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
-    add_function(f, parsed_parameters
+    add_function(f
+                 , None # name
+                 , parsed_parameters
                  , nokeys_name in special_used
                  , variadic_name in special_used
                  , keys_name in special_used
@@ -780,8 +788,10 @@ def __defun(env, name, parameters, *body):
     #if env_contains(env, symbol_name(name)):
     #    raise Exception('fun %s already declared' % symbol_name(name))
 
+    name = symbol_name(name)
     f = __fn(env, parameters, *body)
-    env_def(env, symbol_name(name), f)
+    patch_function_name(f, name)
+    env_def(env, name, f)
     return f
 
 
@@ -946,7 +956,7 @@ def __call_function(env, fun, args_forms, eval):
         return fun(*args, **kwargs)
     else:
         # self-defined fun
-        (parameters, nokeys_def, set_varargs, set_kwargs) = functions[fun]
+        (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = functions[fun]
         nokeys = nokeys or nokeys_def
 
         #(param_name, param_default, param_special) = parameters[iparam]
@@ -970,29 +980,29 @@ def __call_function(env, fun, args_forms, eval):
 
                 if not set_varargs and len(args) >= len(parameters):
                     raise Exception('too many arguments for function call: ({fun} {args})'
-                                        .format(name=param_name, fun=fun, args=sexps_str(args_forms)))
+                                        .format(name=args, fun=function_name or fun, args=sexps_str(args_forms)))
                 
                 args.append(arg)
             del arg
 
-        if len(args) < len(parameters) and kwargs:
+        if len(args) < len(parameters):
             for i, p in enumerate(parameters[len(args):]):
                 assert(isinstance(p, tuple)), p
                 (param_name, param_default) = p
                 n = symbol_name(param_name)
                 if n not in kwargs:
-                    raise Exception('function call missing argument {name}: ({fun} {args})'
-                                        .format(name=n, fun=fun, args=sexps_str(args_forms)))
                 args.append(kwargs[n])
                 del kwargs[n]
+                    raise Exception('function call missing argument {name} {default}: ({fun} {args})'
+                                        .format(name=n, fun=function_name or fun, default=param_default() if param_default else '', args=sexps_str(args_forms)))
                     
         if len(parameters) > len(args):
-            raise Exception('function call missing argument #{i}: ({fun} {args})'
-                                .format(i=len(args), fun=fun, args=sexps_str(args_forms)))
+            raise Exception('function call missing argument "{i}": ({fun} {args})'
+                                .format(i=symbol_name(parameters[len(args)][0]), fun=function_name or fun, args=sexps_str(args_forms)))
 
         if not set_kwargs and kwargs:
             raise Exception('Unexpected keyword arguments for function call: ({fun} {args})'
-                            .format(fun=fun, args=sexps_str(args_forms)))
+                            .format(fun=function_name or fun, args=sexps_str(args_forms)))
 
         varargs = []
         if set_varargs and len(args) > len(parameters):
