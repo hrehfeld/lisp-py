@@ -747,6 +747,11 @@ def __fn(env, parameters, *body):
             param_name = normal_parameter_name(param)
             if is_parameter_with_default_(param):
                 param_default = parameter_default(param)
+                def make_default_constructor(param_default):
+                    def constructor():
+                        return __eval(env, param_default)
+                    return constructor
+                param_default = make_default_constructor(param_default)
         if param_name:
             if symbol_name(param_name) in used_names:
                 raise Exception('Duplicate parameter {name}'.format(name=n))
