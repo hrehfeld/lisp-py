@@ -1180,8 +1180,8 @@ def base_env(args=[]):
                     fromlist = [symbol_name(f) for f in froms]
                     for from_name in fromlist:
                         env_def(env, from_name, getattr(module, from_name))
-                    else:
-                        env_def(env, module_name, module)
+                else:
+                    env_def(env, module_name, module)
             else:
                 assert(False), sexps_str(module)
         pass
