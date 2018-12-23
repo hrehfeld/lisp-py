@@ -9,7 +9,7 @@
   (let* ((block-name (gensym while)))
 	`(block
 		 ~block-name
-	   (defun break ((value nil)) (return-from nil value))
+	   (defun break ((value nil)) (return-from ~block-name value))
 	   (__while ~test ~@body))))
 
 (defmacro dolist (iter &rest body)
