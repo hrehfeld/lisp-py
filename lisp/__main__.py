@@ -511,7 +511,8 @@ def read_symbol(s):
         stream_next(s)
     if stream_pos(s) != istart:
         token = stream_token(s, istart, stream_pos(s))
-        resp = lambda: Valid(intern(token))
+        def resp():
+            return Valid(intern(token))
         if accessor_char not in token:
             return resp()
         else:
