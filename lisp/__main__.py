@@ -507,11 +507,9 @@ def read_comment(s):
 
 def read_symbol(s):
     istart = stream_pos(s)
-    parsed = None
     while not (stream_empty(s) or ends_token(s)):
         stream_next(s)
-        parsed = True
-    if parsed:
+    if stream_pos(s) != istart:
         token = stream_token(s, istart, stream_pos(s))
         resp = lambda: Valid(intern(token))
         if accessor_char not in token:
