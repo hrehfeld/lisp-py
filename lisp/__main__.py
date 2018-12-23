@@ -793,7 +793,7 @@ def __fn(env, parameters, *body):
             parsed_parameters.append((param_name, param_default))
         i += 1
 
-    block_name = gensym()
+    block_name = gensym('fn')
     def f(args, varargs, kwargs):
         fun_env = make_env(env)
         env_def(fun_env, return_name, special_form(lambda call_env, value=None: return_from(fun_env, block_name, value)))
