@@ -1404,7 +1404,11 @@ def base_env(args=[]):
                 iend = len(l)
             if step is None:
                 step = 1
-            return [l[i] for i in range(istart, iend, step)]
+            r = [l[i] for i in range(istart, iend, step)]
+            if is_str(l):
+                return ''.join(r)
+            else:
+                return l
     env_def(env, 'slice', _slice)
 
 
