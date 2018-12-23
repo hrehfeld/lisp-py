@@ -613,6 +613,11 @@ keys_name = '&keys'
 nokeys_name = '&nokeys'
 
 
+def format_operator_call(fun, args):
+    args = [sexps_str(a) for a in args]
+    return '({fun} {args})'.format(fun=fun, args=' '.join(args))
+
+
 callstack = []
 
 
@@ -621,10 +626,7 @@ def callstack_str():
     long = len(callstack) > max_n
     partial_callstack = reversed(list(reversed(callstack))[:max_n]) if long else callstack
     def stack_line(f, args):
-        return '----({fun} {args})'.format(
-            fun=sexps_str(f)
-            , args=' '.join([sexps_str(a) for a in args])
-        )
+        return '----' + format_operator_call(sexps_str(f), args)
     stack_strs = [stack_line(*line) for line in partial_callstack]
     r = '\n'.join(stack_strs)
     if long:
@@ -1026,8 +1028,8 @@ def __call_function(env, fun, args_forms, eval):
                 n = symbol_name(param_name)
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
-                    raise Exception(make_error_msg('function call missing argument {name} {default}: ({fun} {args})'
-                                                   , name=n, fun=function_repr, default=param_default() if param_default else '', args=sexps_str(args_forms)))
+                    raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call}'
+                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, args)))
                 args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
