@@ -1081,9 +1081,9 @@ def __eval(env, form):
     elif is_list(form):
         if not length(form):
             raise Exception(make_error_msg('trying to evaluate list of length 0'))
-        fun = __eval(env, form[0])
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
+        fun = __eval(env, form[0])
         r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
         return r
