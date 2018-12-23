@@ -297,6 +297,7 @@ py_bind_env(['symbol', 'is_symbol', ['symbol_name'], '_'], defstruct('symbol', '
 
 
 def intern(s):
+    assert(is_str(s)), s
     if s not in symbols:
         symbols[s] = symbol(s)
     return symbols[s]
