@@ -164,18 +164,18 @@
 	  r)))
 
 (defmacro cond (&rest clauses)
-  (assert (>= (length clauses) 1) "cond not allowed with only one clause")
-  (let* ((ifs nil))
-    (dolist (clause (reversed clauses))
-      (let* ((test (car clause))
+  (foldr
+   (fn (clause ifs)
+	 (let* ((test (car clause))
             (body (cdr clause)))
-        (set ifs (if (eq test 'true)
-                    ;; else/true branch skips test
-                     (progn
-                       (assert (not ifs) "else/true needs to be the last clause")
-                       `(progn ~@body))
-                   `(if ~test (progn ~@body) ~ifs)))))
-    ifs))
+       (if (eq test 'true)
+           ;; else/true branch skips test
+           (progn
+             (assert (is ifs nil) "else/true needs to be the last clause")
+             `(progn ~@body))
+         `(if ~test (progn ~@body) ~ifs))))
+   nil
+   clauses))
 
 
 (defun member? (e l) (contains? l e))
