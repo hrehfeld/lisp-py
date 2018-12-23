@@ -941,12 +941,17 @@ def __call_function(env, fun, args_forms, eval):
         args_forms = [__eval(env, arg) for arg in args_forms]
 
     # python fun
-    if fun not in functions:
-        if fun not in py_functions:
-            #parameters = py_get_param_names(fun)
-            py_functions[fun] = False
+    # TODO: ugly hack around: [].append in {} => unhashable type
+    is_native = type(fun).__name__ == 'builtin_function_or_method'
+    if is_native or fun not in functions:
+        if is_native:
+            nokeys = False
         else:
-            nokeys = py_functions[fun]
+            if fun not in py_functions:
+                #parameters = py_get_param_names(fun)
+                py_functions[fun] = False
+            else:
+                nokeys = py_functions[fun]
 
         kwargs = {}
         if nokeys:
