@@ -173,7 +173,9 @@
            (progn
              (assert (is ifs nil) "else/true needs to be the last clause")
              `(progn ~@body))
-         `(if ~test (progn ~@body) ~ifs))))
+		 (if ifs
+			 `(if ~test (progn ~@body) ~ifs)
+		   `(when ~test (progn ~@body))))))
    nil
    clauses))
 

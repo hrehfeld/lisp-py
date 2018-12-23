@@ -1725,6 +1725,12 @@ interpreter_tests = [
     ((< x 9) 7)
     (true 1)))
 """, 7)
+    , ("""
+(let ((x 5))
+  (cond 
+    ((< x 3) 5)
+    ((< x 9) 7)))
+""", 7)
     , ("""(block foo (return-from foo))""", None)
     , ("""(block foo (return-from foo nil))""", None)
     , ("""(block foo (return-from foo 1))""", 1)
