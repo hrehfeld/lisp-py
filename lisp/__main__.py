@@ -682,9 +682,11 @@ def patch_function_name(f, name):
 
 @native
 def block(env, name, *body):
+    assert(is_str(name))
     try:
         r = __progn(env, *body)
     except BlockException as e:
+        assert is_str(e.name), e.name
         if e.name != name:
             raise e
         return e.value
@@ -693,8 +695,9 @@ def block(env, name, *body):
 
 @native
 def return_from(env, name, value=None):
+    assert (is_symbol(name)), name
     r = __eval(env, value) if value is not None else None
-    raise BlockException(name, r)
+    raise BlockException(symbol_name(name), r)
     
 
 def parameter_default(p):
@@ -806,7 +809,7 @@ def __fn(env, parameters, *body):
         if is_symbol(keysargs_name):
             env_def(fun_env, symbol_name(keysargs_name), kwargs)
 
-        return block(fun_env, block_name, *body)
+        return block(fun_env, symbol_name(block_name), *body)
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
     add_function(f
                  , None # name
@@ -1210,11 +1213,11 @@ def base_env(args=[]):
         pass
     env_def(env, 'py-import', special_form(py_import))
 
+    env_def(env, '__block', special_form(block))
+    env_def(env, 'return-from', special_form(return_from))
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('progn'), *body])
-    env_def(env, 'block', special_form(block))
-    env_def(env, 'return-from', special_form(return_from))
 
     env_def(env, 'while', special_form(__while))
 
