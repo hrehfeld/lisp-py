@@ -1215,11 +1215,11 @@ def base_env(args=[]):
 
     env_def(env, '__block', special_form(block))
     env_def(env, 'return-from', special_form(return_from))
+
     def __while(env, cond, *body):
         while __eval(env, cond):
             __eval(env, [intern('progn'), *body])
-
-    env_def(env, 'while', special_form(__while))
+    env_def(env, '__while', special_form(__while))
 
     def __lookup(env, obj, *ks):
         r = __eval(env, obj)

@@ -4,6 +4,14 @@
 (defmacro block (name &rest body)
   `(__block ~(symbol-name name) ~@body))
 
+(defmacro while (test &rest body)
+  ;; can't use let because of while recursion
+  (let* ((block-name (gensym while)))
+	`(block
+		 ~block-name
+	   (defun break ((value nil)) (return-from nil value))
+	   (__while ~test ~@body))))
+
 (defmacro dolist (iter &rest body)
   (assert (eq (length iter) 2))
   (let* ((var-sym (head iter))
@@ -167,9 +175,6 @@
 (defmacro member? (e l) `(contains? ~l ~e))
 (defmacro not-member? (e l) `(not  (contains? ~l ~e)))
 
-(defun break (&rest values)
-  (assert (<= (length values) 1))
-  (return-from nil (when values (head values))))
 
 (defun reversed (l)
   (let* ((r (list))
