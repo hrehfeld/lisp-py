@@ -2,15 +2,16 @@
   `(if ~test (progn ~@body)))
 
 (defmacro block (name &rest body)
-  `(__block ~(symbol-name name) ~@body))
+  (let* ((name (if (is name 'nil)
+				   (gensym block)
+				 name)))
+	`(__block ~(symbol-name name)
+			  (defun break ((value nil)) (return-from ~name value))
+			  ~@body)))
 
 (defmacro while (test &rest body)
-  ;; can't use let because of while recursion
-  (let* ((block-name (gensym while)))
-	`(block
-		 ~block-name
-	   (defun break ((value nil)) (return-from ~block-name value))
-	   (__while ~test ~@body))))
+	`(block ~(gensym while)
+	   (__while ~test ~@body)))
 
 (defmacro dolist (iter &rest body)
   (assert (eq (length iter) 2))
