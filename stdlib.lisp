@@ -171,9 +171,8 @@
     ifs))
 
 
-(defmacro member? (e l) `(contains? ~l ~e))
-(defmacro not-member? (e l) `(not  (contains? ~l ~e)))
-
+(defun member? (e l) (contains? l e))
+(defun not-member? (e l) (not  (member? e l)))
 
 (defun reversed (l)
   (let* ((r (list))
