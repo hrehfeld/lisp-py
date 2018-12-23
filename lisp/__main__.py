@@ -793,7 +793,7 @@ def __fn(env, parameters, *body):
     block_name = gensym()
     def f(args, varargs, kwargs):
         fun_env = make_env(env)
-        env_def(fun_env, return_name, lambda value=None: return_from(fun_env, block_name, value))
+        env_def(fun_env, return_name, special_form(lambda call_env, value=None: return_from(fun_env, block_name, value)))
 
         for (parameter, default), arg in zip(parsed_parameters, args):
             assert(is_symbol(parameter)), parameter
