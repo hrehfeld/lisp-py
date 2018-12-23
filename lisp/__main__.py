@@ -1712,6 +1712,7 @@ interpreter_tests = [
       (print (repr n))))
     n)""", intern('foo'))
     , ("""(let ((r '())) (dolist (i '(0 1 2 3 4)) (append r i)) r)""", [0, 1, 2, 3, 4])
+    , ("(foldr + 0 '(0 1 2 3 4))", 10)
     , ("""
 (let ((x 5))
   (cond ((< x 3) 7)

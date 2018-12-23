@@ -45,6 +45,12 @@
 	  (set r (f r e)))
 	r))
 
+(defun foldr (f start l)
+  (let* ((r start))
+	(dolist (e (reversed l))
+	  (set r (f e r)))
+	r))
+
 (defun range (&rest args)
   (let* ((m (length args))
 		 (n 0)
