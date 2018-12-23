@@ -673,6 +673,7 @@ def add_function(f, *args):
 
 
 def patch_function_name(f, name):
+    assert(is_str(name))
     assert(f in functions), '{f}\n{fs}'.format(fs=functions, f=f)
     args = functions[f]
     functions[f] = name, *args[1:]
