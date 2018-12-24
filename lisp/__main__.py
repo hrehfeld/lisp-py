@@ -1790,13 +1790,25 @@ def load_tests():
 
     return suite
 
+def get_process_args():
+    print(argv)
+    return argv
+
+@native
+def get_process_args():
+    import sys
+    print(sys.argv)
+    return sys.argv[1:]
+
+
+
 p = argparse.ArgumentParser()
 p.add_argument('--type')
 p.add_argument('--num', type=int)
 p.add_argument('-c', nargs='+')
 p.add_argument('args', nargs='*')
 
-args = p.parse_args()
+args = p.parse_args(get_process_args())
 
 if args.type is not None and args.num is not None:
     if args.type == 'reader':
