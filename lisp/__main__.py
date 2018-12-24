@@ -1794,7 +1794,7 @@ p = argparse.ArgumentParser()
 p.add_argument('--type')
 p.add_argument('--num', type=int)
 p.add_argument('-c', nargs='+')
-p.add_argument('--', dest='args', nargs='*')
+p.add_argument('args', nargs='*')
 
 args = p.parse_args()
 
