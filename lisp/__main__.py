@@ -105,7 +105,7 @@ def make_dict(*args):
         
 
 @native
-def __defstruct(name_str, *field_names):
+def py_defstruct(name_str, *field_names):
     for n in field_names:
         assert(isinstance(n, str))
     type = make_dict(TYPE, TYPE_T, 'name', name_str, 'fields', field_names)
@@ -137,6 +137,11 @@ def __defstruct(name_str, *field_names):
         setters += [set]
 
     return constructor, is_instance, getters, setters
+
+
+@native
+def __defstruct(*args):
+    return py_defstruct(*args)
 
 
 def is_struct(obj):
@@ -1444,6 +1449,7 @@ def base_env(args=[]):
     env_def(env, 'tail', tail)
     
     env_def(env, 'defstruct', special_form(defstruct))
+    env_def(env, '__defstruct', special_form(__defstruct))
 
 
     def throw(e):
