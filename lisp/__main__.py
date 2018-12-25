@@ -105,7 +105,7 @@ def make_dict(*args):
         
 
 @native
-def defstruct(name_str, *field_names):
+def __defstruct(name_str, *field_names):
     for n in field_names:
         assert(isinstance(n, str))
     type = make_dict(TYPE, TYPE_T, 'name', name_str, 'fields', field_names)
@@ -247,7 +247,8 @@ def is_callable(e):
 
 
     
-py_bind_env(['Env', 'is_env', ['env_d', 'env_parent'], '_'], defstruct('Env', 'd', 'parent'), __name__)
+# py_bind_env(['Env', 'is_env', ['env_d', 'env_parent'], '_'], __defstruct('Env', 'd', 'parent'), __name__)
+Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
 
 
 def make_env(parent=None):
@@ -288,12 +289,12 @@ def env_change(env, k, v):
     env = env_containing_parent(env, k) or env
     #print('        env_change:', k, '=', sexps_str(v), env_d(env).keys())
     env_d(env)[k] = v
-# from .base import defstruct, py_bind_env
+# from .base import __defstruct, py_bind_env
 
 symbols = {}
 
-py_bind_env(['symbol', 'is_symbol', ['symbol_name'], '_'], defstruct('symbol', 'name'), __name__)
-# Symbol, is_symbol, (symbol_name, ), _symbol_setters = defstruct('symbol', 'name')
+py_bind_env(['symbol', 'is_symbol', ['symbol_name'], '_'], __defstruct('symbol', 'name'), __name__)
+# Symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
 
 
 def intern(s):
@@ -591,7 +592,7 @@ def read(s, readers=readers, one=False):
             break
     return r
 
-# from .base import native, defstruct, is_struct, TYPE
+# from .base import native, __defstruct, is_struct, TYPE
 # from .base import keyword, keyword_name, is_keyword, special_form, is_special_form, is_list, is_num, is_str, is_int, is_atom, is_callable, length, special_form_get_fun, is_special_keyword, Macro, is_macro, macro_get_fun
 # from .base import make_env, env_contains, env_get, env_def, env_change, env_d, env_parent
 # from .base import sexps_str, ps, is_named_operator
@@ -644,7 +645,7 @@ def make_error_msg(msg, **kwargs):
     return s.format(stack=callstack_str(), msg=msg.format(**kwargs))
     
 
-def __defstruct(env, name, *fields):
+def defstruct(env, name, *fields):
     # FIXME: for bootstrapping
     if is_str(name):
         name = intern(name)
@@ -654,7 +655,7 @@ def __defstruct(env, name, *fields):
     name_str = symbol_name(name)
     field_names = [symbol_name(f) for f in fields]
 
-    constructor, is_instance, getter, setter = defstruct(name_str, *field_names)
+    constructor, is_instance, getter, setter = __defstruct(name_str, *field_names)
     env_def(env, name_str, constructor)
     fname = '%s?' % (name_str)
     env_def(env, fname, is_instance)
@@ -1442,7 +1443,7 @@ def base_env(args=[]):
         return l[1:]
     env_def(env, 'tail', tail)
     
-    env_def(env, 'defstruct', special_form(__defstruct))
+    env_def(env, 'defstruct', special_form(defstruct))
 
 
     def throw(e):
