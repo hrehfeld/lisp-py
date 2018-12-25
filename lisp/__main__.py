@@ -1064,8 +1064,9 @@ def __call_function(env, fun, args_forms, eval):
 def __call(env, fun, args_forms, do_eval_args):
     if is_special_form(fun):
         fun = special_form_get_fun(fun)
-        return __call_function(env, fun, [env] + args_forms, eval=False)
 
+        r = __call_function(env, fun, [env] + args_forms, eval=False)
+        return r
     elif is_macro(fun):
         fun = macro_get_fun(fun)
         form = __call_function(env, fun, args_forms, eval=False)
@@ -1086,9 +1087,9 @@ def __eval(env, form):
                                            , sym=symbol_name(form)
                                     , keys=', '.join(sorted(env_d(env).keys()))
                                     , pkeys=', '.join(map(str, sorted(env_d(env_parent(env)).keys()))) if env_parent(env) else ''))
-        return env_get(env, symbol_name(form))
+        r = env_get(env, symbol_name(form))
     elif is_atom(form):
-        return form
+        r = form
     elif is_list(form):
         if not length(form):
             raise Exception(make_error_msg('trying to evaluate list of length 0'))
@@ -1098,9 +1099,9 @@ def __eval(env, form):
         assert is_macro(fun) or is_special_form(fun) or callable(fun), fun
         r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
-        return r
     else:
         raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
+    return r
         
 
 def base_env(args=[]):
