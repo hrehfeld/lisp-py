@@ -1599,8 +1599,8 @@ interpreter_tests = [
        , [[intern('targeta'), [intern('nth'), 0, [intern('nth'), 0, intern('value')]]]
           , [intern('targetb'), [intern('nth'), 1, [intern('nth'), 0, intern('value')]]]
           , [intern('targetc'), [intern('nth'), 1, intern('value')]]])
-    , ("(setf target 0) target", 0)
-    , ("(setf (tuple targeta targetb) '(1 2)) (list targeta targetb)"
+    , ("(def target) (setf target 0) target", 0)
+    , ("(def targeta) (def targetb) (setf (tuple targeta targetb) '(1 2)) (list targeta targetb)"
        , [1, 2])
     , ("(let* ((l (list 1))) (setf (aref l 0) 0) l)", [0])
     , ("(let* ((l (dict :foo 1))) (setf (aref l :foo) 0) l)", dict(foo=0))
@@ -1670,7 +1670,7 @@ interpreter_tests = [
     , ("(eval 1)", 1)
     , ("(eval '())", [])
     , ("(eval (+ 1 2))", 3)
-    , ("(setf foo (+ 1 2)) foo", 3)
+    , ("(def foo) (setf foo (+ 1 2)) foo", 3)
     , ("""
 (def foo0)
 (def foo1)
