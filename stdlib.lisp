@@ -93,18 +93,23 @@
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
 
 (defun destructuring-bind-parse (target value-evaluated-form)
-  (if (symbol? target)
-	  `((~target ~value-evaluated-form))
+  (defun symbol-form (target) `((~target ~value-evaluated-form)))
+  (cond
+   ((symbol? target)
+	(symbol-form target))
+   ((named-operator? target 'tuple)
 	(fold
-	 (fn (binds targ)
-		 (let* ((itarg (head targ))
-				(targ (last targ)))
-		   (assert (int? itarg))
+	 (fn (binds target)
+		 (assert (eq (length target) 2))
+		 (let* ((itarget (head target))
+				(target (last target)))
+		   (assert (int? itarget))
 		   ;; TODO assert when value was not exhausted
 		   (+ binds
-			  (destructuring-bind-parse targ `(nth ~itarg ~value-evaluated-form)))))
+			  (destructuring-bind-parse target `(nth ~itarget ~value-evaluated-form)))))
 	 (list)
-	 (enumerate target))))
+	 (enumerate (as-list (slice target 1 nil)))))
+   (true (throw (Exception (+ "unknown destructuring " (repr target)))))))
 
 (defmacro setf (target value)
   (let* ((value-var (gensym setf-value)))
