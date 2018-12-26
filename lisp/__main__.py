@@ -1082,7 +1082,7 @@ def __call(env, fun, args_forms, do_eval_args):
 
 
 def __eval(env, form):
-    #print('******** eval:', sexps_str(form))
+    # print('******** eval :', env_get(env, '__interpreter_meta_level'), sexps_str(form))
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
             raise Exception(make_error_msg('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'
