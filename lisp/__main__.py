@@ -299,8 +299,7 @@ def env_change(env, k, v):
 
 symbols = {}
 
-py_bind_env(['symbol', 'is_symbol', ['symbol_name'], '_'], __defstruct('symbol', 'name'), __name__)
-# Symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
+symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
 
 
 def intern(s):
