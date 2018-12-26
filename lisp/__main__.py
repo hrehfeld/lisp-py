@@ -935,6 +935,10 @@ def py_set_nokeys(fun, nokeys):
     py_functions[fun] = nokeys
 
 
+def is_function(fun):
+    return type(fun).__name__ == 'function'
+
+
 def is_py_native(fun):
     # TODO: ugly hack around: [].append in {} => unhashable type
     return type(fun).__name__ == 'builtin_function_or_method'
