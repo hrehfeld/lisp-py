@@ -106,6 +106,7 @@ def make_dict(*args):
 
 @native
 def py_defstruct(name_str, *field_names):
+    assert(is_str(name_str)), name_str
     for n in field_names:
         assert(isinstance(n, str))
     type = make_dict(TYPE, TYPE_T, 'name', name_str, 'fields', field_names)
