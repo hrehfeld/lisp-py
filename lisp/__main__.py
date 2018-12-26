@@ -1177,6 +1177,7 @@ def base_env(args=[]):
     env_def(env, 'tuple', Tuple)
 
 
+    # assert is not a function thus pain
     def __assert(env, cond, msg=''):
         r = __eval(env, cond)
         if not r:
