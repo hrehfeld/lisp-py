@@ -124,7 +124,7 @@
 			  (fn (var val)
 				  (assert (symbol? var) (repr var))
 				  (list 'set var val))
-			  (destructuring-bind-parse (as-list (slice target 1 nil))
+			  (destructuring-bind-parse target
 										value-var)))
 			((named-operator? target 'aref)
 			 (let* ((target (tail target)))
