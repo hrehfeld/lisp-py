@@ -936,6 +936,16 @@ def py_set_nokeys(fun, nokeys):
     py_functions[fun] = nokeys
 
 
+def is_py_native(fun):
+    # TODO: ugly hack around: [].append in {} => unhashable type
+    return type(fun).__name__ == 'builtin_function_or_method'
+
+
+def is_py_fun(fun):
+    assert not is_py_native(fun), fun
+    return fun not in functions
+
+
 def __call_function(env, fun, args_forms, eval):
     nokeys = False
 
@@ -948,10 +958,8 @@ def __call_function(env, fun, args_forms, eval):
     if eval:
         args_forms = [__eval(env, arg) for arg in args_forms]
 
-    # python fun
-    # TODO: ugly hack around: [].append in {} => unhashable type
-    is_native = type(fun).__name__ == 'builtin_function_or_method'
-    if is_native or fun not in functions:
+    is_native = is_py_native(fun)
+    if is_native or is_py_fun(fun):
         if is_native:
             nokeys = False
         else:
