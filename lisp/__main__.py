@@ -1171,11 +1171,17 @@ def base_env(args=[]):
         l[k] = v
         return v
     env_def(env, 'list-set', list_set)
-    
-    def Tuple(*args):
-        return tuple(args)
-    env_def(env, 'tuple', Tuple)
 
+    def native_binds():
+        env_def(env, 'tuple', tuple)
+
+    @native
+    def native_binds():
+        def __tuple(*args):
+            # tuple doesn't take more than one arg
+            return tuple(args)
+        env_def(env, 'tuple', __tuple)
+    native_binds()
 
     # assert is not a function thus pain
     def __assert(env, cond, msg=''):
