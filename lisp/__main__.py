@@ -1093,10 +1093,18 @@ def __eval(env, form):
     # print('******** eval :', env_get(env, '__interpreter_meta_level'), sexps_str(form))
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
-            raise Exception(make_error_msg('Symbol "{sym}" not found in env \nKeys: {keys}\nParent keys: {pkeys}'
+            def print_env_keys(env):
+                r = []
+                while env is not None:
+                    r += ['Keys: ' + ' '.join(sorted(env_d(env).keys()))]
+                    r += ['']
+                    env = env_parent(env)
+                return '\n'.join(r)
+                    
+
+            raise Exception(make_error_msg('Symbol "{sym}" not found in env \n{keys}'
                                            , sym=symbol_name(form)
-                                    , keys=', '.join(sorted(env_d(env).keys()))
-                                    , pkeys=', '.join(map(str, sorted(env_d(env_parent(env)).keys()))) if env_parent(env) else ''))
+                                    , keys=print_env_keys(env)))
         r = env_get(env, symbol_name(form))
     elif is_atom(form):
         r = form
