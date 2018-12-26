@@ -1457,7 +1457,7 @@ def base_env(args=[]):
     env_def(env, 'tail', tail)
     
     env_def(env, 'defstruct', special_form(defstruct))
-    env_def(env, '__defstruct', special_form(lambda env, *args: __defstruct(*args)))
+    env_def(env, '__defstruct', __defstruct)
 
 
     def throw(e):
