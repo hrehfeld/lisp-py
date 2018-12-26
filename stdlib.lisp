@@ -114,37 +114,38 @@
 (defmacro setf (target value)
   (let* ((value-var (gensym setf-value)))
 	`(progn
-	   (let* ((~value-var ~value))
-		 ~@(cond
-			((symbolp target)
-			 `((set ~target ~value-var)))
-			;; tuples
-			((named-operator? target 'tuple)
-			 (map-apply
-			  (fn (var val)
-				  (assert (symbol? var) (repr var))
-				  (list 'set var val))
-			  (destructuring-bind-parse target
-										value-var)))
-			((named-operator? target 'aref)
-			 (let* ((target (tail target)))
-			   (assert (eq (length target) 2) (repr target))
-			   (let* ((obj (1st target))
-					  (key (2nd target)))
-				 (assert (symbol? obj) (repr obj))
-				 (when (keyword? key)
-				   (set key (keyword-name key)))
-				 `(
-				   (if (list? ~obj)
-					   (progn
-						 (assert (num? ~key) (repr ~key))
-						 (list-set ~obj ~key ~value-var))
-					 (assert (dict? ~obj) (repr ~obj))
-					 (assert (str? ~key) (+ ~key " " (repr (quote ~target))))
-					 (dict-set ~obj (keyword ~key) ~value-var))
-				   ))))
-			(true
-			 (throw (Exception (+ "unknown target" (repr target))))))))))
+	   ;; avoid let's sub-env
+	   (def ~value-var ~value)
+	   ~@(cond
+		  ((symbolp target)
+		   `((set ~target ~value-var)))
+		  ;; tuples
+		  ((named-operator? target 'tuple)
+		   (map-apply
+			(fn (var val)
+				(assert (symbol? var) (repr var))
+				(list 'set var val))
+			(destructuring-bind-parse target
+									  value-var)))
+		  ((named-operator? target 'aref)
+		   (let* ((target (tail target)))
+			 (assert (eq (length target) 2) (repr target))
+			 (let* ((obj (1st target))
+					(key (2nd target)))
+			   (assert (symbol? obj) (repr obj))
+			   (when (keyword? key)
+				 (set key (keyword-name key)))
+			   `(
+				 (if (list? ~obj)
+					 (progn
+					   (assert (num? ~key) (repr ~key))
+					   (list-set ~obj ~key ~value-var))
+				   (assert (dict? ~obj) (repr ~obj))
+				   (assert (str? ~key) (+ ~key " " (repr (quote ~target))))
+				   (dict-set ~obj (keyword ~key) ~value-var))
+				 ))))
+		  (true
+		   (throw (Exception (+ "unknown target" (repr target)))))))))
 
 (defmacro let (vars &rest body)
   ;; TODO use fold
