@@ -1105,8 +1105,19 @@ def __eval(env, form):
     return r
         
 
+def get_interpreter_meta_level():
+    return __interpreter_meta_level
+
+
+@native
+def get_interpreter_meta_level():
+    return 0
+
+
 def base_env(args=[]):
     env = make_env()
+
+    env_def(env, '__interpreter_meta_level', get_interpreter_meta_level() + 1)
 
     env_def(env, 'true', True)
     env_def(env, 'false', False)
