@@ -133,7 +133,6 @@
 			 (assert (eq (length target) 2) (repr target))
 			 (let* ((obj (1st target))
 					(key (2nd target)))
-			   (assert (symbol? obj) (repr obj))
 			   (when (keyword? key)
 				 (set key (keyword-name key)))
 			   `(
@@ -142,8 +141,7 @@
 					   (assert (num? ~key) (repr ~key))
 					   (list-set ~obj ~key ~value-var))
 				   (assert (dict? ~obj) (repr ~obj))
-				   (assert (str? ~key) (+ ~key " " (repr (quote ~target))))
-				   (dict-set ~obj (keyword ~key) ~value-var))
+				   (dict-set ~obj ~key ~value-var))
 				 ))))
 		  (true
 		   (throw (Exception (+ "unknown target" (repr target)))))))))
