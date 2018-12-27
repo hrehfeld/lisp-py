@@ -1176,8 +1176,10 @@ def base_env(args=[]):
     env_def(env, 'dict-setdefault', dict.setdefault)
 
     @native
-    def dict_set(d, **kwargs):
-        for k, v in kwargs.items():
+    def dict_set(d, *args):
+        for i in range(0, len(args), 2):
+            k = args[i]
+            v = args[i + 1]
             d[k] = v
     env_def(env, 'dict-set', dict_set)
     env_def(env, 'dict_set', dict_set)
