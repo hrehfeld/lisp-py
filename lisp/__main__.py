@@ -213,7 +213,7 @@ def is_atom(form):
 def __keyword(s):
     if is_symbol(s):
         s = symbol_name(s)
-    assert is_str(s)
+    assert is_str(s), sexps_str(s)
     return intern(keyword_start + s)
 
 
