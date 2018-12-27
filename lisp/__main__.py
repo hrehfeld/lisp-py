@@ -531,7 +531,7 @@ def read_symbol(s):
                 return resp()
             accessors = [a for a in accessors if a]
             
-            return Valid([intern(s) for s in [accessor_char, *accessors]])
+            return Valid([intern(s) for s in [accessor_char] + accessors])
     return None
         
 
@@ -542,7 +542,7 @@ def read_quote_like(s, quote_char, symstr):
     # quote only supports one following exp
     expr =  read(s, one=True)
     
-    r = [intern(symstr), *expr]
+    r = [intern(symstr)] + expr
     return Valid(r)
 
 
