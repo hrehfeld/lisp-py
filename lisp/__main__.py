@@ -72,6 +72,20 @@ TYPE = '__type'
 TYPE_T = '__type_t'
 
 @native
+def is_int(v):
+    return isinstance(v, int)
+
+
+@native
+def is_num(f):
+    return isinstance(f, int) or isinstance(f, float)
+
+@native
+def is_str(f):
+    return isinstance(f, str)
+
+
+@native
 def make_dict(*args):
     assert (len(args) % 2 == 0), args
     kwargs = {}
@@ -169,16 +183,6 @@ def macro_get_fun(macro):
 
 
 
-def is_int(v):
-    return isinstance(v, int)
-
-
-def is_num(f):
-    return isinstance(f, int) or isinstance(f, float)
-
-
-def is_str(f):
-    return isinstance(f, str)
 
 
 def is_atom(form):
