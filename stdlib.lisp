@@ -157,14 +157,13 @@
                  (+ vars `((~value-var ~value)) r)
                  ))
            (list) vars)))
-    (let* ((r `(progn
+    `(progn
                  (let*
                      (~@(map-apply
                          (fn (var val)
                              (list var val))
                          var-defs))
                    ~@body))))
-	  r)))
 
 (defmacro cond (&rest clauses)
   (foldr
