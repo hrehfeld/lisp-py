@@ -1856,13 +1856,13 @@ def load_tests():
     return suite
 
 def get_process_args():
-    print(argv)
+    print('Getting process args', argv)
     return argv
 
 @native
 def get_process_args():
     import sys
-    print(sys.argv)
+    print('getting process args', sys.argv)
     return sys.argv[1:]
 
 
