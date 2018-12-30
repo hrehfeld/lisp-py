@@ -90,7 +90,7 @@
 	  )
 	  r))
 
-; TODO: test
+;; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
 
 (defun destructuring-bind-parse (target value-evaluated-form)
