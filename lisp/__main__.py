@@ -233,7 +233,6 @@ def is_callable(e):
 
 
     
-# py_bind_env(['Env', 'is_env', ['env_d', 'env_parent'], '_'], __defstruct('Env', 'd', 'parent'), __name__)
 Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
 
 
