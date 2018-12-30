@@ -1210,6 +1210,7 @@ def base_env(args=[]):
     env_def(env, 'callable', callable)
     
     def native_binds():
+        # could use list + globals here, but this is easier to bootstrap
         env_def(env, 'tuple', tuple)
 
     @native
