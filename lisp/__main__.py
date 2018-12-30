@@ -1221,6 +1221,8 @@ def base_env(args=[]):
             # tuple doesn't take more than one arg
             return tuple(args)
         env_def(env, 'tuple', __tuple)
+        env_def(env, '__block', special_form(block))
+        env_def(env, 'return-from', special_form(return_from))
     native_binds()
 
     # assert is not a function thus pain
@@ -1277,8 +1279,6 @@ def base_env(args=[]):
         pass
     env_def(env, 'py-import', special_form(py_import))
 
-    env_def(env, '__block', special_form(block))
-    env_def(env, 'return-from', special_form(return_from))
 
     def __while(env, cond, *body):
         while __eval(env, cond):
