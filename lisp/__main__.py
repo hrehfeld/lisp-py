@@ -1207,6 +1207,8 @@ def base_env(args=[]):
         return v
     env_def(env, 'list-set', list_set)
 
+    env_def(env, 'callable', callable)
+    
     def native_binds():
         env_def(env, 'tuple', tuple)
 
