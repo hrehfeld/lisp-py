@@ -148,7 +148,7 @@ def is_named_operator(form, op):
     return is_list(form) and form and is_symbol(form[0]) and form[0] == op
 
 
-special_form, is_special_form, (special_form_get_fun,), _ = __defstruct('special-form', 'fun')
+special_form, is_special_form, (special_form_fun,), _ = __defstruct('special-form', 'fun')
 
 Macro, is_macro, (macro_fun,), _ = __defstruct('macro', 'fun')
 
@@ -1038,7 +1038,7 @@ def __call_function(env, fun, args_forms, eval):
 
 def __call(env, fun, args_forms, do_eval_args):
     if is_special_form(fun):
-        fun = special_form_get_fun(fun)
+        fun = special_form_fun(fun)
 
         r = __call_function(env, fun, [env] + args_forms, eval=False)
         return r
