@@ -123,6 +123,7 @@ def __defstruct(*args):
     return py_defstruct(*args)
 
 
+@native
 def is_struct(obj):
     return isinstance(obj, dict) and TYPE in obj
 
