@@ -55,40 +55,40 @@
 
 (defun range (&rest args)
   (let* ((m (length args))
-		 (n 0)
-		 (i 0)
-		 (step 1))
-	(cond ((eq m 1)
-		   (set n (head args)))
-		  ((eq m 2)
-		   (setf (tuple i n) args))
-		  ((eq m 3)
-		   (setf (tuple i n step) args)))
-	(assert (and (int? n) (>= n 0)) n)
-	(assert (and (int? i) (>= i 0)) i)
-	(assert (and (int? step) (>= step 0)) step)
-	(let* ((l (list)))
-	  (while (< i n)
-		(append l i)
-		(+= i step))
-	  l)))
+         (n 0)
+         (i 0)
+         (step 1))
+    (cond ((eq m 1)
+           (set n (head args)))
+          ((eq m 2)
+           (setf (tuple i n) args))
+          ((eq m 3)
+           (setf (tuple i n step) args)))
+    (assert (and (int? n) (>= n 0)) n)
+    (assert (and (int? i) (>= i 0)) i)
+    (assert (and (int? step) (>= step 0)) step)
+    (let* ((l (list)))
+      (while (< i n)
+        (append l i)
+        (+= i step))
+      l)))
 
 ;; TODO: generator
 (defun enumerate (l)
   (let* ((i 0)) (map (fn (e)
-						 (let* ((oldi i))
-						   (+= i 1)
-						   (list oldi e)))
-					 l)))
+                         (let* ((oldi i))
+                           (+= i 1)
+                           (list oldi e)))
+                     l)))
 
 (defun zip (&rest ls)
   (let* ((n (apply min (map length ls)))
-		 (r (list)))
-	(dolist (iel (range n))
-	  (append r (map (fn (l) (nth iel l)) ls))
-	  (assert (< iel n) (list iel n))
-	  )
-	r))
+         (r (list)))
+    (dolist (iel (range n))
+      (append r (map (fn (l) (nth iel l)) ls))
+      (assert (< iel n) (list iel n))
+      )
+    r))
 
 ;; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
@@ -97,54 +97,54 @@
   (defun symbol-form (target) `((~target ~value-evaluated-form)))
   (cond
    ((symbol? target)
-	(symbol-form target))
+    (symbol-form target))
    ((named-operator? target 'tuple)
-	(fold
-	 (fn (binds target)
-		 (assert (eq (length target) 2))
-		 (let* ((itarget (head target))
-				(target (last target)))
-		   (assert (int? itarget))
-		   ;; TODO assert when value was not exhausted
-		   (+ binds
-			  (destructuring-bind-parse target `(nth ~itarget ~value-evaluated-form)))))
-	 (list)
-	 (enumerate (as-list (slice target 1 nil)))))
+    (fold
+     (fn (binds target)
+         (assert (eq (length target) 2))
+         (let* ((itarget (head target))
+                (target (last target)))
+           (assert (int? itarget))
+           ;; TODO assert when value was not exhausted
+           (+ binds
+              (destructuring-bind-parse target `(nth ~itarget ~value-evaluated-form)))))
+     (list)
+     (enumerate (as-list (slice target 1 nil)))))
    (true (throw (Exception (+ "unknown destructuring " (repr target)))))))
 
 (defmacro setf (target value)
   (let* ((value-var (gensym setf-value)))
-	`(progn
-	   ;; avoid let's sub-env
-	   (def ~value-var ~value)
-	   ~@(cond
-		  ((symbolp target)
-		   `((set ~target ~value-var)))
-		  ;; tuples
-		  ((named-operator? target 'tuple)
-		   (map-apply
-			(fn (var val)
-				(assert (symbol? var) (repr var))
-				(list 'set var val))
-			(destructuring-bind-parse target
-									  value-var)))
-		  ((named-operator? target 'aref)
-		   (let* ((target (tail target)))
-			 (assert (eq (length target) 2) (repr target))
-			 (let* ((obj (1st target))
-					(key (2nd target)))
-			   (when (keyword? key)
-				 (set key (keyword-name key)))
-			   `(
-				 (if (list? ~obj)
-					 (progn
-					   (assert (num? ~key) (repr ~key))
-					   (list-set ~obj ~key ~value-var))
-				   (assert (dict? ~obj) (repr ~obj))
-				   (dict-set ~obj ~key ~value-var))
-				 ))))
-		  (true
-		   (throw (Exception (+ "unknown target" (repr target)))))))))
+    `(progn
+       ;; avoid let's sub-env
+       (def ~value-var ~value)
+       ~@(cond
+          ((symbolp target)
+           `((set ~target ~value-var)))
+          ;; tuples
+          ((named-operator? target 'tuple)
+           (map-apply
+            (fn (var val)
+                (assert (symbol? var) (repr var))
+                (list 'set var val))
+            (destructuring-bind-parse target
+                                      value-var)))
+          ((named-operator? target 'aref)
+           (let* ((target (tail target)))
+             (assert (eq (length target) 2) (repr target))
+             (let* ((obj (1st target))
+                    (key (2nd target)))
+               (when (keyword? key)
+                 (set key (keyword-name key)))
+               `(
+                 (if (list? ~obj)
+                     (progn
+                       (assert (num? ~key) (repr ~key))
+                       (list-set ~obj ~key ~value-var))
+                   (assert (dict? ~obj) (repr ~obj))
+                   (dict-set ~obj ~key ~value-var))
+                 ))))
+          (true
+           (throw (Exception (+ "unknown target" (repr target)))))))))
 
 (defmacro let (vars &rest body)
   ;; TODO use fold
@@ -162,9 +162,9 @@
                  (let*
                      (~@(map-apply
                          (fn (var val)
-    						 (list var val))
-						 var-defs))
-				   ~@body))))
+                             (list var val))
+                         var-defs))
+                   ~@body))))
 	  r)))
 
 (defmacro cond (&rest clauses)
