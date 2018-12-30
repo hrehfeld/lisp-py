@@ -1195,6 +1195,9 @@ def base_env(args=[]):
     env_def(env, 'dict-set', dict_set)
     env_def(env, 'dict_set', dict_set)
 
+    env_def(env, 'dict-keys', lambda d: d.keys())
+
+
     env_def(env, 'aref', lambda l, k: l[k])
 
     def list_set(l, k, v):
