@@ -1881,13 +1881,13 @@ if args.type is not None and args.num is not None:
         ps(read(Stream(program, 0)))
     if args.type == 'interpreter':
         program = interpreter_tests[args.num][0]
-        print(program)
+        print('Program:', program)
         ps(interpret(read(Stream(program, 0))))
 elif args.c:
     for filename in args.c:
         with open(filename, 'r') as f:
             program = f.read()
-        print(interpret(read(Stream(program, 0)), args=args.args))
+        print('Result:', interpret(read(Stream(program, 0)), args=args.args))
 else:
     suite = load_tests()
     unittest.TextTestRunner().run(suite)
