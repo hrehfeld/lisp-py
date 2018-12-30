@@ -234,6 +234,16 @@ def is_special_keyword(e):
     return is_symbol(e) and symbol_name(e).startswith('&')
 
 
+@native
+def is_iterable(o):
+    try:
+        iter(o)
+    except TypeError:
+        return False
+    else:
+        return True
+
+
 def is_list(e):
     return isinstance(e, list)
 
@@ -1148,7 +1158,8 @@ def base_env(args=[]):
     env_def(env, 'list', list_)
 
     def as_list(arg):
-        return list(arg)
+        assert(is_iterable(arg))
+        return list(iter(arg))
     env_def(env, 'as-list', as_list)
 
     def append(l, *es):
