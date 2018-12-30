@@ -995,7 +995,8 @@ def __call_function(env, fun, args_forms, eval):
         remaining_args = args_forms
         keywords_started = False
         while remaining_args:
-            arg, *remaining_args = remaining_args
+            arg = remaining_args[0]
+            remaining_args = remaining_args[1:]
             
             if is_keyword(arg) and remaining_args and not nokeys:
                 keywords_started = True
