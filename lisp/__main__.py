@@ -1064,8 +1064,8 @@ def __call_function(env, fun, args_forms, eval):
                                            , i=symbol_name(parameters[len(args)][0]), fun=function_repr, args=sexps_str(args_forms)))
 
         if not set_kwargs and kwargs:
-            raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {args})'
-                                           , fun=function_repr, args=sexps_str(args_forms)))
+            raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {params} {kwargs}) called with {args}'
+                                           , fun=function_repr, args=sexps_str(args_forms), params=sexps_str(parameters), kwargs=sexps_str(kwargs)))
 
         varargs = []
         if set_varargs and len(args) > len(parameters):
