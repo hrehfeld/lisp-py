@@ -77,12 +77,17 @@ def is_int(v):
 
 
 @native
-def is_num(f):
-    return isinstance(f, int) or isinstance(f, float)
+def is_float(v):
+    return isinstance(v, float)
+
 
 @native
 def is_str(f):
     return isinstance(f, str)
+
+
+def is_num(f):
+    return is_int(f) or is_float(f)
 
 
 @native
