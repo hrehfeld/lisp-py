@@ -150,7 +150,7 @@ def is_named_operator(form, op):
 
 special_form, is_special_form, (special_form_get_fun,), _ = __defstruct('special-form', 'fun')
 
-Macro, is_macro, (macro_get_fun,), _ = __defstruct('macro', 'fun')
+Macro, is_macro, (macro_fun,), _ = __defstruct('macro', 'fun')
 
 
 def is_atom(form):
@@ -1043,7 +1043,7 @@ def __call(env, fun, args_forms, do_eval_args):
         r = __call_function(env, fun, [env] + args_forms, eval=False)
         return r
     elif is_macro(fun):
-        fun = macro_get_fun(fun)
+        fun = macro_fun(fun)
         form = __call_function(env, fun, args_forms, eval=False)
         return __eval(env, form)
 
