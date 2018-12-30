@@ -147,7 +147,6 @@
            (throw (Exception (+ "unknown target" (repr target)))))))))
 
 (defmacro let (vars &rest body)
-  ;; TODO use fold
   (let* ((var-defs
           (fold
            (fn (vars target-value)
