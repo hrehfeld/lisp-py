@@ -1217,7 +1217,8 @@ def base_env(args=[]):
                     module = module[1:]
                     assert(False), 'relative imports from lisp not allowed'
                 if len(module) > 1:
-                    module, *froms = module
+                    froms = module[1:]
+                    module = module[0]
 
                 assert(is_symbol(module))
                 assert(is_list(froms))
