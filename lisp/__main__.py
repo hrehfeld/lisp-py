@@ -1,29 +1,6 @@
 def native(f):
     return f
 
-@native
-def destructure(names, values):
-    r = []
-    for k, v in zip(names, values):
-        if isinstance(k, str):
-            r += [(k, v)]
-        else:
-            r += destructure(k, v)
-    return r
-            
-
-# non-native code only
-def py_bind_env(names, values, module):
-    pass
-
-
-@native
-def py_bind_env(names, values, module):
-    import sys
-    for k, v in destructure(names, values):
-        setattr(sys.modules[module], k, v)
-        #print('binding ', k, v, 'in', module)
-
 
 def sexps_str(form, indent=0):
     sexpr_print_operators = {
