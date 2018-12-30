@@ -71,6 +71,7 @@ def ps(form):
 TYPE = '__type'
 TYPE_T = '__type_t'
 
+@native
 def make_dict(*args):
     assert (len(args) % 2 == 0), args
     kwargs = {}
