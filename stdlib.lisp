@@ -118,7 +118,7 @@
        ;; avoid let's sub-env
        (def ~value-var ~value)
        ~@(cond
-          ((symbolp target)
+          ((symbol? target)
            `((set ~target ~value-var)))
           ;; tuples
           ((named-operator? target 'tuple)
