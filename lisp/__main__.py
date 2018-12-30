@@ -1225,6 +1225,8 @@ def base_env(args=[]):
         env_def(env, 'tuple', __tuple)
         env_def(env, '__block', special_form(block))
         env_def(env, 'return-from', special_form(return_from))
+        env_def(env, 'let*', special_form(__let))
+        
     native_binds()
 
     # assert is not a function thus pain
@@ -1372,7 +1374,6 @@ def base_env(args=[]):
     env_def(env, 'eval', special_form(source_eval))
     env_def(env, 'set', special_form(__setq))
     env_def(env, '__sub-env', special_form(__sub_env))
-    env_def(env, 'let*', special_form(__let))
     env_def(env, 'progn', special_form(__progn))
 
     env_def(env, 'def', special_form(__def))
