@@ -257,7 +257,8 @@ def __length(e):
 def length(l):
     return __length(l)
     
-    
+
+@native
 def is_callable(e):
     return callable(e)
 
@@ -1207,7 +1208,8 @@ def base_env(args=[]):
         return v
     env_def(env, 'list-set', list_set)
 
-    env_def(env, 'callable', callable)
+    env_def(env, 'callable?', is_callable)
+    env_def(env, 'is_callable', is_callable)
     
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
