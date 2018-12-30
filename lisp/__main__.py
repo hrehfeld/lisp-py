@@ -148,28 +148,9 @@ def is_named_operator(form, op):
     return is_list(form) and form and is_symbol(form[0]) and form[0] == op
 
 
-MACRO = '__macro'
-
 special_form, is_special_form, (special_form_get_fun,), _ = __defstruct('special-form', 'fun')
 
-
-def is_macro(e):
-    return isinstance(e, tuple) and len(e) == 2 and e[0] == MACRO
-
-
-def Macro(f):
-    if not is_callable(f):
-        raise Exception(make_error_msg('{f} is not callable', f=f))
-
-    return (MACRO, f)
-
-
-def macro_get_fun(macro):
-    return macro[1]
-
-
-
-
+Macro, is_macro, (macro_get_fun,), _ = __defstruct('macro', 'fun')
 
 
 def is_atom(form):
