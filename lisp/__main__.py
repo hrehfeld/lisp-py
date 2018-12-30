@@ -150,7 +150,7 @@ def is_named_operator(form, op):
 
 special_form, is_special_form, (special_form_fun,), _ = __defstruct('special-form', 'fun')
 
-Macro, is_macro, (macro_fun,), _ = __defstruct('macro', 'fun')
+macro, is_macro, (macro_fun,), _ = __defstruct('macro', 'fun')
 
 
 def is_atom(form):
@@ -803,7 +803,7 @@ def __defmacro(lexical_env, name, parameters, *body):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     f = __fn(lexical_env, parameters, *body)
-    m = Macro(f)
+    m = macro(f)
     env_def(lexical_env, symbol_name(name), m)
     return m
 
