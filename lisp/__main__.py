@@ -1242,7 +1242,7 @@ def base_env(args=[]):
 
     def __while(env, cond, *body):
         while __eval(env, cond):
-            __eval(env, [intern('progn'), *body])
+            __eval(env, [intern('progn')] + list(body))
     env_def(env, '__while', special_form(__while))
 
     def __lookup(env, obj, *ks):
