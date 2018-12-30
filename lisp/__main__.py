@@ -149,21 +149,8 @@ def is_named_operator(form, op):
 
 
 MACRO = '__macro'
-SPECIAL_FORM = '__special'
 
-
-def is_special_form(e):
-    return isinstance(e, tuple) and len(e) == 2 and e[0] == SPECIAL_FORM
-
-
-def special_form(f):
-    if not is_callable(f):
-        raise Exception(make_error_msg('{f} is not callable', f=f))
-    return (SPECIAL_FORM, f)
-
-
-def special_form_get_fun(f):
-    return f[1]
+special_form, is_special_form, (special_form_get_fun,), _ = __defstruct('special-form', 'fun')
 
 
 def is_macro(e):
