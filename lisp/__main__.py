@@ -326,7 +326,7 @@ def gensym(prefix='g'):
         prefix = symbol_name(prefix)
     global gensym_counter
     gensym_counter += 1
-    return symbol('__' + prefix + str(gensym_counter))
+    return symbol('__' + prefix + '-' + str(gensym_counter))
 # from .symbol import intern
 
 whitespace = ' \t\n'
