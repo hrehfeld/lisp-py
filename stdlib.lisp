@@ -10,8 +10,8 @@
 			  ~@body)))
 
 (defmacro while (test &rest body)
-	`(block ~(gensym while)
-	   (__while ~test ~@body)))
+  `(block ~(gensym while)
+	      (__while ~test ~@body)))
 
 (defmacro dolist (iter &rest body)
   (assert (eq (length iter) 2))
@@ -20,7 +20,7 @@
          (i-var (gensym dolist-i))
          (iter-list (gensym dolist-list)))
     `( let* ((~iter-list ~list-value-sym)
-			(~i-var 0))
+			 (~i-var 0))
 	   (assert (not (is nil ~iter-list)) "list is None")
        (while (< ~i-var (length ~iter-list))
 		 (~(if (symbol? var-sym) 'let* 'let)
@@ -76,10 +76,10 @@
 ;; TODO: generator
 (defun enumerate (l)
   (let* ((i 0)) (map (fn (e)
-						(let* ((oldi i))
-						  (+= i 1)
-						  (list oldi e)))
-					l)))
+						 (let* ((oldi i))
+						   (+= i 1)
+						   (list oldi e)))
+					 l)))
 
 (defun zip (&rest ls)
   (let* ((n (apply min (map length ls)))
@@ -88,7 +88,7 @@
 	  (append r (map (fn (l) (nth iel l)) ls))
 	  (assert (< iel n) (list iel n))
 	  )
-	  r))
+	r))
 
 ;; TODO: test
 (defun curry (f &rest fixed-args) (fn (&rest args) (apply f (extend fixed-args args))))
@@ -149,37 +149,37 @@
 (defmacro let (vars &rest body)
   ;; TODO use fold
   (let* ((var-defs
-		  (fold
-		   (fn (vars target-value)
-			   (let* ((target (head target-value))
-					  (value (last target-value))
-					  (value-var (gensym let-value))
-					  (r (destructuring-bind-parse target value-var)))
-				 (+ vars `((~value-var ~value)) r)
-				 ))
-		   (list) vars)))
-	(let* ((r `(progn
-				 (let*
-					 (~@(map-apply
-						 (fn (var val)
-							 (list var val))
+          (fold
+           (fn (vars target-value)
+               (let* ((target (head target-value))
+                      (value (last target-value))
+                      (value-var (gensym let-value))
+                      (r (destructuring-bind-parse target value-var)))
+                 (+ vars `((~value-var ~value)) r)
+                 ))
+           (list) vars)))
+    (let* ((r `(progn
+                 (let*
+                     (~@(map-apply
+                         (fn (var val)
+    						 (list var val))
 						 var-defs))
-						~@body))))
+				   ~@body))))
 	  r)))
 
 (defmacro cond (&rest clauses)
   (foldr
    (fn (clause ifs)
-	 (let* ((test (car clause))
-            (body (cdr clause)))
-       (if (eq test 'true)
-           ;; else/true branch skips test
-           (progn
-             (assert (is ifs nil) "else/true needs to be the last clause")
-             `(progn ~@body))
-		 (if ifs
-			 `(if ~test (progn ~@body) ~ifs)
-		   `(when ~test (progn ~@body))))))
+	   (let* ((test (car clause))
+              (body (cdr clause)))
+         (if (eq test 'true)
+             ;; else/true branch skips test
+             (progn
+               (assert (is ifs nil) "else/true needs to be the last clause")
+               `(progn ~@body))
+		   (if ifs
+			   `(if ~test (progn ~@body) ~ifs)
+		     `(when ~test (progn ~@body))))))
    nil
    clauses))
 
@@ -189,7 +189,7 @@
 
 (defun reversed (l)
   (let* ((r (list))
-        (i (- (length l) 1)))
+         (i (- (length l) 1)))
     (while (>= i 0)
       (append r (nth i l))
       (set i (- i 1)))
