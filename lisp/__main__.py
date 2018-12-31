@@ -1,7 +1,7 @@
 def native(f):
     return f
 
-
+@native
 def sexps_str(form, indent=0):
     sexpr_print_operators = {
         quote_fun_name: quote_char
