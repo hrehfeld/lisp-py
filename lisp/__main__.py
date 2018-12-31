@@ -1165,12 +1165,20 @@ def base_env(args=[]):
     env_def(env, 'callable?', is_callable)
     env_def(env, 'is_callable', is_callable)
 
+    @native
+    def __while(env, condition, *body):
+        while __eval(env, condition):
+            __progn(env, *body)
+            #__eval(env, [intern('progn')] + list(body))
+
+
     # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
         env_def(env, 'tuple', tuple)
         env_def(env, 'if', __if)
         env_def(env, '__if', __if)
+        env_def(env, '__while', __while)
 
     @native
     def native_binds():
@@ -1181,6 +1189,7 @@ def base_env(args=[]):
         env_def(env, '__block', special_form(block))
         env_def(env, 'if', special_form(__if))
         env_def(env, '__if', special_form(__if))
+        env_def(env, '__while', special_form(__while))
         env_def(env, 'return-from', special_form(return_from))
         env_def(env, 'let*', special_form(__let))
         env_def(env, 'sexps_str', sexps_str)
@@ -1241,12 +1250,6 @@ def base_env(args=[]):
                 assert(False), sexps_str(module)
         pass
     env_def(env, 'py-import', special_form(py_import))
-
-
-    def __while(env, condition, *body):
-        while __eval(env, condition):
-            __eval(env, [intern('progn')] + list(body))
-    env_def(env, '__while', special_form(__while))
 
     def __lookup(env, obj, *ks):
         r = __eval(env, obj)
