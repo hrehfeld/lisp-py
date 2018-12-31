@@ -843,8 +843,8 @@ def __let(env, vars, *let_body):
     return __progn(let_env, *let_body)
 
 
-def __if(env, cond, then, *else_body):
-    if __eval(env, cond):
+def __if(env, condition, then, *else_body):
+    if __eval(env, condition):
         r = __eval(env, then)
     elif else_body:
         r = __progn(env, *else_body)
@@ -1181,11 +1181,11 @@ def base_env(args=[]):
     native_binds()
 
     # assert is not a function thus pain
-    def __assert(env, cond, msg=''):
-        r = __eval(env, cond)
+    def __assert(env, condition, msg=''):
+        r = __eval(env, condition)
         if not r:
             msg = __eval(env, msg)
-            msg = '%s: %s' % (sexps_str(cond), msg)
+            msg = '%s: %s' % (sexps_str(condition), msg)
             
         assert r, msg
     env_def(env, 'assert', special_form(__assert))
@@ -1236,8 +1236,8 @@ def base_env(args=[]):
     env_def(env, 'py-import', special_form(py_import))
 
 
-    def __while(env, cond, *body):
-        while __eval(env, cond):
+    def __while(env, condition, *body):
+        while __eval(env, condition):
             __eval(env, [intern('progn')] + list(body))
     env_def(env, '__while', special_form(__while))
 
