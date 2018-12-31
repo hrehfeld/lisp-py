@@ -1167,6 +1167,7 @@ def base_env(args=[]):
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
         env_def(env, 'tuple', tuple)
+        env_def(env, '__if', __if)
 
     @native
     def native_binds():
@@ -1175,8 +1176,11 @@ def base_env(args=[]):
             return tuple(args)
         env_def(env, 'tuple', __tuple)
         env_def(env, '__block', special_form(block))
+        env_def(env, 'if', special_form(__if))
+        env_def(env, '__if', special_form(__if))
         env_def(env, 'return-from', special_form(return_from))
         env_def(env, 'let*', special_form(__let))
+        env_def(env, 'sexps_str', sexps_str)
         
     native_binds()
 
@@ -1333,32 +1337,31 @@ def base_env(args=[]):
     env_def(env, 'defmacro', special_form(__defmacro))
     env_def(env, 'fn', special_form(__fn))
     env_def(env, 'apply', special_form(__apply))
-    env_def(env, 'if', special_form(__if))
 
     env_def(env, 'gensym', special_form(lambda env, *args: gensym(*args)))
 
     env_def(env, 'null?', lambda *args: all([e is None for e in args]))
 
-    env_def(env, 'symbolp', is_symbol)
-    env_def(env, 'symbol?', is_symbol)
-
-    env_def(env, 'keyword?', is_keyword)
-
-    env_def(env, 'listp', is_list)
-    env_def(env, 'list?', is_list)
-
-    env_def(env, 'num?', is_num)
-
-    env_def(env, 'dict?', lambda d: isinstance(d, dict) and not is_struct(d))
-
     def is_tuple(v):
         return isinstance(v, tuple)
-    env_def(env, 'tuplep', is_tuple)
-    env_def(env, 'tuple?', is_tuple)
 
-    env_def(env, 'str?', is_str)
-
-    env_def(env, 'int?', is_int)
+    def is_dict(d):
+        return isinstance(d, dict) and not is_struct(d)
+    
+    tests = dict(
+        symbol=is_symbol
+        , keyword=is_keyword
+        , list=is_list
+        , tuple=is_tuple
+        , dict=is_dict
+        , num=is_num
+        , float=is_float
+        , int=is_int
+        , str=is_str
+    )
+    for k, f in list(tests.items()):
+        env_def(env, '{s}?'.format(s=k), f)
+        env_def(env, 'is_{s}'.format(s=k), f)
 
     env_def(env, 'named-operator?', is_named_operator)
 
