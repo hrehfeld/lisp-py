@@ -843,6 +843,7 @@ def __let(env, vars, *let_body):
     return __progn(let_env, *let_body)
 
 
+@native
 def __if(env, condition, then, *else_body):
     if __eval(env, condition):
         r = __eval(env, then)
