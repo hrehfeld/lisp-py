@@ -1079,9 +1079,7 @@ def __eval(env, form):
         r = env_get(env, symbol_name(form))
     elif is_atom(form):
         r = form
-    elif is_list(form):
-        if not length(form):
-            raise Exception(make_error_msg('trying to evaluate list of length 0'))
+    elif is_list(form) and form:
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
