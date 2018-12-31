@@ -1164,7 +1164,8 @@ def base_env(args=[]):
 
     env_def(env, 'callable?', is_callable)
     env_def(env, 'is_callable', is_callable)
-    
+
+    # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
         env_def(env, 'tuple', tuple)
