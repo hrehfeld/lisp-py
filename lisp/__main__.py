@@ -843,7 +843,6 @@ def __let(env, vars, *let_body):
     return __progn(let_env, *let_body)
 
 
-# TODO if without else
 def __if(env, cond, then, *else_body):
     cond = __eval(env, cond)
     if cond:
