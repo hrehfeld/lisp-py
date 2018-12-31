@@ -844,8 +844,7 @@ def __let(env, vars, *let_body):
 
 
 def __if(env, cond, then, *else_body):
-    cond = __eval(env, cond)
-    if cond:
+    if __eval(env, cond):
         r = __eval(env, then)
     elif else_body:
         r = __progn(env, *else_body)
