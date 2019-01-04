@@ -158,18 +158,13 @@ def is_atom(form):
 
 
 
-def __keyword(s):
+def keyword(s):
     if is_symbol(s):
         s = symbol_name(s)
     assert is_str(s), sexps_str(s)
     return intern(keyword_start + s)
 
 
-@native
-def keyword(s):
-    return __keyword(s)
-    
-    
 def keyword_name(s):
     assert(is_keyword(s)), s
     return symbol_name(s)[len(keyword_start):]
