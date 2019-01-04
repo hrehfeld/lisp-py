@@ -593,6 +593,7 @@ class BlockException(Exception):
         self.name = name
         self.value = value
 
+
 variadic_name = '&rest'
 keys_name = '&keys'
 nokeys_name = '&nokeys'
