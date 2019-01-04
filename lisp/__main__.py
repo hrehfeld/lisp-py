@@ -191,14 +191,9 @@ def is_list(e):
     return isinstance(e, list)
 
 
-def __length(e):
-    assert(isinstance(e, list))
-    return len(e)
-
-
 @native
 def length(l):
-    return __length(l)
+    return len(l)
     
 
 @native
@@ -1436,9 +1431,6 @@ def base_env(args=[]):
     env_def(env, 'slice', _slice)
 
 
-    @native
-    def length(l):
-        return len(l)
     env_def(env, 'length', length)
 
     def has(l, e):
