@@ -269,8 +269,11 @@ symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'nam
 def intern(s):
     assert(is_str(s)), s
     if s not in symbols:
-        dict_set(symbols, s, symbol(s))
-    return symbols[s]
+        sym = symbol(s)
+        dict_set(symbols, s, sym)
+        return sym
+    else:
+        return symbols[s]
 
 
 gensym_counter = -1
