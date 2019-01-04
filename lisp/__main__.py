@@ -337,24 +337,7 @@ def Failed():
     return (FAILED, None)
 
 
-def valid_action(a):
-    return get_state(a) in (VALID, RETURN)
-
-
-def return_action(a):
-    return get_state(a) is RETURN
-
-
-def get_state(a):
-    assert is_tuple(a), a
-    assert len(a) == 2, a
-    return a[0]
-
-
-def get_expr(a):
-    assert is_tuple(a), a
-    assert len(a) == 2, a
-    return a[1]
+VALID_ACTIONS = VALID, RETURN
 
 
 def ends_token(s):
@@ -575,20 +558,19 @@ readers = [
 
 def read(s, readers=readers, one=False):
     r = []
-    res = Failed()
-    while not stream_empty(s) and not return_action(res):
+    action = FAILED
+    while not stream_empty(s) and not action is RETURN:
         for reader in readers:
             istart = stream_pos(s)
-            res = reader(s)
-            assert res is not None, reader
-            if valid_action(res):
-                e = get_expr(res)
+            action, res = reader(s)
+            if action in VALID_ACTIONS:
+                e = res
                 if e is not None:
                     r.append(e)
                 break
             else:
                 stream_pos_set(s, istart)
-        if not valid_action(res):
+        if not action in VALID_ACTIONS:
             raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), stream_pos(s)))
         # one reads until one actual token is parsed
         elif r and one:
