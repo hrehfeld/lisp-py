@@ -923,6 +923,7 @@ def is_function(fun):
     return type(fun).__name__ == 'function'
 
 
+@native
 def is_py_native(fun):
     # TODO: ugly hack around: [].append in {} => unhashable type
     return type(fun).__name__ == 'builtin_function_or_method'
