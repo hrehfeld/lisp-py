@@ -318,11 +318,11 @@ def Return(expr):
 
 
 def valid_action(a):
-    return isinstance(a, tuple) and len(a) == 2 and a[0] in (VALID, RETURN)
+    return is_tuple(a) and len(a) == 2 and a[0] in (VALID, RETURN)
 
 
 def return_action(a):
-    return isinstance(a, tuple) and len(a) == 2 and a[0] == RETURN
+    return is_tuple(a) and len(a) == 2 and a[0] == RETURN
     
 
 def get_expr(s):
