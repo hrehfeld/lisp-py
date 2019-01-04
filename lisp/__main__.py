@@ -328,15 +328,23 @@ def Failed():
 
 
 def valid_action(a):
-    return is_tuple(a) and len(a) == 2 and a[0] in (VALID, RETURN)
+    return get_state(a) in (VALID, RETURN)
 
 
 def return_action(a):
-    return is_tuple(a) and len(a) == 2 and a[0] == RETURN
-    
+    return get_state(a) is RETURN
 
-def get_expr(s):
-    return s[1]
+
+def get_state(a):
+    assert is_tuple(a), a
+    assert len(a) == 2, a
+    return a[0]
+
+
+def get_expr(a):
+    assert is_tuple(a), a
+    assert len(a) == 2, a
+    return a[1]
 
 
 def ends_token(s):
