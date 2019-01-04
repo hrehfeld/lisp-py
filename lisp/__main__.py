@@ -241,13 +241,13 @@ def env_def(env, k, v):
     d = env_d(env)
     assert not k in d, '{k} in {d}'.format(k=k, d=env_d(env))
     #print('~~~~~~~~env_def:', k, '=', sexps_str(v), sexps_str(env_d(env)))
-    env_d(env)[k] = v
+    dict_set(env_d(env), k, v)
 
 
 def env_change(env, k, v):
     env = env_containing_parent(env, k) or env
     #print('        env_change:', k, '=', sexps_str(v), env_d(env).keys())
-    env_d(env)[k] = v
+    dict_set(env_d(env), k, v)
 # from .base import __defstruct, py_bind_env
 
 symbols = {}
@@ -258,7 +258,7 @@ symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'nam
 def intern(s):
     assert(is_str(s)), s
     if s not in symbols:
-        symbols[s] = symbol(s)
+        dict_set(symbols, s, symbol(s))
     return symbols[s]
 
 gensym_counter = -1
@@ -627,14 +627,15 @@ functions = {}
 
 
 def add_function(f, *args):
-    functions[f] = args
+    dict_set(functions, f, args)
 
 
 def patch_function_name(f, name):
     assert(is_str(name))
     assert(f in functions), '{f}\n{fs}'.format(fs=functions, f=f)
     args = functions[f]
-    functions[f] = name, args[1], args[2], args[3], args[4]
+    data = name, args[1], args[2], args[3], args[4]
+    dict_set(functions, f, data)
 
 
 @native
@@ -715,13 +716,13 @@ def __fn(env, parameters, *body):
             if param_special not in specials:
                 raise Exception(make_error_msg('Unkown special keyword: {s} at position {i}', s=p, i=i))
             if param_special in special_params:
-                special_params[param_special] = True
+                dict_set(special_params, param_special, True)
             if param_special in special_allows_next:
                 if has_normal_next:
                     # skip next parameter which we just parsed
                     i += 1
                     if param_special in special_params:
-                        special_params[param_special] = next_param
+                        dict_set(special_params, param_special, next_param)
                 
             if param_special in special_once_only and param_special in special_used:
                 raise Exception(make_error_msg('{special} parameter defined more than once', special=param_special))
@@ -886,7 +887,7 @@ py_functions = dict()
 
 def py_set_nokeys(fun, nokeys):
     #parameters = py_get_param_names(fun)
-    py_functions[fun] = nokeys
+    dict_set(py_functions, fun, nokeys)
 
 
 def is_function(fun):
@@ -922,7 +923,7 @@ def __call_function(env, fun, args_forms, eval):
         else:
             if fun not in py_functions:
                 #parameters = py_get_param_names(fun)
-                py_functions[fun] = False
+                py_set_nokeys(fun, False)
             else:
                 nokeys = py_functions[fun]
 
@@ -954,7 +955,7 @@ def __call_function(env, fun, args_forms, eval):
             for iarg, arg in enumerate(args):
                 if iarg > ilast_normal_arg:
                     k, v = arg
-                    kwargs[k] = v
+                    dict_set(kwargs, k, v)
                 else:
                     # TODO hack: we really need to fix our type system
                     if isinstance(arg, tuple) and not is_symbol(arg):
@@ -989,7 +990,7 @@ def __call_function(env, fun, args_forms, eval):
                 keywords_started = True
                 key = keyword_name(arg)
                 arg = remaining_args.pop(0)
-                kwargs[key] = arg
+                dict_set(kwargs, key, arg)
             else:
                 if keywords_started:
                     raise Exception(make_error_msg('positional argument follows keyword argument'))
