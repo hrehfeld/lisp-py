@@ -918,6 +918,7 @@ def py_set_nokeys(fun, nokeys):
     dict_set(py_functions, fun, nokeys)
 
 
+@native
 def is_function(fun):
     return type(fun).__name__ == 'function'
 
