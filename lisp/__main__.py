@@ -1289,9 +1289,6 @@ def base_env(args=[]):
 
     env_def(env, quote_fun_name, special_form(lambda env, e: e))
 
-    def is_backquote_eval(s):
-        return is_named_operator(s, intern(backquote_eval_fun_name)) or is_named_operator(s, intern(backquote_splice_fun_name))
-
     backquote_level_var = '*__backquote_level*'
 
     def backquote_(env, s):
