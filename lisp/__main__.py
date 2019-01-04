@@ -96,6 +96,11 @@ def is_tuple(v):
 
 
 @native
+def is_dict(d):
+    return isinstance(d, dict) and not is_struct(d)
+
+
+@native
 def make_dict(*args):
     assert (len(args) % 2 == 0), args
     kwargs = {}
@@ -1340,9 +1345,6 @@ def base_env(args=[]):
 
     env_def(env, 'null?', lambda *args: all([e is None for e in args]))
 
-    def is_dict(d):
-        return isinstance(d, dict) and not is_struct(d)
-    
     tests = dict(
         symbol=is_symbol
         , keyword=is_keyword
