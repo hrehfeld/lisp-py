@@ -130,7 +130,7 @@ def __defstruct(name_str, *field_names):
         return r
 
     def is_instance(obj):
-        return isinstance(obj, dict) and obj.get(TYPE, None) == type
+        return isinstance(obj, dict) and TYPE in obj and obj[TYPE] == type
 
     getters = []
     setters = []
