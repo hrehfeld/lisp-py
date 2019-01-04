@@ -101,17 +101,6 @@ def is_dict(d):
 
 
 @native
-def make_dict(*args):
-    assert (len(args) % 2 == 0), args
-    kwargs = {}
-    for i in range(0, len(args), 2):
-        k = args[i]
-        v = args[i + 1]
-        kwargs[k] = v
-    return kwargs
-
-
-@native
 def dict_set(d, k, v):
     d[k] = v
 
