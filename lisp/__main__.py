@@ -115,6 +115,7 @@ def make_dict(*args):
 def dict_set(d, k, v):
     d[k] = v
 
+
 @native
 def __defstruct(name_str, *field_names):
     assert(is_str(name_str)), name_str
