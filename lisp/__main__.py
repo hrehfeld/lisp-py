@@ -1136,6 +1136,7 @@ def base_env(args=[]):
 
     env_def(env, 'aref', lambda l, k: l[k])
 
+    @native
     def list_set(l, k, v):
         assert(is_list(l))
         assert(is_int(k))
