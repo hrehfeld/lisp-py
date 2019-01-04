@@ -1764,8 +1764,8 @@ interpreter_tests = [
     , ("(defun foo (a &keys ks) (tuple a ks)) (foo :a 1 :b 2 :c 3)", (1, dict(b=2, c=3)))
     , ("(defmacro add (a) (list '+ 5 a)) (add 1)", 6)
 
-    , ("(defstruct Foo) (Foo)", {TYPE: {TYPE: TYPE_T, 'name': 'Foo', 'fields': tuple()}})
-    , ("(defstruct Foo a) (Foo 1)", {TYPE: {TYPE: TYPE_T, 'name': 'Foo', 'fields':tuple('a')}, 'a': 1})
+    , ("(defstruct Foo) (Foo)", {TYPE: {'__name__': 'Foo', 'fields': tuple()}})
+    , ("(defstruct Foo a) (Foo 1)", {TYPE: {'__name__': 'Foo', 'fields':tuple('a')}, 'a': 1})
     , ("(defstruct Foo a) (def v (Foo 1)) (Foo-a v)", 1)
 #    , ("(defstruct Foo a) (def v (Foo 1)) v.a", 1)
     , ("(def foo (dict :a 1))", dict(a=1))
