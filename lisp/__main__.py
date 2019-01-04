@@ -1277,6 +1277,7 @@ def base_env(args=[]):
                 assert(False), sexps_str(module)
         pass
     env_def(env, 'py-import', special_form(py_import))
+    env_def(env, 'py_import', py_import)
 
     @native
     def __lookup(env, obj, *ks):
