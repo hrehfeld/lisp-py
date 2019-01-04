@@ -271,6 +271,7 @@ def gensym(prefix='g'):
     return symbol('__' + prefix + '-' + str(gensym_counter))
 # from .symbol import intern
 
+
 whitespace = ' \t\n'
 newlines = '\n' #TODO add windows mac shit
 token_end_chars = whitespace + ')'
