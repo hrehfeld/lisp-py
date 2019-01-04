@@ -156,9 +156,6 @@ macro, is_macro, (macro_fun,), _ = __defstruct('macro', 'fun')
 def is_atom(form):
     return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or (is_list(form) and not len(form))
 
-# from .reader import keyword_start
-# from .reader import quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name, quote_char, backquote_char, backquote_eval_char, backquote_splice_char
-
 
 
 def __keyword(s):
