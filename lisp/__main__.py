@@ -1226,6 +1226,7 @@ def base_env(args=[]):
         pass
     env_def(env, 'import', special_form(__import))
 
+    @native
     def py_import(env, *args):
         import importlib
         for module in args:
