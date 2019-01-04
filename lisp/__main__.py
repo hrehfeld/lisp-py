@@ -561,6 +561,7 @@ def read(s, readers=readers, one=False):
         for reader in readers:
             istart = stream_pos(s)
             res = reader(s)
+            assert res is not None, reader
             if valid_action(res):
                 e = get_expr(res)
                 if e is not None:
