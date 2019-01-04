@@ -260,6 +260,7 @@ def env_change(env, k, v):
     dict_set(env_d(env), k, v)
 # from .base import __defstruct, py_bind_env
 
+
 symbols = {}
 
 symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
