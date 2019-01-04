@@ -892,6 +892,7 @@ def __setq(env, name, value):
     return value
 
 
+@native
 def py_get_param_names(obj):
     sig = inspect.Signature.from_callable(obj)
     P = inspect.Parameter
