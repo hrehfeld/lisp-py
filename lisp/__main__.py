@@ -516,31 +516,37 @@ def read_symbol(s):
     return Failed()
         
 
-def read_quote_like(s, quote_char, symstr):
+def read_quote_like(s, quote_char, quote_call_sym):
     for c in quote_char:
         if stream_next(s) != c:
             return Failed()
     # quote only supports one following exp
     expr =  read(s, one=True)
     
-    r = [intern(symstr)] + expr
+    r = [quote_call_sym] + expr
     return Valid(r)
 
 
+quote_fun_sym = intern(quote_fun_name)
+backquote_fun_sym = intern(backquote_fun_name)
+backquote_eval_fun_sym = intern(backquote_eval_fun_name)
+backquote_splice_fun_sym = intern(backquote_splice_fun_name)
+
+
 def read_quote(s):
-    return read_quote_like(s, quote_char, quote_fun_name)
+    return read_quote_like(s, quote_char, quote_fun_sym)
     
 
 def read_backquote(s):
-    return read_quote_like(s, backquote_char, backquote_fun_name)
+    return read_quote_like(s, backquote_char, backquote_fun_sym)
     
 
 def read_backquote_eval(s):
-    return read_quote_like(s, backquote_eval_char, backquote_eval_fun_name)
+    return read_quote_like(s, backquote_eval_char, backquote_eval_fun_sym)
     
 
 def read_backquote_splice(s):
-    return read_quote_like(s, backquote_splice_char, backquote_splice_fun_name)
+    return read_quote_like(s, backquote_splice_char, backquote_splice_fun_sym)
     
 
 readers = [
