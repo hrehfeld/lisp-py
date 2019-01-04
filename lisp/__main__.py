@@ -102,7 +102,7 @@ def make_dict(*args):
         
 
 @native
-def py_defstruct(name_str, *field_names):
+def __defstruct(name_str, *field_names):
     assert(is_str(name_str)), name_str
     for n in field_names:
         assert(isinstance(n, str))
@@ -135,11 +135,6 @@ def py_defstruct(name_str, *field_names):
         setters += [set]
 
     return constructor, is_instance, getters, setters
-
-
-@native
-def __defstruct(*args):
-    return py_defstruct(*args)
 
 
 @native
