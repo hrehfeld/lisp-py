@@ -1460,7 +1460,7 @@ def base_env(args=[]):
 
 
     env_def(env, 'length', length)
-
+ 
     def has(l, e):
         return e in l
     env_def(env, 'contains?', has)
