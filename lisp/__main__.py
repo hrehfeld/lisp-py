@@ -225,6 +225,7 @@ def env_get(env, k):
     elif env_parent(env):
         return env_get(env_parent(env), k)
     else:
+        # TODO bind
         raise KeyError(k)
 
 
