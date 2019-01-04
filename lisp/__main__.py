@@ -168,6 +168,7 @@ def keyword_name(s):
     assert(is_keyword(s)), s
     return symbol_name(s)[len(keyword_start):]
 
+
 def is_keyword(e):
     return is_symbol(e) and symbol_name(e).startswith(keyword_start)
 
