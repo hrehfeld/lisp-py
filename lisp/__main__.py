@@ -204,6 +204,7 @@ def is_callable(e):
 Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
 
 
+# constructor with default values
 def make_env(parent=None):
     return Env({}, parent)
 
