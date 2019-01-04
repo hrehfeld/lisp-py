@@ -1267,6 +1267,7 @@ def base_env(args=[]):
         pass
     env_def(env, 'py-import', special_form(py_import))
 
+    @native
     def __lookup(env, obj, *ks):
         r = __eval(env, obj)
         for k in ks:
