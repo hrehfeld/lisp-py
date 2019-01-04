@@ -1294,17 +1294,17 @@ def base_env(args=[]):
     def backquote_(env, s):
         if is_atom(s):
             return [s]
-        elif is_named_operator(s, intern(backquote_eval_fun_name)):
+        elif is_named_operator(s, backquote_eval_fun_sym):
             arg = s[1]
             assert(len(s) == 2)
             #print('~:', level, sexps_str(s))
 
             form = s[1]
             nested_level = 0
-            while is_named_operator(form, intern(backquote_eval_fun_name)):
+            while is_named_operator(form, backquote_eval_fun_sym):
                 nested_level += 1
                 form = form[1]
-            if is_named_operator(form, intern(backquote_splice_fun_name)):
+            if is_named_operator(form, backquote_splice_fun_sym):
                 nested_level += 1
             # sanity check
             #assert(nested_level <= level), '%s is deeper than %s in %s' % (nested_level, level, sexps_str(s))
@@ -1317,7 +1317,7 @@ def base_env(args=[]):
                 r = __eval(env, form)
             #print('~:', level, sexps_str(form))
             return [r]
-        elif is_named_operator(s, intern(backquote_splice_fun_name)):
+        elif is_named_operator(s, backquote_splice_fun_sym):
             #print('~@:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
@@ -1325,13 +1325,13 @@ def base_env(args=[]):
             #print('~@:', level, sexps_str(r))
             assert(is_list(r)), (r, sexps_str(s))
             return r
-        elif is_named_operator(s, intern(backquote_fun_name)):
+        elif is_named_operator(s, backquote_fun_sym):
             #print('`:', level, sexps_str(s))
             assert(len(s) == 2)
             form = s[1]
             r = backquote_(env, form)
             assert(len(r) == 1)
-            r = [[intern(backquote_fun_name)] + r]
+            r = [[backquote_fun_sym] + r]
             #print('`:', level, sexps_str(r))
             return r
         elif is_list(s):
