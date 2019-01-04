@@ -201,7 +201,6 @@ def is_callable(e):
     return callable(e)
 
 
-    
 Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
 
 
