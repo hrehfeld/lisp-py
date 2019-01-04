@@ -794,7 +794,7 @@ def __defun(env, name, parameters, *body):
 
 
 def __defmacro(lexical_env, name, parameters, *body):
-    assert(is_symbol(name)), (name, type(name))
+    assert(is_symbol(name)), (name)
     if env_contains(lexical_env, symbol_name(name)):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
