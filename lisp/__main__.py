@@ -943,11 +943,13 @@ def is_py_fun(fun):
     return fun not in functions
 
 
+nokeys_sym = intern(nokeys_name)
+
 def __call_function(env, fun, args_forms, eval):
     nokeys = False
 
     first_arg = args_forms[0] if args_forms else None
-    if is_symbol(first_arg) and first_arg == intern(nokeys_name):
+    if first_arg == nokeys_sym:
         nokeys = True
         args_forms.pop(0)
 
