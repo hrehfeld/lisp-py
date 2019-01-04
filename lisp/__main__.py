@@ -121,17 +121,20 @@ def __defstruct(name_str, *field_names):
     assert(is_str(name_str)), name_str
     for n in field_names:
         assert(isinstance(n, str))
-    type = make_dict(TYPE, TYPE_T, 'name', name_str, 'fields', field_names)
+    type_marker = {
+        '__name__': name_str
+        , 'fields': field_names
+    }
 
     def constructor(*values):
         assert(len(field_names) == len(values))
-        r = {TYPE: type}
+        r = {TYPE: type_marker}
         for k, v in zip(field_names, values):
             r[k] = v
         return r
 
     def is_instance(obj):
-        return isinstance(obj, dict) and TYPE in obj and obj[TYPE] == type
+        return isinstance(obj, dict) and TYPE in obj and obj[TYPE] == type_marker
 
     getters = []
     setters = []
