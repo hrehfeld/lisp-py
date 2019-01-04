@@ -1287,6 +1287,7 @@ def base_env(args=[]):
             r = getattr(r, symbol_name(k))
         return r
     env_def(env, '.', special_form(__lookup))
+    env_def(env, '__lookup', __lookup)
 
     env_def(env, quote_fun_name, special_form(lambda env, e: e))
 
