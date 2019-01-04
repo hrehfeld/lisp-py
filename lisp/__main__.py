@@ -312,6 +312,7 @@ return_name = 'return'
 
 VALID = '__VALID'
 RETURN = '__RETURN'
+FAILED = '__FAILED'
 
 
 def Valid(expr):
@@ -320,6 +321,10 @@ def Valid(expr):
 
 def Return(expr):
     return (RETURN, expr)
+
+
+def Failed():
+    return (FAILED, None)
 
 
 def valid_action(a):
@@ -401,12 +406,12 @@ def make_parse_fail(msg):
 
 def read_list(s):
     if stream_empty(s) or not is_paren_open(stream_next(s)):
-        return
+        return Failed()
     else:
         # TODO check if ) throws error
         def read_list_end(s):
             if stream_empty(s) or not is_paren_close(stream_next(s)):
-                return None
+                return Failed()
             return Return(None)
 
         els = read(s, readers=[read_list_end] + readers)
@@ -436,7 +441,7 @@ def read_num(s):
     if parsed:
         s = stream_token(s, istart, stream_pos(s))
         return Valid(num(s))
-    return None
+    return Failed()
 
 
 def read_str(s):
@@ -458,7 +463,7 @@ def read_str(s):
         if not stream_empty(s):
             stream_next(s)
             return Valid(r)
-    return None
+    return Failed()
 
 
 def read_whitespace(s):
@@ -466,12 +471,12 @@ def read_whitespace(s):
     while not stream_empty(s) and stream_peek(s) in whitespace:
         stream_next(s)
         parsed = True
-    return Valid(None) if parsed else None
+    return Valid(None) if parsed else Failed()
 
 
 def read_comment(s):
     if stream_next(s) not in comment_chars:
-        return None
+        return Failed()
     while not stream_empty(s) and stream_peek(s) not in newlines:
         stream_next(s)
     return Valid(None)
@@ -497,13 +502,13 @@ def read_symbol(s):
             accessors = [a for a in accessors if a]
             
             return Valid([intern(s) for s in [accessor_char] + accessors])
-    return None
+    return Failed()
         
 
 def read_quote_like(s, quote_char, symstr):
     for c in quote_char:
         if stream_next(s) != c:
-            return None
+            return Failed()
     # quote only supports one following exp
     expr =  read(s, one=True)
     
@@ -543,7 +548,7 @@ readers = [
 
 def read(s, readers=readers, one=False):
     r = []
-    res = None
+    res = Failed()
     while not stream_empty(s) and not return_action(res):
         for reader in readers:
             istart = stream_pos(s)
