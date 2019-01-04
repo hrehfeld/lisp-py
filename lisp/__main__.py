@@ -222,6 +222,28 @@ def is_callable(e):
 Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
 
 
+@native
+class Env:
+    def __init__(self, d, parent):
+        self.d = d
+        self.parent = parent
+
+
+@native
+def is_env(o):
+    return isinstance(o, Env)
+
+
+@native
+def env_d(e):
+    return e.d
+
+
+@native
+def env_parent(e):
+    return e.parent
+
+
 # constructor with default values
 def make_env(parent=None):
     return Env({}, parent)
