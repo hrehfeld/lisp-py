@@ -186,6 +186,7 @@ def is_iterable(o):
     return True
 
 
+@native
 def is_list(e):
     return isinstance(e, list)
 
