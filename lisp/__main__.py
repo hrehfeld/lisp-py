@@ -270,6 +270,22 @@ symbols = {}
 symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
 
 
+@native
+class symbol:
+    def __init__(self, name):
+        self.name = name
+
+
+@native
+def is_symbol(s):
+    return isinstance(s, symbol)
+
+
+@native
+def symbol_name(s):
+    return s.name
+
+
 def intern(s):
     assert(is_str(s)), s
     if s not in symbols:
