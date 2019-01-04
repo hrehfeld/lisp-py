@@ -157,7 +157,6 @@ def is_atom(form):
     return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or (is_list(form) and not len(form))
 
 
-
 def keyword(s):
     if is_symbol(s):
         s = symbol_name(s)
