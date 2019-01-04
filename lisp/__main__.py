@@ -1144,6 +1144,7 @@ def base_env(args=[]):
         assert(is_int(k))
         l[k] = v
         return v
+    env_def(env, 'list_set', list_set)
     env_def(env, 'list-set', list_set)
 
     env_def(env, 'callable?', is_callable)
