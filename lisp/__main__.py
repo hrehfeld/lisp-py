@@ -490,6 +490,9 @@ def read_comment(s):
     return Valid(None)
 
 
+accessor_char_sym = intern(accessor_char)
+
+
 def read_symbol(s):
     istart = stream_pos(s)
     while not (stream_empty(s) or ends_token(s)):
@@ -509,7 +512,7 @@ def read_symbol(s):
                 return resp()
             accessors = [a for a in accessors if a]
             
-            return Valid([intern(s) for s in [accessor_char] + accessors])
+            return Valid([accessor_char_sym] + [intern(s) for s in accessors])
     return Failed()
         
 
