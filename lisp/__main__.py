@@ -91,6 +91,11 @@ def is_num(f):
 
 
 @native
+def is_tuple(v):
+    return isinstance(v, tuple)
+
+
+@native
 def make_dict(*args):
     assert (len(args) % 2 == 0), args
     kwargs = {}
@@ -1334,9 +1339,6 @@ def base_env(args=[]):
     env_def(env, 'gensym', special_form(lambda env, *args: gensym(*args)))
 
     env_def(env, 'null?', lambda *args: all([e is None for e in args]))
-
-    def is_tuple(v):
-        return isinstance(v, tuple)
 
     def is_dict(d):
         return isinstance(d, dict) and not is_struct(d)
