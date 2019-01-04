@@ -272,7 +272,9 @@ def intern(s):
         dict_set(symbols, s, symbol(s))
     return symbols[s]
 
+
 gensym_counter = -1
+
 
 def gensym(prefix='g'):
     if is_symbol(prefix):
