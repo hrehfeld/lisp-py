@@ -1271,12 +1271,15 @@ def base_env(args=[]):
     env_def(env, 'return_from', return_from_special)
     env_def(env, 'return-from', return_from_special)
     env_def(env, 'let*', special_form(__let))
+    
     # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
+
         env_def(env, 'list', list)
         env_def(env, 'tuple', tuple)
         env_def(env, 'dict', dict)
+
         env_def(env, 'dict_setdefault', dict_setdefault)
         env_def(env, 'dict-setdefault', dict_setdefault)
 
