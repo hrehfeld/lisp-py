@@ -1200,7 +1200,6 @@ def base_env(args=[]):
     env_def(env, 'keyword', keyword)
     env_def(env, 'keyword-name', keyword_name)
 
-    env_def(env, 'dict', dict)
     env_def(env, 'dict-setdefault', dict.setdefault)
 
     env_def(env, 'dict-set', dict_set)
@@ -1237,13 +1236,17 @@ def base_env(args=[]):
         env_def(env, 'if', __if)
         env_def(env, '__if', __if)
         env_def(env, '__while', __while)
+        env_def(env, 'dict', dict)
 
     @native
     def native_binds():
         def __tuple(*args):
             # tuple doesn't take more than one arg
             return tuple(args)
+        def __dict(*args, **kwargs):
+            return dict(*args, **kwargs)
         env_def(env, 'tuple', __tuple)
+        env_def(env, 'dict', __dict)
         env_def(env, '__block', special_form(block))
         env_def(env, 'if', special_form(__if))
         env_def(env, '__if', special_form(__if))
