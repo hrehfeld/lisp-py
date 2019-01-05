@@ -1271,7 +1271,7 @@ def base_env(args=[]):
             msg = '%s: %s' % (sexps_str(condition), msg)
 
         assert r, msg
-    env_def(env, 'assert', special_form(__assert))
+    bindn('assert', '__assert', special_form(__assert))
         
     env_def(env, '__block', special_form(block))
     bindn('__if', 'if', special_form(__if))
