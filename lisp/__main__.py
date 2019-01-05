@@ -1228,8 +1228,8 @@ def base_env(args=[]):
         assert(is_int(k))
         l[k] = v
         return v
-    env_def(env, 'list_set', list_set)
-    env_def(env, 'list-set', list_set)
+    bindn('list-set', 'list_set', list_set)
+
     @native
     def dict_set(d, k, v):
         d[k] = v
