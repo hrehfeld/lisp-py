@@ -854,6 +854,7 @@ def __fn(env, parameters, *body):
                  , variadic_name in special_used
                  , keys_name in special_used
     )
+    assert is_callable(user_function), repr(user_function)
     return user_function
 
 
