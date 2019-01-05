@@ -1262,15 +1262,21 @@ def base_env(args=[]):
         assert r, msg
     env_def(env, 'assert', special_form(__assert))
         
+    env_def(env, '__block', special_form(block))
+    bindn('__if', 'if', special_form(__if))
+    env_def(env, 'if', special_form(__if))
+    env_def(env, '__if', special_form(__if))
+    env_def(env, '__while', special_form(__while))
+    return_from_special = special_form(return_from)
+    env_def(env, 'return_from', return_from_special)
+    env_def(env, 'return-from', return_from_special)
+    env_def(env, 'let*', special_form(__let))
     # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
         env_def(env, 'list', list)
         env_def(env, 'tuple', tuple)
         env_def(env, 'dict', dict)
-        env_def(env, 'if', __if)
-        env_def(env, '__if', __if)
-        env_def(env, '__while', __while)
         env_def(env, 'dict_setdefault', dict_setdefault)
         env_def(env, 'dict-setdefault', dict_setdefault)
 
@@ -1290,12 +1296,6 @@ def base_env(args=[]):
             return dict(*args, **kwargs)
         env_def(env, 'dict', __dict)
 
-        env_def(env, '__block', special_form(block))
-        env_def(env, 'if', special_form(__if))
-        env_def(env, '__if', special_form(__if))
-        env_def(env, '__while', special_form(__while))
-        env_def(env, 'return-from', special_form(return_from))
-        env_def(env, 'let*', special_form(__let))
         env_def(env, 'sexps_str', sexps_str)
 
         env_def(env, 'dict_setdefault', dict.setdefault)
