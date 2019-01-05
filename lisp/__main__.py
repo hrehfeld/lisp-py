@@ -1219,7 +1219,6 @@ def base_env(args=[]):
     env_def(env, 'keyword', keyword)
     env_def(env, 'keyword-name', keyword_name)
 
-
     env_def(env, 'aref', lambda l, k: l[k])
 
     @native
@@ -1263,7 +1262,6 @@ def base_env(args=[]):
         
     env_def(env, '__block', special_form(block))
     bindn('__if', 'if', special_form(__if))
-    env_def(env, 'if', special_form(__if))
     env_def(env, '__if', special_form(__if))
     env_def(env, '__while', special_form(__while))
     return_from_special = special_form(return_from)
