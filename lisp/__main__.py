@@ -705,6 +705,7 @@ functions = {}
 
 def add_function(f, *args):
     dict_set(functions, f, args)
+    assert f in functions, functions
 
 
 def patch_function_name(f, name):
