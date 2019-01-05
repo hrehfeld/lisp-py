@@ -1,5 +1,19 @@
+import sys
 def native(f):
     return f
+
+
+def set_limit():
+    pass
+
+
+@native
+def set_limit():
+    sys.setrecursionlimit(5000)
+
+
+set_limit()
+
 
 def get_interpreter_meta_level():
     return __interpreter_meta_level
