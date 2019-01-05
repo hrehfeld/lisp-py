@@ -1202,6 +1202,7 @@ def base_env(args=[]):
         return list(iter(arg))
     bindn('as-list', 'as_list', as_list)
 
+    @native
     def append(l, *es):
         for e in es:
             l.append(e)
