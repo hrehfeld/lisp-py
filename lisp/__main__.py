@@ -1297,6 +1297,7 @@ def base_env(args=[]):
         env_def(env, 'return-from', special_form(return_from))
         env_def(env, 'let*', special_form(__let))
         env_def(env, 'sexps_str', sexps_str)
+
         env_def(env, 'dict_setdefault', dict.setdefault)
         env_def(env, 'dict-setdefault', dict.setdefault)
     
