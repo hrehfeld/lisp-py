@@ -1244,14 +1244,14 @@ def base_env(args=[]):
     # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
+        env_def(env, 'list', list)
         env_def(env, 'tuple', tuple)
+        env_def(env, 'dict', dict)
         env_def(env, 'if', __if)
         env_def(env, '__if', __if)
         env_def(env, '__while', __while)
-        env_def(env, 'dict', dict)
         env_def(env, 'dict_setdefault', dict_setdefault)
         env_def(env, 'dict-setdefault', dict_setdefault)
-        env_def(env, 'list', list)
 
 
     @native
@@ -1264,10 +1264,12 @@ def base_env(args=[]):
         def __tuple(*args):
             # tuple doesn't take more than one arg
             return tuple(args)
+        env_def(env, 'tuple', __tuple)
+
         def __dict(*args, **kwargs):
             return dict(*args, **kwargs)
-        env_def(env, 'tuple', __tuple)
         env_def(env, 'dict', __dict)
+
         env_def(env, '__block', special_form(block))
         env_def(env, 'if', special_form(__if))
         env_def(env, '__if', special_form(__if))
