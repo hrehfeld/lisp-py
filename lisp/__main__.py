@@ -1185,10 +1185,6 @@ def base_env(args=[]):
     env_def(env, 'true', True)
     env_def(env, 'false', False)
     env_def(env, 'nil', None)
-    def list_(*args):
-        return list(args)
-    native_set_nokeys(list_, True)
-    env_def(env, 'list', list_)
 
     def as_list(arg):
         assert(is_iterable(arg))
@@ -1255,9 +1251,16 @@ def base_env(args=[]):
         env_def(env, 'dict', dict)
         env_def(env, 'dict_setdefault', dict_setdefault)
         env_def(env, 'dict-setdefault', dict_setdefault)
+        env_def(env, 'list', list)
+
 
     @native
     def native_binds():
+        def list_(*args):
+            return list(args)
+        native_set_nokeys(list_, True)
+        env_def(env, 'list', list_)
+
         def __tuple(*args):
             # tuple doesn't take more than one arg
             return tuple(args)
