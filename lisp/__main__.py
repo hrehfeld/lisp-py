@@ -1241,6 +1241,11 @@ def base_env(args=[]):
         d[k] = v
     bindn('dict-set', 'dict_set', dict_set)
 
+    @native
+    def dict_keys(d):
+        return d.keys()
+    bindn('dict-keys', 'dict_keys', dict_keys)
+
 
     env_def(env, 'callable?', is_callable)
     env_def(env, 'is_callable', is_callable)
