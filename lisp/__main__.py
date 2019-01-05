@@ -1209,6 +1209,7 @@ def base_env(args=[]):
         return l
     env_def(env, 'append', append)
 
+    @native
     def extend(l, *ls):
         l = list(l)
         for e in ls:
