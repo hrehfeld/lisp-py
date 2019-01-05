@@ -1186,6 +1186,9 @@ def base_env(args=[]):
 
     env_def(env, '__interpreter_meta_level', get_interpreter_meta_level() + 1)
 
+    def bind(name, value):
+        env_def(env, name, value)
+
     def bindn(*args):
         assert len(args) >= 2, args
         names = args[:-1]
