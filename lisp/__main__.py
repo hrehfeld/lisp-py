@@ -1200,8 +1200,6 @@ def base_env(args=[]):
     env_def(env, 'keyword', keyword)
     env_def(env, 'keyword-name', keyword_name)
 
-    env_def(env, 'dict-setdefault', dict.setdefault)
-
     env_def(env, 'dict-set', dict_set)
     env_def(env, 'dict_set', dict_set)
 
@@ -1237,6 +1235,8 @@ def base_env(args=[]):
         env_def(env, '__if', __if)
         env_def(env, '__while', __while)
         env_def(env, 'dict', dict)
+        env_def(env, 'dict_setdefault', dict_setdefault)
+        env_def(env, 'dict-setdefault', dict_setdefault)
 
     @native
     def native_binds():
@@ -1254,6 +1254,9 @@ def base_env(args=[]):
         env_def(env, 'return-from', special_form(return_from))
         env_def(env, 'let*', special_form(__let))
         env_def(env, 'sexps_str', sexps_str)
+        env_def(env, 'dict_setdefault', dict.setdefault)
+        env_def(env, 'dict-setdefault', dict.setdefault)
+    
         
     native_binds()
 
