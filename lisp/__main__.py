@@ -1198,6 +1198,7 @@ def base_env(args=[]):
     @native
     def as_list(arg):
         assert(is_iterable(arg))
+        # iter not supported currently
         return list(iter(arg))
     bindn('as-list', 'as_list', as_list)
 
