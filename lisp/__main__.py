@@ -1505,7 +1505,8 @@ def base_env(args=[]):
         return [e] + l
     env_def(env, 'cons', cons)
 
-    def _slice(l, istart=None, *args):
+    @native
+    def slice(l, istart=None, *args):
         n = len(args)
         assert(n <= 2)
         if n < 2:
@@ -1531,7 +1532,8 @@ def base_env(args=[]):
                 return ''.join(r)
             else:
                 return l
-    env_def(env, 'slice', _slice)
+                return r
+    env_def(env, 'slice', slice)
 
 
     env_def(env, 'length', length)
