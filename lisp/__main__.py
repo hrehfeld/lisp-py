@@ -91,6 +91,11 @@ def ps(form):
     print(sexps_str(form))
 
 
+def debug(*args, **kwargs):
+    if get_interpreter_meta_level() > 0:
+        print(*args, **kwargs)
+        
+
 TYPE = '__type'
 TYPE_T = '__type_t'
 
@@ -709,6 +714,7 @@ def patch_function_name(f, name):
     args = functions[f]
     data = name, args[1], args[2], args[3], args[4]
     functions[f] = data
+    debug('patching ', name)
 
 
 @native
@@ -859,6 +865,7 @@ def __defun(env, name, parameters, *body):
     #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     name = symbol_name(name)
+    debug('defining function ', name)
     f = __fn(env, parameters, *body)
     patch_function_name(f, name)
     env_def(env, name, f)
@@ -1011,6 +1018,7 @@ def __call_function(env, fun, args_forms, eval):
     is_native = is_native_builtin(fun)
     if not is_native:
         function_info = get_function_info(fun)
+        debug(repr(fun), function_info)
     # native functions
     if is_native or function_info is None:
         if not is_native:
@@ -1141,7 +1149,7 @@ def __call(env, fun, args_forms, do_eval_args):
 
 
 def __eval(env, form):
-    # print('******** eval :', env_get(env, '__interpreter_meta_level'), sexps_str(form))
+    debug('******** eval :', sexps_str(form))
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
             def print_env_keys(env):
@@ -1168,7 +1176,7 @@ def __eval(env, form):
         callstack.pop()
     else:
         raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
-    #print('******** eval returning:', sexps_str(form))
+    debug('******** eval returning:', repr(form))
     return r
         
 
