@@ -1252,6 +1252,16 @@ def base_env(args=[]):
             #__eval(env, [intern('progn')] + list(body))
 
 
+    # assert is not a function thus pain
+    def __assert(env, condition, msg=''):
+        r = __eval(env, condition)
+        if not r:
+            msg = __eval(env, msg)
+            msg = '%s: %s' % (sexps_str(condition), msg)
+
+        assert r, msg
+    env_def(env, 'assert', special_form(__assert))
+        
     # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
@@ -1298,15 +1308,6 @@ def base_env(args=[]):
     set_nokeys_from_env('list')
     set_nokeys_from_env('tuple')
 
-    # assert is not a function thus pain
-    def __assert(env, condition, msg=''):
-        r = __eval(env, condition)
-        if not r:
-            msg = __eval(env, msg)
-            msg = '%s: %s' % (sexps_str(condition), msg)
-            
-        assert r, msg
-    env_def(env, 'assert', special_form(__assert))
     
     def __import(env, *args):
         # TODO 
