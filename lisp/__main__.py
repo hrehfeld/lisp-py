@@ -1189,7 +1189,6 @@ def base_env(args=[]):
         names = args[:-1]
         value = args[-1]
         for name in names:
-            print('bindn', name, len(args), sexps_str(names))
             env_def(env, name, value)
             
     env_def(env, 'true', True)
