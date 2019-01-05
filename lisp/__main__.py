@@ -1252,6 +1252,7 @@ def base_env(args=[]):
 
 
     # assert is not a function thus pain
+    @native
     def __assert(env, condition, msg=''):
         r = __eval(env, condition)
         if not r:
