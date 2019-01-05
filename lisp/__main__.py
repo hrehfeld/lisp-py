@@ -923,7 +923,7 @@ def __setq(env, name, value):
     #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
     #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
-    if is_function(value) and not is_py_native(value) and value in functions and not functions[value][0]:
+    if is_function(value) and not is_native_builtin(value) and value in functions and not functions[value][0]:
         patch_function_name(value, symbol_name(name))
     env_change(env, symbol_name(name), value)
     return value
@@ -947,29 +947,42 @@ def py_get_param_names(obj):
     return args, varargs, varkwargs, False
 
 
-py_functions = dict()
+native_functions = dict()
 
 
-def py_set_nokeys(fun, nokeys):
+@native
+def native_set_nokeys(fun, nokeys):
     #parameters = py_get_param_names(fun)
-    dict_set(py_functions, fun, nokeys)
+    dict_set(native_functions, fun, nokeys)
 
 
 @native
 def is_function(fun):
-    return type(fun).__name__ == 'function'
+    return type(fun).__name__ in ('function', 'builtin_function_or_method')
 
 
 @native
-def is_py_native(fun):
+def is_native_builtin(fun):
     # TODO: ugly hack around: [].append in {} => unhashable type
     return type(fun).__name__ == 'builtin_function_or_method'
 
 
-def is_py_fun(fun):
-    assert not is_py_native(fun), fun
-    return fun not in functions
 
+@native
+def get_native_function_info(fun):
+    if is_native_builtin(fun) and fun.__self__.__class__ is list:
+        fun = fun.__self__.__class__.__name__ + '_' + fun.__name__
+
+    if fun not in native_functions:
+        #parameters = py_get_param_names(fun)
+        native_set_nokeys(fun, False)
+        return False
+    else:
+        return native_functions[fun]
+
+
+def get_function_info(fun):
+    return functions.get(fun, None)
 
 nokeys_sym = intern(nokeys_name)
 
@@ -985,16 +998,12 @@ def __call_function(env, fun, args_forms, eval):
     if eval:
         args_forms = [__eval(env, arg) for arg in args_forms]
 
-    is_native = is_py_native(fun)
-    if is_native or is_py_fun(fun):
-        if is_native:
-            nokeys = False
-        else:
-            if fun not in py_functions:
-                #parameters = py_get_param_names(fun)
-                py_set_nokeys(fun, False)
-            else:
-                nokeys = py_functions[fun]
+    is_native = is_native_builtin(fun)
+    if not is_native:
+        function_info = get_function_info(fun)
+    # native functions
+    if is_native or function_info is None:
+        nokeys = False if is_native else get_native_function_info(fun)
 
         kwargs = {}
         if nokeys:
@@ -1043,7 +1052,7 @@ def __call_function(env, fun, args_forms, eval):
         return fun(*args, **kwargs)
     else:
         # self-defined fun
-        (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = functions[fun]
+        (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
         nokeys = nokeys or nokeys_def
 
         function_repr = function_name or 'lambda'
@@ -1162,7 +1171,7 @@ def base_env(args=[]):
     env_def(env, 'nil', None)
     def list_(*args):
         return list(args)
-    py_set_nokeys(list_, True)
+    native_set_nokeys(list_, True)
     env_def(env, 'list', list_)
 
     def as_list(arg):
