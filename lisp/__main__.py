@@ -1553,6 +1553,10 @@ def base_env(args=[]):
     # TODO
     #(infix
 
+    env_def(env, 'get_native_function_info', get_native_function_info)
+    env_def(env, 'is_native_builtin', is_native_builtin)
+    env_def(env, 'native_set_nokeys', native_set_nokeys)
+
     ## python interop
 
     env_def(env, 'int', int)
