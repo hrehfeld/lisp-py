@@ -1195,10 +1195,11 @@ def base_env(args=[]):
     env_def(env, 'false', False)
     env_def(env, 'nil', None)
 
+    @native
     def as_list(arg):
         assert(is_iterable(arg))
         return list(iter(arg))
-    env_def(env, 'as-list', as_list)
+    bindn('as-list', 'as_list', as_list)
 
     def append(l, *es):
         for e in es:
