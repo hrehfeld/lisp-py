@@ -830,7 +830,7 @@ def __fn(env, parameters, *body):
         i += 1
 
     block_name = gensym('fn')
-    def f(args, varargs, kwargs):
+    def user_function(args, varargs, kwargs):
         fun_env = make_env(env)
         env_def(fun_env, return_name, special_form(lambda call_env, value=None: return_from(fun_env, block_name, value)))
 
@@ -847,14 +847,14 @@ def __fn(env, parameters, *body):
 
         return block(fun_env, symbol_name(block_name), *body)
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
-    add_function(f
+    add_function(user_function
                  , None # name
                  , parsed_parameters
                  , nokeys_name in special_used
                  , variadic_name in special_used
                  , keys_name in special_used
     )
-    return f
+    return user_function
 
 
 def __defun(env, name, parameters, *body):
