@@ -1220,9 +1220,6 @@ def base_env(args=[]):
     env_def(env, 'keyword-name', keyword_name)
 
 
-    env_def(env, 'dict-keys', lambda d: d.keys())
-
-
     env_def(env, 'aref', lambda l, k: l[k])
 
     @native
