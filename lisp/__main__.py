@@ -287,7 +287,7 @@ def env_change(env, k, v):
 
 symbols = {}
 
-symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
+# symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
 
 
 @native
@@ -1195,6 +1195,8 @@ def base_env(args=[]):
     env_def(env, 'repr', lambda arg: sexps_str(arg))
 
     env_def(env, 'intern', intern)
+    env_def(env, 'symbol', symbol)
+    env_def(env, 'symbol_name', symbol_name)
     env_def(env, 'symbol-name', symbol_name)
 
     env_def(env, 'keyword', keyword)
