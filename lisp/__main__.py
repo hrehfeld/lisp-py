@@ -1262,7 +1262,6 @@ def base_env(args=[]):
         
     env_def(env, '__block', special_form(block))
     bindn('__if', 'if', special_form(__if))
-    env_def(env, '__if', special_form(__if))
     env_def(env, '__while', special_form(__while))
     return_from_special = special_form(return_from)
     env_def(env, 'return_from', return_from_special)
