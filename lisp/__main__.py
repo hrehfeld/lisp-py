@@ -1133,7 +1133,7 @@ def __call_function(env, fun, args_forms, eval):
 def __call(env, fun, args_forms, do_eval_args):
     if is_special_form(fun):
         fun = special_form_fun(fun)
-
+        debug(repr(fun))
         r = __call_function(env, fun, [env] + args_forms, eval=False)
         return r
     elif is_macro(fun):
