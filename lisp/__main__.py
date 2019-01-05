@@ -1531,7 +1531,6 @@ def base_env(args=[]):
             if is_str(l):
                 return ''.join(r)
             else:
-                return l
                 return r
     env_def(env, 'slice', slice)
 
