@@ -1887,8 +1887,13 @@ interpreter_tests = [
     , ("""(zip (range 3) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
     , ("""(zip (range 5) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
     , ("""(zip (range 3) '(foo bar baz biz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+    , ('(slice (range 9) 3)', [0, 1, 2])
     , ('(slice (range 9) 3 7)', [3, 4, 5, 6])
     , ('(slice (range 9) 3 7 2)', [3, 5])
+    , ('(slice (range 9) -8)', [0])
+    , ('(slice (range 9) -7)', [0, 1])
+    , ('(slice (range 9) -3 -1)', [6, 7])
+    , ('(slice (range 9) -3 0)', [6, 7, 8])
 ]
 
 
