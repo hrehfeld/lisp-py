@@ -1184,6 +1184,8 @@ def base_env(args=[]):
         value = args[-1]
         for name in names:
             env_def(env, name, value)
+
+    env_def(env, 'type', type)
             
     env_def(env, 'true', True)
     env_def(env, 'false', False)
