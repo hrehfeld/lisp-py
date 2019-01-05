@@ -1530,6 +1530,10 @@ def base_env(args=[]):
 
             if iend is None:
                 iend = len(l)
+            if istart < 0:
+                assert iend <= 0, iend
+                istart += len(l)
+                iend += len(l)
             return l[istart:iend]
         else:
             if istart is None:
