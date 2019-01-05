@@ -1258,13 +1258,11 @@ def base_env(args=[]):
     def native_binds():
         def __list(*args):
             return list(args)
-        native_set_nokeys(__list, True)
         env_def(env, 'list', __list)
 
         def __tuple(*args):
             # tuple doesn't take more than one arg
             return tuple(args)
-        native_set_nokeys(__tuple, True)
         env_def(env, 'tuple', __tuple)
 
         def __dict(*args, **kwargs):
@@ -1283,6 +1281,11 @@ def base_env(args=[]):
     
         
     native_binds()
+    def set_nokeys_from_env(name):
+        f = env_get(env, name)
+        native_set_nokeys(f, True)
+    set_nokeys_from_env('list')
+    set_nokeys_from_env('tuple')
 
     # assert is not a function thus pain
     def __assert(env, condition, msg=''):
