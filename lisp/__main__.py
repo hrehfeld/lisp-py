@@ -1,6 +1,15 @@
 def native(f):
     return f
 
+def get_interpreter_meta_level():
+    return __interpreter_meta_level
+
+
+@native
+def get_interpreter_meta_level():
+    return 0
+
+
 @native
 def sexps_str(form, indent=0):
     sexpr_print_operators = {
@@ -1142,15 +1151,6 @@ def __eval(env, form):
         raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
     return r
         
-
-def get_interpreter_meta_level():
-    return __interpreter_meta_level
-
-
-@native
-def get_interpreter_meta_level():
-    return 0
-
 
 def base_env(args=[]):
     env = make_env()
