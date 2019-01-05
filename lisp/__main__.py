@@ -1214,8 +1214,7 @@ def base_env(args=[]):
 
     env_def(env, 'intern', intern)
     env_def(env, 'symbol', symbol)
-    env_def(env, 'symbol_name', symbol_name)
-    env_def(env, 'symbol-name', symbol_name)
+    bindn('symbol-name', 'symbol_name', symbol_name)
 
     env_def(env, 'keyword', keyword)
     env_def(env, 'keyword-name', keyword_name)
