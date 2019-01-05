@@ -1457,7 +1457,7 @@ def base_env(args=[]):
 
     env_def(env, 'def', special_form(__def))
     env_def(env, 'defun', special_form(__defun))
-    env_def(env, 'defmacro', special_form(__defmacro))
+    bind('defmacro', special_form(__defmacro))
     env_def(env, 'fn', special_form(__fn))
     env_def(env, 'apply', special_form(__apply))
 
