@@ -266,13 +266,14 @@ def env_contains(env, k):
 
 def env_get(env, k):
     assert(is_env(env))
-    if k in env_d(env):
-        return env_d(env)[k]
-    elif env_parent(env):
-        return env_get(env_parent(env), k)
-    else:
-        # TODO bind
-        raise KeyError(k)
+    while env is not None:
+        d = env_d(env)
+        if k in d:
+            return d[k]
+        else:
+            env = env_parent(env)
+    # TODO bind
+    raise KeyError(k)
 
 
 def env_containing_parent(env, k):
