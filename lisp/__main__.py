@@ -1212,8 +1212,6 @@ def base_env(args=[]):
         return l
     env_def(env, 'extend', extend)
 
-    env_def(env, 'repr', lambda arg: sexps_str(arg))
-
     env_def(env, 'intern', intern)
     env_def(env, 'symbol', symbol)
     env_def(env, 'symbol_name', symbol_name)
@@ -1304,7 +1302,7 @@ def base_env(args=[]):
             return dict(*args, **kwargs)
         env_def(env, 'dict', __dict)
 
-        env_def(env, 'sexps_str', sexps_str)
+        bindn('repr', 'sexps_str', sexps_str)
 
         env_def(env, 'dict_setdefault', dict.setdefault)
         env_def(env, 'dict-setdefault', dict.setdefault)
