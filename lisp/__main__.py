@@ -1661,6 +1661,7 @@ def __progn(env, *forms):
 def _interpret(forms, env=None, args=[]):
     if env is None:
         env = base_env(args)
+    assert env, env
     env_def(env, '__name__', '<self>')
     return __progn(env, *forms)
 
