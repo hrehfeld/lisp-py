@@ -124,11 +124,6 @@ def is_dict(d):
 
 
 @native
-def dict_set(d, k, v):
-    d[k] = v
-
-
-@native
 def __defstruct(name_str, *field_names):
     assert(is_str(name_str)), name_str
     for n in field_names:
@@ -1227,8 +1222,6 @@ def base_env(args=[]):
     env_def(env, 'keyword', keyword)
     env_def(env, 'keyword-name', keyword_name)
 
-    env_def(env, 'dict-set', dict_set)
-    env_def(env, 'dict_set', dict_set)
 
     env_def(env, 'dict-keys', lambda d: d.keys())
 
@@ -1243,6 +1236,11 @@ def base_env(args=[]):
         return v
     env_def(env, 'list_set', list_set)
     env_def(env, 'list-set', list_set)
+    @native
+    def dict_set(d, k, v):
+        d[k] = v
+    bindn('dict-set', 'dict_set', dict_set)
+
 
     env_def(env, 'callable?', is_callable)
     env_def(env, 'is_callable', is_callable)
