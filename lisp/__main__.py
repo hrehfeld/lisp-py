@@ -1256,10 +1256,10 @@ def base_env(args=[]):
 
     @native
     def native_binds():
-        def list_(*args):
+        def __list(*args):
             return list(args)
-        native_set_nokeys(list_, True)
-        env_def(env, 'list', list_)
+        native_set_nokeys(__list, True)
+        env_def(env, 'list', __list)
 
         def __tuple(*args):
             # tuple doesn't take more than one arg
