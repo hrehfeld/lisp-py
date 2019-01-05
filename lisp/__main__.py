@@ -1009,6 +1009,10 @@ def __call_function(env, fun, args_forms, eval):
                     else:
                         ilast_normal_arg = iarg
                     args += [(k, arg)]
+            # lone keyword at the end is a positional arg
+            if kw is not None:
+                args += [(len(args), arg)]
+                
             del kw
 
             clean_args = []
