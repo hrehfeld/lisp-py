@@ -1186,9 +1186,8 @@ def base_env(args=[]):
 
     def bindn(*args):
         assert len(args) >= 2, args
-        ilast = len(args) - 1
-        names = args[:ilast - 2]
-        value = args[ilast]
+        names = args[:-1]
+        value = args[-1]
         for name in names:
             print('bindn', name, len(args), sexps_str(names))
             env_def(env, name, value)
