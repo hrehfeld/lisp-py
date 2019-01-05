@@ -1174,14 +1174,25 @@ def __eval(env, form):
         callstack.pop()
     else:
         raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
+    #print('******** eval returning:', sexps_str(form))
     return r
         
 
 def base_env(args=[]):
+    print('CREATING BASEENV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', get_interpreter_meta_level())
     env = make_env()
 
     env_def(env, '__interpreter_meta_level', get_interpreter_meta_level() + 1)
 
+    def bindn(*args):
+        assert len(args) >= 2, args
+        ilast = len(args) - 1
+        names = args[:ilast - 2]
+        value = args[ilast]
+        for name in names:
+            print('bindn', name, len(args), sexps_str(names))
+            env_def(env, name, value)
+            
     env_def(env, 'true', True)
     env_def(env, 'false', False)
     env_def(env, 'nil', None)
