@@ -1264,6 +1264,7 @@ def base_env(args=[]):
         def __tuple(*args):
             # tuple doesn't take more than one arg
             return tuple(args)
+        native_set_nokeys(__tuple, True)
         env_def(env, 'tuple', __tuple)
 
         def __dict(*args, **kwargs):
