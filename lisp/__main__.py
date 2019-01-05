@@ -1032,8 +1032,7 @@ def __call_function(env, fun, args_forms, eval):
                 else:
                     k = iarg
                     if kw:
-                        # without :
-                        k = symbol_name(kw)[1:]
+                        k = keyword_name(kw)
                         kw = None
                     else:
                         ilast_normal_arg = iarg
