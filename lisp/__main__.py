@@ -880,7 +880,7 @@ def __apply(env, f_form, args):
     callstack.append((f_form, args))
     f = __eval(env, f_form)
     args = __eval(env, args)
-    r =  __call(env, f, args, do_eval_args=False)
+    r = __call(env, f, args, do_eval_args=False)
     callstack.pop()
     return r
     
