@@ -1163,7 +1163,7 @@ def __eval(env, form):
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
-        assert is_macro(fun) or is_special_form(fun) or callable(fun), fun
+        assert is_macro(fun) or is_special_form(fun) or is_callable(fun), fun
         r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
     else:
