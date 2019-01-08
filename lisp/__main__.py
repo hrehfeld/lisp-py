@@ -1940,6 +1940,7 @@ interpreter_tests = [
 ]
 
 
+@native
 def load_tests():
     def make_test(name, program, expected_result):
         def run(self):
