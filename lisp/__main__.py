@@ -1333,6 +1333,9 @@ def base_env(args=[]):
     set_nokeys_from_env('list')
     set_nokeys_from_env('tuple')
 
+    native_set_nokeys(__defmacro, True)
+
+
     
     def __import(env, *args):
         # TODO 
