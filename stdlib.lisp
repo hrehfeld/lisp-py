@@ -61,9 +61,9 @@
     (cond ((eq m 1)
            (set n (head args)))
           ((eq m 2)
-           (setf (tuple i n) args))
+           (setf (:= i n) args))
           ((eq m 3)
-           (setf (tuple i n step) args)))
+           (setf (:= i n step) args)))
     (assert (and (int? n) (>= n 0)) n)
     (assert (and (int? i) (>= i 0)) i)
     (assert (and (int? step) (>= step 0)) step)
@@ -98,7 +98,7 @@
   (cond
    ((symbol? target)
     (symbol-form target))
-   ((named-operator? target 'tuple)
+   ((list? target)
     (fold
      (fn (binds target)
          (assert (eq (length target) 2))
@@ -109,7 +109,7 @@
            (+ binds
               (destructuring-bind-parse target `(nth ~itarget ~value-evaluated-form)))))
      (list)
-     (enumerate (as-list (slice target 1 nil)))))
+     (enumerate target)))
    (true (throw (Exception (+ "unknown destructuring " (repr target)))))))
 
 (defmacro setf (target value)
@@ -121,12 +121,12 @@
           ((symbol? target)
            `((set ~target ~value-var)))
           ;; tuples
-          ((named-operator? target 'tuple)
+          ((named-operator? target ':=)
            (map-apply
             (fn (var val)
                 (assert (symbol? var) (repr var))
                 (list 'set var val))
-            (destructuring-bind-parse target
+            (destructuring-bind-parse (as-list (slice target 1 nil))
                                       value-var)))
           ((named-operator? target 'aref)
            (let* ((target (tail target)))
@@ -151,11 +151,13 @@
           (fold
            (fn (vars target-value)
                (let* ((target (head target-value))
-                      (value (last target-value))
-                      (value-var (gensym let-value))
-                      (r (destructuring-bind-parse target value-var)))
-                 (+ vars `((~value-var ~value)) r)
-                 ))
+                      (value (last target-value)))
+                 (+ vars
+                    (if (named-operator? target ':=)
+                        (let* ((value-var (gensym let-value)))
+                          (cons (list value-var value)
+                                (destructuring-bind-parse (as-list (slice target 1 nil)) value-var)))
+                      (list target-value)))))
            (list) vars)))
     `(progn
                  (let*

@@ -1760,23 +1760,23 @@ interpreter_tests = [
     , ("(let* ((foo 3)) `(bar ~foo))", [intern('bar'), 3])
     , ("(let* ((foo 3)) `(bar ~@(list foo 1)))", [intern('bar'), 3, 1])
     , ("(destructuring-bind-parse 'target 0", [[intern('target'), 0]])
-    , ("(destructuring-bind-parse '(tuple targeta targetb) 'value)", [[intern('targeta'), [intern('nth'), 0, intern('value')]]
+    , ("(destructuring-bind-parse '(targeta targetb) 'value)", [[intern('targeta'), [intern('nth'), 0, intern('value')]]
                                                                 , [intern('targetb'), [intern('nth'), 1, intern('value')]]])
-    , ("(destructuring-bind-parse '(tuple targeta (tuple targetb targetc)) 'value)"
+    , ("(destructuring-bind-parse '(targeta (targetb targetc)) 'value)"
        , [[intern('targeta'), [intern('nth'), 0, intern('value')]]
           , [intern('targetb'), [intern('nth'), 0, [intern('nth'), 1, intern('value')]]]
           , [intern('targetc'), [intern('nth'), 1, [intern('nth'), 1, intern('value')]]]])
-    , ("(destructuring-bind-parse '(tuple (tuple targeta targetb) targetc) 'value)"
+    , ("(destructuring-bind-parse '((targeta targetb) targetc) 'value)"
        , [[intern('targeta'), [intern('nth'), 0, [intern('nth'), 0, intern('value')]]]
           , [intern('targetb'), [intern('nth'), 1, [intern('nth'), 0, intern('value')]]]
           , [intern('targetc'), [intern('nth'), 1, intern('value')]]])
     , ("(def target) (setf target 0) target", 0)
-    , ("(def targeta) (def targetb) (setf (tuple targeta targetb) '(1 2)) (list targeta targetb)"
+    , ("(def targeta) (def targetb) (setf (:= targeta targetb) '(1 2)) (list targeta targetb)"
        , [1, 2])
     , ("(let* ((l (list 1))) (setf (aref l 0) 0) l)", [0])
     , ("(let* ((l (dict :foo 1))) (setf (aref l :foo) 0) l)", dict(foo=0))
     , ("(let ((foo 3)) foo)", 3)
-    , ("(let (((tuple foo bar) (list 0 1))) (list foo bar))", [0, 1])
+    , ("(let (((:= foo bar) (list 0 1))) (list foo bar))", [0, 1])
     # expected error
     #, ("(let (((tuple foo bar baz) (list 0 1))) (list foo bar))", [0, 1])
     # expected error
@@ -1846,7 +1846,7 @@ interpreter_tests = [
 (def foo0)
 (def foo1)
 (def foo2)
-(setf (tuple foo0 foo1 foo2) '(0 1 2))
+(setf (:= foo0 foo1 foo2) '(0 1 2))
 (tuple foo2 foo1 foo0)
 """, (2, 1, 0))
     , ("(defun foo ()) (foo)", None)
@@ -1931,6 +1931,8 @@ interpreter_tests = [
     , ("""(zip (range 3) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
     , ("""(zip (range 5) '(foo bar baz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
     , ("""(zip (range 3) '(foo bar baz biz))""", [[0, intern('foo')], [1, intern('bar')], [2, intern('baz')]])
+#    , ('tuple', __tuple)
+    , ('(dolist (i (range 99)) (print (repr i)))', None)
     , ('(slice (range 9) 3)', [0, 1, 2])
     , ('(slice (range 9) 3 7)', [3, 4, 5, 6])
     , ('(slice (range 9) 3 -2)', [3, 4, 5, 6])
