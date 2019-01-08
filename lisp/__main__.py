@@ -1121,8 +1121,8 @@ def __call_function(env, fun, args_forms, eval):
                 n = symbol_name(param_name)
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
-                    raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call}'
-                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, args)))
+                    raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call} -- forms: {forms}'
+                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, args), forms=sexps_str(args_forms)))
                 args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
