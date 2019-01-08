@@ -1003,6 +1003,11 @@ def get_native_function_info(fun):
         return native_functions[fun]
 
 
+@native
+def get_host_function_info(fun):
+    return functions.get(fun, None)
+
+
 def get_function_info(fun):
     return functions.get(fun, None)
 
@@ -1023,6 +1028,8 @@ def __call_function(env, fun, args_forms, eval):
     is_native = is_native_builtin(fun)
     if not is_native:
         function_info = get_function_info(fun)
+        if function_info is None:
+            function_info = get_host_function_info(fun)
         debug(repr(fun), function_info)
     # native functions
     if is_native or function_info is None:
@@ -1628,6 +1635,7 @@ def base_env(args=[]):
     # TODO
     #(infix
 
+    bind('get_host_function_info', get_host_function_info)
     env_def(env, 'get_native_function_info', get_native_function_info)
     env_def(env, 'is_native_builtin', is_native_builtin)
     env_def(env, 'native_set_nokeys', native_set_nokeys)
