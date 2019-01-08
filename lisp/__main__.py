@@ -1108,8 +1108,8 @@ def __call_function(env, fun, args_forms, eval):
                     raise Exception(make_error_msg('positional argument follows keyword argument'))
 
                 if not set_varargs and len(args) >= len(parameters):
-                    raise Exception(make_error_msg('too many arguments for function call: ({fun} {args})'
-                                                   , name=args, fun=function_repr, args=sexps_str(args_forms)))
+                    raise Exception(make_error_msg('too many arguments for function call: {call}'
+                                                   , call=format_operator_call(function_repr, args_forms)))
                 
                 args.append(arg)
             del arg
