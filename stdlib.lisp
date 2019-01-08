@@ -150,6 +150,7 @@
   (let* ((var-defs
           (fold
            (fn (vars target-value)
+               (assert (eq (length target-value) 2) target-value)
                (let* ((target (head target-value))
                       (value (last target-value)))
                  (+ vars
