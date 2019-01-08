@@ -719,6 +719,9 @@ def patch_function_name(f, name):
     debug('patching ', name)
 
 
+def function_name(f):
+    return functions[f][0] if f in functions else str(f)
+
 @native
 def block(env, name, *body):
     assert(is_str(name))
