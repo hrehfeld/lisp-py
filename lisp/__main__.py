@@ -1558,6 +1558,8 @@ def base_env(args=[]):
             else:
                 iend = args[0]
 
+            if istart is None:
+                istart = 0
             if iend is None:
                 iend = len(l)
             if istart > iend:
