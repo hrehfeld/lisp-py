@@ -333,7 +333,7 @@ def intern(s):
 
 gensym_counter = -1
 
-
+@native
 def gensym(prefix='g'):
     if is_symbol(prefix):
         prefix = symbol_name(prefix)
