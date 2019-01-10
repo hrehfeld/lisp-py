@@ -1711,14 +1711,15 @@ def _interpret(forms, env=None, args=[]):
 interpret = _interpret
 
 # TODO:
-@native
-def interpret(*args, **kwargs):
-    try:
-        return _interpret(*args, **kwargs)
-    except Exception as e:
-        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
-    except KeyboardInterrupt as e:
-        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
+if True:
+    @native
+    def interpret(*args, **kwargs):
+        try:
+            return _interpret(*args, **kwargs)
+        except Exception as e:
+            raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
+        except KeyboardInterrupt as e:
+            raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
     
 # from .base import TYPE, TYPE_T
 # from .symbol import intern
