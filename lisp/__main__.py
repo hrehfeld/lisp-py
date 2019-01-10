@@ -663,7 +663,7 @@ def callstack_str():
     max_n = 50
     long = len(callstack) > max_n
     partial_callstack = reversed(list(reversed(callstack))[:max_n]) if long else callstack
-    indent = '### '
+    indent = '### ' * (1 + get_interpreter_meta_level())
     def stack_line(f, args):
         return indent + format_operator_call(sexps_str(f), args)
     stack_strs = [stack_line(*line) for line in partial_callstack]
