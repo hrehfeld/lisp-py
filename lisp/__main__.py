@@ -1658,6 +1658,7 @@ def base_env(args=[]):
         assert is_list(_with)
         assert len(_with) == 1
         _with = _with[0]
+        var = None
         if is_list(_with):
             assert len(_with) == 2
             var, _with = _with
