@@ -1180,7 +1180,6 @@ def __eval(env, form):
             def print_env_keys(env):
                 r = []
                 while env is not None:
-                    r += ['']
                     r += ['Keys: ' + ' '.join(sorted(map(symbol_name, as_list(env_d(env).keys()))))]
                     env = env_parent(env)
                 return '\n'.join(r)
