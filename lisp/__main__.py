@@ -1187,7 +1187,7 @@ def __eval(env, form):
 
             raise Exception(make_error_msg('Symbol "{sym}" not found in env \n{keys}'
                                            , sym=symbol_name(form)
-                                    , keys=print_env_keys(env)))
+                                           , keys=print_env_keys(env)))
         r = env_get(env, form)
     elif is_atom(form):
         r = form
