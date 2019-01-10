@@ -1664,7 +1664,8 @@ def base_env(args=[]):
             var, _with = _with
             assert(is_symbol(var))
         with __eval(env, _with) as f:
-            env_def(env, symbol_name(var), f)
+            if var is not None:
+                env_def(env, symbol_name(var), f)
             __progn(env, *body)
     env_def(env, 'py-with', special_form(py_with))
 
