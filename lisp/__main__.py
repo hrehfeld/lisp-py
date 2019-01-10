@@ -693,8 +693,8 @@ def defstruct(env, name, *fields):
     fname = '%s?' % (name_str)
     env_def(env, fname, is_instance)
     for field, get in zip(field_names, getter):
-        fname = '%s-%s' % (name_str, (field))
-        env_def(env, fname, get)
+        gname = '%s-%s' % (name_str, (field))
+        env_def(env, gname, get)
 
     for field, set in zip(field_names, setter):
         fname = '%s-%s-set' % (name_str, (field))
