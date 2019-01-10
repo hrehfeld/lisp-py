@@ -229,6 +229,13 @@ def length(l):
 
 
 @native
+def as_list(arg):
+    assert(is_iterable(arg))
+    # iter not supported currently
+    return list(iter(arg))
+
+
+@native
 def is_callable(e):
     return callable(e)
 
@@ -1227,11 +1234,6 @@ def base_env(args=[]):
     bind('false', False)
     bind('nil', None)
 
-    @native
-    def as_list(arg):
-        assert(is_iterable(arg))
-        # iter not supported currently
-        return list(iter(arg))
     bindn('as-list', 'as_list', as_list)
 
     @native
