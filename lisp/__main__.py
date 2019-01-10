@@ -920,12 +920,11 @@ def __let(env, vars, *let_body):
 
 @native
 def __if(env, condition, then, *else_body):
+    r = None
     if __eval(env, condition):
         r = __eval(env, then)
     elif else_body:
         r = __progn(env, *else_body)
-    else:
-        r = None
     return r
 
 
