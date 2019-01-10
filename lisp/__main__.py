@@ -1209,6 +1209,7 @@ def base_env(args=[]):
     env_def(env, intern('__interpreter_meta_level'), get_interpreter_meta_level() + 1)
 
     def bind(name, value):
+        assert is_str(name), name
         env_def(env, intern(name), value)
 
     def bindn(*args):
