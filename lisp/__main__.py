@@ -1251,6 +1251,9 @@ def base_env(args=[]):
         return l
     bind('extend', extend)
 
+    # FIXME implement in stdlib
+    bind('sorted', sorted)
+
     bind('intern', intern)
     bind('symbol', symbol)
     bindn('symbol-name', 'symbol_name', symbol_name)
