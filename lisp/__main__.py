@@ -263,11 +263,13 @@ def make_env(parent=None):
 
 
 def env_contains(env, k):
+    assert is_symbol(k), k
     assert(is_env(env))
     return k in env_d(env) or (env_parent(env) and env_contains(env_parent(env), k))
 
 
 def env_get(env, k):
+    assert is_symbol(k), k
     assert(is_env(env))
     while env is not None:
         d = env_d(env)
@@ -280,6 +282,7 @@ def env_get(env, k):
 
 
 def env_containing_parent(env, k):
+    assert is_symbol(k), k
     assert(is_env(env))
     while env and k not in env_d(env):
         env = env_parent(env)
@@ -287,6 +290,7 @@ def env_containing_parent(env, k):
 
 
 def env_def(env, k, v):
+    assert is_symbol(k), k
     assert(is_env(env))
     d = env_d(env)
     assert not k in d, '{k} in {d}'.format(k=k, d=env_d(env))
@@ -295,6 +299,7 @@ def env_def(env, k, v):
 
 
 def env_change(env, k, v):
+    assert is_symbol(k), k
     env = env_containing_parent(env, k) or env
     #print('        env_change:', k, '=', sexps_str(v), env_d(env).keys())
     env_d(env)[k] = v
@@ -373,6 +378,7 @@ backquote_eval_fun_name = "unquote"
 backquote_splice_fun_name = "unquote-splice"
 
 return_name = 'return'
+return_sym = intern(return_name)
 
 VALID = '__VALID'
 RETURN = '__RETURN'
@@ -692,16 +698,16 @@ def defstruct(env, name, *fields):
     field_names = [symbol_name(f) for f in fields]
 
     constructor, is_instance, getter, setter = __defstruct(name_str, *field_names)
-    env_def(env, name_str, constructor)
+    env_def(env, name, constructor)
     fname = '%s?' % (name_str)
-    env_def(env, fname, is_instance)
+    env_def(env, intern(fname), is_instance)
     for field, get in zip(field_names, getter):
         gname = '%s-%s' % (name_str, (field))
-        env_def(env, gname, get)
+        env_def(env, intern(gname), get)
 
     for field, set in zip(field_names, setter):
         sname = '%s-%s-set' % (name_str, (field))
-        env_def(env, sname, set)
+        env_def(env, intern(sname), set)
 
     return constructor
 
@@ -728,11 +734,11 @@ def function_name(f):
 
 @native
 def block(env, name, *body):
-    assert(is_str(name))
+    assert is_symbol(name), name
     try:
         return __progn(env, *body)
     except BlockException as e:
-        assert is_str(e.name), e.name
+        assert is_symbol(e.name), e.name
         if e.name != name:
             raise e
         return e.value
@@ -742,7 +748,7 @@ def block(env, name, *body):
 def return_from(env, name, value=None):
     assert (is_symbol(name)), name
     r = __eval(env, value) if value is not None else None
-    raise BlockException(symbol_name(name), r)
+    raise BlockException(name, r)
     
 
 def parameter_default(p):
@@ -841,20 +847,20 @@ def __fn(env, parameters, *body):
     block_name = gensym('fn')
     def user_function(args, varargs, kwargs):
         fun_env = make_env(env)
-        env_def(fun_env, return_name, special_form(lambda call_env, value=None: return_from(call_env, block_name, value)))
+        env_def(fun_env, return_sym, special_form(lambda call_env, value=None: return_from(call_env, block_name, value)))
 
         for (parameter, default), arg in zip(parsed_parameters, args):
             assert(is_symbol(parameter)), parameter
-            env_def(fun_env, symbol_name(parameter), arg)
+            env_def(fun_env, parameter, arg)
 
         varargs_name = special_params[variadic_name]
         if is_symbol(varargs_name):
-            env_def(fun_env, symbol_name(varargs_name), varargs)
+            env_def(fun_env, varargs_name, varargs)
         keysargs_name = special_params[keys_name]
         if is_symbol(keysargs_name):
-            env_def(fun_env, symbol_name(keysargs_name), kwargs)
+            env_def(fun_env, keysargs_name, kwargs)
 
-        return block(fun_env, symbol_name(block_name), *body)
+        return block(fun_env, block_name, *body)
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
     add_function(user_function
                  , None # name
@@ -869,33 +875,32 @@ def __fn(env, parameters, *body):
 
 def __defun(env, name, parameters, *body):
     assert(is_symbol(name))
-    #if env_contains(env, symbol_name(name)):
+    #if env_contains(env, name):
     #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
-    name = symbol_name(name)
-    debug('defining function ', name)
+    name_str = symbol_name(name)
     f = __fn(env, parameters, *body)
-    patch_function_name(f, name)
+    patch_function_name(f, name_str)
     env_def(env, name, f)
     return f
 
 
 def __defmacro(lexical_env, name, parameters, *body):
     assert(is_symbol(name)), (name)
-    if env_contains(lexical_env, symbol_name(name)):
+    if env_contains(lexical_env, name):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     f = __fn(lexical_env, parameters, *body)
     m = macro(f)
-    env_def(lexical_env, symbol_name(name), m)
+    env_def(lexical_env, name, m)
     return m
 
 
 def __apply(env, f_form, args):
     f = __eval(env, f_form)
-    args = __eval(env, args)
-    r = __call(env, f, args, do_eval_args=False)
     callstack.append((function_name(f), [args]))
+    evaled_args = __eval(env, args)
+    r = __call(env, f, evaled_args, do_eval_args=False)
     callstack.pop()
     return r
     
@@ -917,7 +922,7 @@ def __let(env, vars, *let_body):
     for var in vars:
         name_sym, body = var
         val = __eval(let_env, body)
-        env_def(let_env, symbol_name(name_sym), val)
+        env_def(let_env, name_sym, val)
     return __progn(let_env, *let_body)
 
 
@@ -933,23 +938,23 @@ def __if(env, condition, then, *else_body):
 
 def __def(env, name, *args):
     assert(is_symbol(name))
-    if env_contains(env, symbol_name(name)):
+    if env_contains(env, name):
         raise Exception(make_error_msg('var {var} already declared', var=symbol_name(name)))
     val = __eval(env, args[0]) if args else None
-    env_def(env, symbol_name(name), val)
+    env_def(env, name, val)
     return val
 
 
 def __setq(env, name, value):
     assert(env is not None)
     assert(is_symbol(name))
-    #if not env_contains(env, symbol_name(name)):
+    #if not env_contains(env, name):
     #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
     #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
     if is_function(value) and not is_native_builtin(value) and value in functions and not functions[value][0]:
         patch_function_name(value, symbol_name(name))
-    env_change(env, symbol_name(name), value)
+    env_change(env, name, value)
     return value
 
 
@@ -1168,7 +1173,7 @@ def __eval(env, form):
     debug('******** eval :', sexps_str(form))
     r = None
     if is_symbol(form) and not is_keyword(form):
-        if not env_contains(env, symbol_name(form)):
+        if not env_contains(env, form):
             def print_env_keys(env):
                 r = []
                 while env is not None:
@@ -1181,7 +1186,7 @@ def __eval(env, form):
             raise Exception(make_error_msg('Symbol "{sym}" not found in env \n{keys}'
                                            , sym=symbol_name(form)
                                     , keys=print_env_keys(env)))
-        r = env_get(env, symbol_name(form))
+        r = env_get(env, form)
     elif is_atom(form):
         r = form
     elif is_list(form) and form:
@@ -1201,10 +1206,10 @@ def base_env(args=[]):
     debug(print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CREATING BASEENV for interpreter', get_interpreter_meta_level()))
     env = make_env()
 
-    env_def(env, '__interpreter_meta_level', get_interpreter_meta_level() + 1)
+    env_def(env, intern('__interpreter_meta_level'), get_interpreter_meta_level() + 1)
 
     def bind(name, value):
-        env_def(env, name, value)
+        env_def(env, intern(name), value)
 
     def bindn(*args):
         assert len(args) >= 2, args
@@ -1693,7 +1698,7 @@ def _interpret(forms, env=None, args=[]):
     if env is None:
         env = base_env(args)
     assert env, env
-    env_def(env, '__name__', '<self>')
+    env_def(env, intern('__name__'), '<self>')
     return __progn(env, *forms)
 
 interpret = _interpret

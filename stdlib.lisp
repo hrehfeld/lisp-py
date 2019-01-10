@@ -2,10 +2,11 @@
   `(if ~test (progn ~@body)))
 
 (defmacro block (name &rest body)
+  (assert (symbol? name) name)
   (let* ((name (if (is name 'nil)
 				   (gensym block)
 				 name)))
-	`(__block ~(symbol-name name)
+	`(__block ~name
 			  (defun break ((value nil)) (return-from ~name value))
 			  ~@body)))
 
