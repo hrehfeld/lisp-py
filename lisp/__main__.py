@@ -1606,10 +1606,12 @@ def base_env(args=[]):
 
 
     bind('length', length)
- 
-    def has(l, e):
+
+    @native
+    def contains(l, e):
+        assert is_list(l) or is_tuple(l) or is_dict(l)
         return e in l
-    bind('contains?', has)
+    bindn('contains?', 'contains', contains)
 
     def nth(i, l):
         assert (is_list(l) or is_tuple(l) or is_str(l)),  'nth: {i} {l} ({t})'.format(i=sexps_str(i), l=sexps_str(l), t=type(l))
