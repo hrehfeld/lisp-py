@@ -697,8 +697,8 @@ def defstruct(env, name, *fields):
         env_def(env, gname, get)
 
     for field, set in zip(field_names, setter):
-        fname = '%s-%s-set' % (name_str, (field))
-        env_def(env, fname, set)
+        sname = '%s-%s-set' % (name_str, (field))
+        env_def(env, sname, set)
 
     return constructor
 
