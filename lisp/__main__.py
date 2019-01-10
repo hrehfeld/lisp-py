@@ -786,7 +786,9 @@ def __fn(env, parameters, *body):
     parsed_parameters = []
     special_used = set()
 
-    special_params = {variadic_name: None, keys_name: None}
+    special_params = {}
+    special_params[variadic_name] = None
+    special_params[keys_name] = None
 
     varargs_param = False
     kwargs_param = False
