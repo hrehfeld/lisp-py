@@ -1162,6 +1162,7 @@ def __call(env, fun, args_forms, do_eval_args):
 
 def __eval(env, form):
     debug('******** eval :', sexps_str(form))
+    r = None
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, symbol_name(form)):
             def print_env_keys(env):
