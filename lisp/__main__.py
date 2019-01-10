@@ -143,7 +143,8 @@ def __defstruct(name_str, *field_names):
 
     def constructor(*values):
         assert(len(field_names) == len(values))
-        r = {TYPE: type_marker}
+        r = {}
+        r[TYPE] = type_marker
         for k, v in zip(field_names, values):
             r[k] = v
         return r
