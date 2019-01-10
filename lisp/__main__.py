@@ -51,6 +51,9 @@ def sexps_str(form, indent=0):
             for e in form:
                 r += sexps_str(e, indent + 1)
             r += p(')')
+            
+    elif is_struct(form):
+        r += p(form[TYPE]['__name__'])
     elif is_symbol(form):
         r += p(symbol_name(form))
     elif isinstance(form, dict):
