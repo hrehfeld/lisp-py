@@ -1213,11 +1213,11 @@ def base_env(args=[]):
         for name in names:
             env_def(env, name, value)
 
-    env_def(env, 'type', type)
+    bind('type', type)
             
-    env_def(env, 'true', True)
-    env_def(env, 'false', False)
-    env_def(env, 'nil', None)
+    bind('true', True)
+    bind('false', False)
+    bind('nil', None)
 
     @native
     def as_list(arg):
@@ -1231,7 +1231,7 @@ def base_env(args=[]):
         for e in es:
             l.append(e)
         return l
-    env_def(env, 'append', append)
+    bind('append', append)
 
     @native
     def extend(l, *ls):
@@ -1239,16 +1239,16 @@ def base_env(args=[]):
         for e in ls:
             l += e
         return l
-    env_def(env, 'extend', extend)
+    bind('extend', extend)
 
-    env_def(env, 'intern', intern)
-    env_def(env, 'symbol', symbol)
+    bind('intern', intern)
+    bind('symbol', symbol)
     bindn('symbol-name', 'symbol_name', symbol_name)
 
-    env_def(env, 'keyword', keyword)
-    env_def(env, 'keyword-name', keyword_name)
+    bind('keyword', keyword)
+    bind('keyword-name', keyword_name)
 
-    env_def(env, 'aref', lambda l, k: l[k])
+    bind('aref', lambda l, k: l[k])
 
     @native
     def list_set(l, k, v):
@@ -1290,53 +1290,53 @@ def base_env(args=[]):
         assert r, msg
     bindn('assert', '__assert', special_form(__assert))
         
-    env_def(env, '__block', special_form(block))
+    bind('__block', special_form(block))
     bindn('__if', 'if', special_form(__if))
-    env_def(env, '__while', special_form(__while))
+    bind('__while', special_form(__while))
     return_from_special = special_form(return_from)
-    env_def(env, 'return_from', return_from_special)
-    env_def(env, 'return-from', return_from_special)
-    env_def(env, 'let*', special_form(__let))
+    bind('return_from', return_from_special)
+    bind('return-from', return_from_special)
+    bind('let*', special_form(__let))
     
     # these are just for bootstrapping -- functions do not need to exist other than for python reasons
     def native_binds():
         # could use list + globals here, but this is easier to bootstrap
 
-        env_def(env, 'list', list)
-        env_def(env, 'tuple', tuple)
-        env_def(env, 'dict', dict)
+        bind('list', list)
+        bind('tuple', tuple)
+        bind('dict', dict)
 
-        env_def(env, 'dict_setdefault', dict_setdefault)
-        env_def(env, 'dict-setdefault', dict_setdefault)
+        bind('dict_setdefault', dict_setdefault)
+        bind('dict-setdefault', dict_setdefault)
 
 
     @native
     def native_binds():
         def __list(*args):
             return list(args)
-        env_def(env, 'list', __list)
+        bind('list', __list)
 
         def __tuple(*args):
             # tuple doesn't take more than one arg
             return tuple(args)
-        env_def(env, 'tuple', __tuple)
+        bind('tuple', __tuple)
 
         def __dict(*args, **kwargs):
             return dict(*args, **kwargs)
-        env_def(env, 'dict', __dict)
+        bind('dict', __dict)
 
         bindn('repr', 'sexps_str', sexps_str)
 
-        env_def(env, 'dict_setdefault', dict.setdefault)
-        env_def(env, 'dict-setdefault', dict.setdefault)
+        bind('dict_setdefault', dict.setdefault)
+        bind('dict-setdefault', dict.setdefault)
     
         
     native_binds()
     def set_nokeys_from_env(name):
         f = env_get(env, name)
         native_set_nokeys(f, True)
-    set_nokeys_from_env('list')
-    set_nokeys_from_env('tuple')
+    set_nokeys_from_env(intern('list'))
+    set_nokeys_from_env(intern('tuple'))
 
     native_set_nokeys(__defmacro, True)
 
@@ -1345,7 +1345,7 @@ def base_env(args=[]):
     def __import(env, *args):
         # TODO 
         pass
-    env_def(env, 'import', special_form(__import))
+    bind('import', special_form(__import))
 
     @native
     def py_import(env, *args):
@@ -1354,7 +1354,7 @@ def base_env(args=[]):
             if is_symbol(module):
                 module_name = symbol_name(module)
                 module = importlib.import_module(module_name)
-                env_def(env, module_name, module)
+                env_def(env, intern(module_name), module)
             elif is_list(module):
                 first = module[0]
                 assert(is_symbol(first)), sexps_str(module)
@@ -1380,14 +1380,14 @@ def base_env(args=[]):
                 if froms:
                     fromlist = [symbol_name(f) for f in froms]
                     for from_name in fromlist:
-                        env_def(env, from_name, getattr(module, from_name))
+                        env_def(env, intern(from_name), getattr(module, from_name))
                 else:
-                    env_def(env, module_name, module)
+                    env_def(env, intern(module_name), module)
             else:
                 assert(False), sexps_str(module)
         pass
-    env_def(env, 'py-import', special_form(py_import))
-    env_def(env, 'py_import', py_import)
+    bind('py-import', special_form(py_import))
+    bind('py_import', py_import)
 
     @native
     def __lookup(env, obj, *ks):
@@ -1396,10 +1396,10 @@ def base_env(args=[]):
             assert(is_symbol(k)), sexps_str(k)
             r = getattr(r, symbol_name(k))
         return r
-    env_def(env, '.', special_form(__lookup))
-    env_def(env, '__lookup', __lookup)
+    bind('.', special_form(__lookup))
+    bind('__lookup', __lookup)
 
-    env_def(env, quote_fun_name, special_form(lambda env, e: e))
+    bind(quote_fun_name, special_form(lambda env, e: e))
 
     backquote_level_var = '*__backquote_level*'
 
@@ -1465,27 +1465,27 @@ def base_env(args=[]):
         #print('backquote:', level, sexps_str(r))
         return r
 
-    env_def(env, backquote_fun_name, special_form(backquote))
+    bind(backquote_fun_name, special_form(backquote))
 
     def source_eval(env, form):
         form = __eval(env, form)
         return __eval(env, form)
-    env_def(env, 'eval', special_form(source_eval))
-    env_def(env, 'set', special_form(__setq))
-    env_def(env, '__sub-env', special_form(__sub_env))
-    env_def(env, 'progn', special_form(__progn))
+    bind('eval', special_form(source_eval))
+    bind('set', special_form(__setq))
+    bind('__sub-env', special_form(__sub_env))
+    bind('progn', special_form(__progn))
 
-    env_def(env, 'def', special_form(__def))
-    env_def(env, 'defun', special_form(__defun))
+    bind('def', special_form(__def))
+    bind('defun', special_form(__defun))
     bind('defmacro', special_form(__defmacro))
-    env_def(env, 'fn', special_form(__fn))
-    env_def(env, 'apply', special_form(__apply))
+    bind('fn', special_form(__fn))
+    bind('apply', special_form(__apply))
 
     bindn('callable?', 'is_callable', is_callable)
 
-    env_def(env, 'gensym', special_form(lambda env, *args: gensym(*args)))
+    bind('gensym', special_form(lambda env, *args: gensym(*args)))
 
-    env_def(env, 'null?', lambda *args: all([e is None for e in args]))
+    bind('null?', lambda *args: all([e is None for e in args]))
 
     tests = dict(
         symbol=is_symbol
@@ -1499,10 +1499,10 @@ def base_env(args=[]):
         , str=is_str
     )
     for k, f in list(tests.items()):
-        env_def(env, '{s}?'.format(s=k), f)
-        env_def(env, 'is_{s}'.format(s=k), f)
+        bind('{s}?'.format(s=k), f)
+        bind('is_{s}'.format(s=k), f)
 
-    env_def(env, 'named-operator?', is_named_operator)
+    bind('named-operator?', is_named_operator)
 
     def numeric_op(op):
         def numeric_op(a, *args):
@@ -1512,18 +1512,18 @@ def base_env(args=[]):
             return r
         return numeric_op
 
-    env_def(env, '+', numeric_op(operator.__add__))
-    env_def(env, '-', numeric_op(operator.__sub__))
-    env_def(env, '*', numeric_op(operator.__mul__))
-    env_def(env, '/', numeric_op(operator.__truediv__))
-    env_def(env, 'mod', numeric_op(operator.__mod__))
+    bind('+', numeric_op(operator.__add__))
+    bind('-', numeric_op(operator.__sub__))
+    bind('*', numeric_op(operator.__mul__))
+    bind('/', numeric_op(operator.__truediv__))
+    bind('mod', numeric_op(operator.__mod__))
 
-    env_def(env, 'eq', operator.__eq__)
-    env_def(env, 'neq', operator.__ne__)
+    bind('eq', operator.__eq__)
+    bind('neq', operator.__ne__)
 
-    env_def(env, 'is', lambda a, *bs: all([a is b for b in bs]))
+    bind('is', lambda a, *bs: all([a is b for b in bs]))
 
-    env_def(env, 'not', operator.__not__)
+    bind('not', operator.__not__)
 
     def _and(env, *tests):
         r = None
@@ -1532,7 +1532,7 @@ def base_env(args=[]):
             if not r:
                 return None
         return r
-    env_def(env, 'and', special_form(_and))
+    bind('and', special_form(_and))
     def _or(env, *tests):
         r = None
         for test in tests:
@@ -1540,17 +1540,17 @@ def base_env(args=[]):
             if r:
                 return r
         return None
-    env_def(env, 'or', special_form(_or))
+    bind('or', special_form(_or))
 
-    env_def(env, '<', operator.__lt__)
-    env_def(env, '<=', operator.__le__)
-    env_def(env, '>', operator.__gt__)
-    env_def(env, '>=', operator.__ge__)
+    bind('<', operator.__lt__)
+    bind('<=', operator.__le__)
+    bind('>', operator.__gt__)
+    bind('>=', operator.__ge__)
 
     def cons(e, l):
         assert is_list(l), repr(l)
         return [e] + l
-    env_def(env, 'cons', cons)
+    bind('cons', cons)
 
     @native
     def slice(l, istart=None, *args):
@@ -1592,35 +1592,35 @@ def base_env(args=[]):
                 return ''.join(r)
             else:
                 return r
-    env_def(env, 'slice', slice)
+    bind('slice', slice)
 
 
-    env_def(env, 'length', length)
+    bind('length', length)
  
     def has(l, e):
         return e in l
-    env_def(env, 'contains?', has)
+    bind('contains?', has)
 
     def nth(i, l):
         assert (is_list(l) or is_tuple(l) or is_str(l)),  'nth: {i} {l} ({t})'.format(i=sexps_str(i), l=sexps_str(l), t=type(l))
         return l[i]
-    env_def(env, 'nth', nth)
+    bind('nth', nth)
 
     def tail(l):
         return l[1:]
-    env_def(env, 'tail', tail)
+    bind('tail', tail)
     
-    env_def(env, 'defstruct', special_form(defstruct))
-    env_def(env, '__defstruct', __defstruct)
+    bind('defstruct', special_form(defstruct))
+    bind('__defstruct', __defstruct)
 
 
     def throw(e):
         raise e
-    env_def(env, 'throw', throw)
+    bind('throw', throw)
 
     def exception(s):
         return Exception(s)
-    env_def(env, 'Exception', exception)
+    bind('Exception', exception)
     
     # sys utils
     def file_open(filename, mode):
@@ -1629,34 +1629,34 @@ def base_env(args=[]):
         assert(is_str(mode))
         return open(filename, mode)
 
-    env_def(env, 'file-open', file_open)
+    bind('file-open', file_open)
     
-    env_def(env, 'argv', args)
+    bind('argv', args)
 
     import pathlib
-    env_def(env, 'make-Path', pathlib.Path)
+    bind('make-Path', pathlib.Path)
 
     def print_(*args):
         print(*args)
-    env_def(env, 'print', print_)
+    bind('print', print_)
 
     def princ(arg):
         ps(arg)
-    env_def(env, 'princ', princ)
+    bind('princ', princ)
 
     # TODO
     #(infix
 
     bind('get_host_function_info', get_host_function_info)
-    env_def(env, 'get_native_function_info', get_native_function_info)
-    env_def(env, 'is_native_builtin', is_native_builtin)
-    env_def(env, 'native_set_nokeys', native_set_nokeys)
+    bind('get_native_function_info', get_native_function_info)
+    bind('is_native_builtin', is_native_builtin)
+    bind('native_set_nokeys', native_set_nokeys)
 
     ## python interop
 
-    env_def(env, 'int', int)
-    env_def(env, 'float', float)
-    env_def(env, 'str', str)
+    bind('int', int)
+    bind('float', float)
+    bind('str', str)
 
     def py_with(env, _with, *body):
         assert is_list(_with)
@@ -1669,9 +1669,11 @@ def base_env(args=[]):
             assert(is_symbol(var))
         with __eval(env, _with) as f:
             if var is not None:
-                env_def(env, symbol_name(var), f)
+                env_def(env, var, f)
             __progn(env, *body)
-    env_def(env, 'py-with', special_form(py_with))
+    bind('py-with', special_form(py_with))
+
+    bind('read', read)
 
     env = make_env(env)
     with open('stdlib.lisp', 'r') as f:
