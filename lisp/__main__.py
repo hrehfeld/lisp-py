@@ -727,13 +727,12 @@ def function_name(f):
 def block(env, name, *body):
     assert(is_str(name))
     try:
-        r = __progn(env, *body)
+        return __progn(env, *body)
     except BlockException as e:
         assert is_str(e.name), e.name
         if e.name != name:
             raise e
         return e.value
-    return r
 
 
 @native
