@@ -1553,6 +1553,7 @@ def base_env(args=[]):
         n = len(args)
         assert(n <= 2)
         if n < 2:
+            iend = None
             if n == 0:
                 iend = istart
                 istart = 0
