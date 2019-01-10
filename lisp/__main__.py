@@ -1064,6 +1064,7 @@ def __call_function(env, fun, args_forms, eval):
 
             clean_args = []
             for iarg, arg in enumerate(args):
+                v = None
                 if iarg > ilast_normal_arg:
                     k, v = arg
                     kwargs[k] = v
