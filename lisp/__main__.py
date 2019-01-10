@@ -747,7 +747,7 @@ def parameter_default(p):
 
 
 def is_parameter_with_default_(p):
-        return is_list(p) and len(p) == 2 and is_symbol(p[0])
+    return is_list(p) and len(p) == 2 and is_symbol(p[0])
 
 
 def is_simple_parameter(p):
