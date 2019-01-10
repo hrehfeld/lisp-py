@@ -667,6 +667,7 @@ def callstack_str():
     def stack_line(f, args):
         return indent + format_operator_call(sexps_str(f), args)
     stack_strs = [stack_line(*line) for line in partial_callstack]
+    msg = None
     if long:
         msg = '<truncated {num} entries>'.format(num=len(callstack) - max_n)
     else:
