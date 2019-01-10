@@ -1211,7 +1211,7 @@ def base_env(args=[]):
         names = args[:-1]
         value = args[-1]
         for name in names:
-            env_def(env, name, value)
+            bind(name, value)
 
     bind('type', type)
             
