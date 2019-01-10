@@ -1024,6 +1024,7 @@ def __call_function(env, fun, args_forms, eval):
     if eval:
         args_forms = [__eval(env, arg) for arg in args_forms]
 
+    function_info = None
     is_native = is_native_builtin(fun)
     if not is_native:
         function_info = get_function_info(fun)
