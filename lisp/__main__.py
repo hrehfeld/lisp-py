@@ -1334,8 +1334,8 @@ def base_env(args=[]):
             return tuple(args)
         bind('tuple', __tuple)
 
-        def __dict(*args, **kwargs):
-            return dict(*args, **kwargs)
+        def __dict(**kwargs):
+            return dict(**kwargs)
         bind('dict', __dict)
 
         bindn('repr', 'sexps_str', sexps_str)
