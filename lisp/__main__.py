@@ -68,7 +68,7 @@ def sexps_str(form, indent=0):
             form = form[:30] + '[..]'
         r += p('"%s"' % form)
     elif is_env(form):
-        r += p(''.join([sexps_str(f) for f in form.keys()]))
+        r += p(''.join([sexps_str(f) for f in env_d(form).keys()]))
     else:
         r += p(form)
 
