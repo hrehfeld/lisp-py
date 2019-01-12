@@ -741,6 +741,11 @@ def patch_function_name(f, name):
 def function_name(f):
     return functions[f][0] if f in functions else str(f)
 
+
+def function_info_nokeys(info):
+    return info[2]
+
+
 @native
 def block(env, name, *body):
     assert is_symbol(name), name
