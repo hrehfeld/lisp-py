@@ -1662,8 +1662,8 @@ def base_env(args=[]):
     # TODO
     #(infix
 
-    bind('get_host_function_info', get_host_function_info)
     bind('get_native_function_info', get_native_function_info)
+    bind('get_host_function_info', get_host_function_info)
     bind('is_native_builtin', is_native_builtin)
     bind('native_set_nokeys', native_set_nokeys)
 
