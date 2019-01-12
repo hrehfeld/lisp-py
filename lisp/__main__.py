@@ -1087,10 +1087,18 @@ def __call_function(env, fun, args_forms, eval):
 
 
     if is_native or function_info is None:
-        try:
+
+        def call_function():
             return fun(*args, **kwargs)
-        except TypeError as e:
-            raise Exception(make_error_msg('{e} from {call} with kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
+
+        @native
+        def call_function():
+            try:
+                return fun(*args, **kwargs)
+            except TypeError as e:
+                raise Exception(make_error_msg('{e} from {call} with kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
+
+        return call_function()
     else:
         # self-defined fun
         (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
