@@ -1052,8 +1052,7 @@ def __call_function(env, fun, args_forms, eval):
         debug(repr(fun), function_info)
     # native functions
     if is_native or function_info is None:
-        if not is_native:
-            nokeys = get_native_function_info(fun)
+        nokeys = get_native_function_info(fun)
 
         kwargs = {}
         if nokeys:
