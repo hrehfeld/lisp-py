@@ -1094,7 +1094,6 @@ def __call_function(env, fun, args_forms, eval):
     else:
         # self-defined fun
         (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
-        nokeys = nokeys or nokeys_def
 
         function_repr = function_name or 'lambda'
 
