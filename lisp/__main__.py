@@ -1185,7 +1185,7 @@ def __eval(env, form):
         
 
 def base_env(args=[]):
-    debug(print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CREATING BASEENV for interpreter', get_interpreter_meta_level()))
+    debug('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CREATING BASEENV for interpreter', get_interpreter_meta_level())
     env = make_env()
 
     env_def(env, intern('__interpreter_meta_level'), get_interpreter_meta_level() + 1)
