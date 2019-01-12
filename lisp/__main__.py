@@ -1105,6 +1105,7 @@ def __call_function(env, fun, args_forms, eval):
                                            , kwargs=kwargs
             ))
 
+        # try defaults, extract missing positional args from kwargs
         if len(args) < len(parameters):
             for i, p in enumerate(parameters[len(args):]):
                 assert(isinstance(p, tuple)), p
