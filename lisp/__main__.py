@@ -1086,8 +1086,11 @@ def __call_function(env, fun, args_forms, eval):
         del arg
 
 
-        return fun(*args, **kwargs)
     if is_native or function_info is None:
+        try:
+            return fun(*args, **kwargs)
+        except TypeError as e:
+            raise Exception(make_error_msg('{e} from {call} with kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
     else:
         # self-defined fun
         (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
