@@ -1055,55 +1055,39 @@ def __call_function(env, fun, args_forms, eval):
         if function_info is None:
             function_info = get_host_function_info(fun)
         debug(repr(fun), function_info)
+        if function_info:
+            nokeys = nokeys or function_info_nokeys(function_info)
+
     # native functions
     if is_native or function_info is None:
         nokeys = get_native_function_info(fun)
 
-        kwargs = {}
-        if nokeys:
-            args = args_forms
+
+    iparam = 0
+    args = []
+    kwargs = {}
+
+    remaining_args = args_forms
+    keywords_started = False
+    while remaining_args:
+        arg = remaining_args[0]
+        remaining_args = remaining_args[1:]
+
+        if is_keyword(arg) and remaining_args and not nokeys:
+            keywords_started = True
+            key = keyword_name(arg)
+            arg = remaining_args.pop(0)
+            kwargs[key] = arg
         else:
-            kw = None
-            args = []
-            varargs = []
-            ilast_normal_arg = -1
-            for iarg, arg in enumerate(args_forms):
-                is_last_arg = iarg + 1 >= len(args_forms)
-                # FIXME: support ((fn (a b) (list a b)) :a 0) => '(:a 0)
-                if is_keyword(arg) and not (is_last_arg or kw):
-                    kw = arg
-                else:
-                    k = iarg
-                    if kw:
-                        k = keyword_name(kw)
-                        kw = None
-                    else:
-                        ilast_normal_arg = iarg
-                    args += [(k, arg)]
-            # lone keyword at the end is a positional arg
-            if kw is not None:
-                args += [(len(args), arg)]
-                
-            del kw
+            if keywords_started:
+                raise Exception(make_error_msg('positional argument follows keyword argument'))
 
-            clean_args = []
-            for iarg, arg in enumerate(args):
-                v = None
-                if iarg > ilast_normal_arg:
-                    k, v = arg
-                    kwargs[k] = v
-                else:
-                    # TODO hack: we really need to fix our type system
-                    if isinstance(arg, tuple) and not is_symbol(arg):
-                        k, v = arg
-                    else:
-                        v = arg
-                    clean_args += [v]
+            args.append(arg)
+        del arg
 
-            args = clean_args
-            del clean_args
 
         return fun(*args, **kwargs)
+    if is_native or function_info is None:
     else:
         # self-defined fun
         (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
@@ -1111,32 +1095,12 @@ def __call_function(env, fun, args_forms, eval):
 
         function_repr = function_name or 'lambda'
 
-        #(param_name, param_default, param_special) = parameters[iparam]
-        iparam = 0
-        args = []
-        kwargs = {}
-
-        remaining_args = args_forms
-        keywords_started = False
-        while remaining_args:
-            arg = remaining_args[0]
-            remaining_args = remaining_args[1:]
-            
-            if is_keyword(arg) and remaining_args and not nokeys:
-                keywords_started = True
-                key = keyword_name(arg)
-                arg = remaining_args.pop(0)
-                kwargs[key] = arg
-            else:
-                if keywords_started:
-                    raise Exception(make_error_msg('positional argument follows keyword argument'))
-
-                if not set_varargs and len(args) >= len(parameters):
-                    raise Exception(make_error_msg('too many arguments for function call: {call}'
-                                                   , call=format_operator_call(function_repr, args_forms)))
-                
-                args.append(arg)
-            del arg
+        if not set_varargs and len(args) > len(parameters):
+            raise Exception(make_error_msg('too many arguments for function call: {call}, parsed as {parsed} with {kwargs}.'
+                                           , call=format_operator_call(function_repr, args_forms)
+                                           , parsed=format_operator_call(function_repr, args)
+                                           , kwargs=kwargs
+            ))
 
         if len(args) < len(parameters):
             for i, p in enumerate(parameters[len(args):]):
