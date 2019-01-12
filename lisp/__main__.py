@@ -1118,7 +1118,8 @@ def __call_function(env, fun, args_forms, eval):
                 args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
-                    
+
+        # even afer adding default values still not enough args
         if len(parameters) > len(args):
             raise Exception(make_error_msg('function call missing argument "{i}": ({fun} {args})'
                                            , i=symbol_name(parameters[len(args)][0]), fun=function_repr, args=sexps_str(args_forms)))
