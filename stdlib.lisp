@@ -185,7 +185,6 @@
    nil
    clauses))
 
-
 (defun member? (e l) (contains? l e))
 (defun not-member? (e l) (not  (member? e l)))
 
