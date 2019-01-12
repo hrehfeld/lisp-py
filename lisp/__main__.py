@@ -1,4 +1,5 @@
 import sys
+
 def native(f):
     return f
 
