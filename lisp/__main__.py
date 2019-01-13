@@ -1017,8 +1017,10 @@ def is_native_builtin(fun):
 
 @native
 def get_native_function_info(fun):
-    if is_native_builtin(fun) and fun.__self__.__class__ is list:
-        fun = fun.__self__.__class__.__name__ + '_' + fun.__name__
+    if is_native_builtin(fun):
+        c = fun.__self__.__class__
+        if c in (list, dict):
+            fun = fun.__self__.__class__.__name__ + '_' + fun.__name__
 
     if fun not in native_functions:
         #parameters = py_get_param_names(fun)
