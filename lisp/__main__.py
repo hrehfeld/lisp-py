@@ -1090,7 +1090,6 @@ def __call_function(env, fun, args_forms, eval):
 
 
     if is_native or function_info is None:
-
         def call_function():
             return fun(*args, **kwargs)
 
