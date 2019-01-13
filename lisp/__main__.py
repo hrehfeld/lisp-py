@@ -955,10 +955,12 @@ def __if(env, condition, then, *else_body):
 
 
 def __def(env, name, *args):
-    assert(is_symbol(name))
-    if env_contains(env, name):
-        raise Exception(make_error_msg('var {var} already declared', var=symbol_name(name)))
     val = __eval(env, args[0]) if args else None
+
+    assert(is_symbol(name))
+    env = env_get(env, global_env_sym)
+    if env_contains(env, name):
+        raise Exception(make_error_msg('var {var} already declared in global env', var=symbol_name(name)))
     env_def(env, name, val)
     return val
 
@@ -1674,9 +1676,12 @@ def base_env(args=[]):
     bind('read', read)
 
     env = make_env(env)
+    env_def(env, global_env_sym, env)
     with open('stdlib.lisp', 'r') as f:
         interpret(read(Stream(f.read(), 0)), env)
     env = make_env(env)
+
+    env_def(env, global_env_sym, env)
     return env
 
 
