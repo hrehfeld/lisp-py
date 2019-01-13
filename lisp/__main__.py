@@ -95,9 +95,9 @@ def ps(form):
     print(sexps_str(form))
 
 
-def debug(*args, **kwargs):
+def debug(*args):
     if get_interpreter_meta_level() > 0:
-        print(*args, **kwargs)
+        print(*[a() if is_callable(a) else a for a in args])
         
 
 TYPE = '__type'
@@ -1059,7 +1059,7 @@ def __call_function(env, fun, args_forms, eval):
         function_info = get_function_info(fun)
         if function_info is None:
             function_info = get_host_function_info(fun)
-        debug(repr(fun), function_info)
+        debug(lambda: repr(fun), function_info)
         if function_info:
             nokeys = nokeys or function_info_nokeys(function_info)
 
@@ -1149,7 +1149,7 @@ def __call_function(env, fun, args_forms, eval):
 def __call(env, fun, args_forms, do_eval_args):
     if is_special_form(fun):
         fun = special_form_fun(fun)
-        debug(repr(fun))
+        debug(lambda: repr(fun))
         r = __call_function(env, fun, [env] + args_forms, eval=False)
         return r
     elif is_macro(fun):
@@ -1165,7 +1165,7 @@ def __call(env, fun, args_forms, do_eval_args):
 
 
 def __eval(env, form):
-    debug('******** eval :', sexps_str(form))
+    debug('******** eval :', lambda: sexps_str(form))
     r = None
     if is_symbol(form) and not is_keyword(form):
         if not env_contains(env, form):
@@ -1184,6 +1184,7 @@ def __eval(env, form):
     elif is_atom(form):
         r = form
     elif is_list(form) and form:
+        debug(lambda: sexps_str(form))
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
@@ -1192,7 +1193,7 @@ def __eval(env, form):
         callstack.pop()
     else:
         raise Exception(make_error_msg('unknown form: {form}', form=sexps_str(form)))
-    debug('******** eval returning:', repr(form))
+    debug('******** eval returning:', lambda: repr(form))
     return r
         
 
