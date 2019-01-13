@@ -1269,7 +1269,7 @@ def base_env(args=[]):
 
     @native
     def dict_keys(d):
-        return d.keys()
+        return as_list(d.keys())
     bindn('dict-keys', 'dict_keys', dict_keys)
 
 
