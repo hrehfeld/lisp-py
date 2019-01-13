@@ -1,6 +1,9 @@
 (defmacro when (test &rest body)
   `(if ~test (progn ~@body)))
 
+(defmacro unless (test &rest body)
+  `(if (not ~test) (progn ~@body)))
+
 (defmacro block (name &rest body)
   (assert (symbol? name) name)
   (let* ((name (if (is name 'nil)
