@@ -243,3 +243,4 @@
 		value))
 
 (defun is-not (&rest xs) (not (apply is xs)))
+(defun all (l) (dolist (e l) (unless e (return false)) true))
