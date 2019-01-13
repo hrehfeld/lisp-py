@@ -1699,19 +1699,20 @@ def _interpret(forms, env=None, args=[]):
     env_def(env, intern('__name__'), '<self>')
     return __progn(env, *forms)
 
-interpret = _interpret
 
-# TODO:
-if True:
-    @native
-    def interpret(*args, **kwargs):
-        try:
-            return _interpret(*args, **kwargs)
-        except Exception as e:
-            raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
-        except KeyboardInterrupt as e:
-            raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
-    
+native_interpret = _interpret
+@native
+def native_interpret(*args, **kwargs):
+    try:
+        return _interpret(*args, **kwargs)
+    except Exception as e:
+        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
+    except KeyboardInterrupt as e:
+        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
+
+interpret = _interpret
+#interpret = native_interpret
+
 # from .base import TYPE, TYPE_T
 # from .symbol import intern
 # from .reader import read, Stream, quote_fun_name, backquote_fun_name, backquote_eval_fun_name, backquote_splice_fun_name
