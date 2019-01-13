@@ -10,7 +10,7 @@ def set_limit():
 
 @native
 def set_limit():
-    sys.setrecursionlimit(5000)
+    sys.setrecursionlimit(16384 * 4)
 
 
 set_limit()
