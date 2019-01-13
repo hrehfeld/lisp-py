@@ -388,6 +388,20 @@ backquote_splice_fun_name = "unquote-splice"
 
 return_name = 'return'
 return_sym = intern(return_name)
+accessor_char_sym = intern(accessor_char)
+
+variadic_name = '&rest'
+keys_name = '&keys'
+nokeys_name = '&nokeys'
+
+nokeys_sym = intern(nokeys_name)
+
+quote_fun_sym = intern(quote_fun_name)
+backquote_fun_sym = intern(backquote_fun_name)
+backquote_eval_fun_sym = intern(backquote_eval_fun_name)
+backquote_splice_fun_sym = intern(backquote_splice_fun_name)
+global_env_sym = intern('*global-env*')
+
 
 VALID = '__VALID'
 RETURN = '__RETURN'
@@ -552,7 +566,6 @@ def read_comment(s):
     return Valid(None)
 
 
-accessor_char_sym = intern(accessor_char)
 
 
 def read_symbol(s):
@@ -587,12 +600,6 @@ def read_quote_like(s, quote_char, quote_call_sym):
     
     r = [quote_call_sym] + expr
     return Valid(r)
-
-
-quote_fun_sym = intern(quote_fun_name)
-backquote_fun_sym = intern(backquote_fun_name)
-backquote_eval_fun_sym = intern(backquote_eval_fun_name)
-backquote_splice_fun_sym = intern(backquote_splice_fun_name)
 
 
 def read_quote(s):
@@ -662,11 +669,6 @@ class BlockException(Exception):
         Exception.__init__(self, name)
         self.name = name
         self.value = value
-
-
-variadic_name = '&rest'
-keys_name = '&keys'
-nokeys_name = '&nokeys'
 
 
 def format_operator_call(fun, args):
@@ -1034,7 +1036,6 @@ def get_host_function_info(fun):
 def get_function_info(fun):
     return functions.get(fun, None)
 
-nokeys_sym = intern(nokeys_name)
 
 def __call_function(env, fun, args_forms, eval):
     nokeys = False
