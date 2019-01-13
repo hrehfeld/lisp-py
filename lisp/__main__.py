@@ -1214,13 +1214,27 @@ def base_env(args=[]):
         for name in names:
             bind(name, value)
 
-    bind('type', type)
-            
+
+    # value binds
     bind('true', True)
     bind('false', False)
     bind('nil', None)
+            
+    # binds that don't need to be wrapped
+    bind('type', type)
+    # FIXME implement in stdlib
+    bind('sorted', sorted)
 
+    # list basics
     bindn('as-list', 'as_list', as_list)
+
+    @native
+    def list_set(l, k, v):
+        assert(is_list(l))
+        assert(is_int(k))
+        l[k] = v
+        return v
+    bindn('list-set', 'list_set', list_set)
 
     @native
     def append(l, *es):
@@ -1237,9 +1251,9 @@ def base_env(args=[]):
         return l
     bind('extend', extend)
 
-    # FIXME implement in stdlib
-    bind('sorted', sorted)
+    bind('aref', lambda l, k: l[k])
 
+    # needs to be wrapped
     bind('intern', intern)
     bind('symbol', symbol)
     bindn('symbol-name', 'symbol_name', symbol_name)
@@ -1247,15 +1261,6 @@ def base_env(args=[]):
     bind('keyword', keyword)
     bind('keyword-name', keyword_name)
 
-    bind('aref', lambda l, k: l[k])
-
-    @native
-    def list_set(l, k, v):
-        assert(is_list(l))
-        assert(is_int(k))
-        l[k] = v
-        return v
-    bindn('list-set', 'list_set', list_set)
 
     @native
     def dict_set(d, k, v):
