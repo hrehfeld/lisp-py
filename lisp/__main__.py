@@ -1520,7 +1520,10 @@ def base_env(args=[]):
     bind('eq', operator.__eq__)
     bind('neq', operator.__ne__)
 
-    bind('is', lambda a, *bs: all([a is b for b in bs]))
+    @native
+    def __is(a, *bs):
+        return all([a is b for b in bs])
+    bind('__is', __is)
 
     bind('not', operator.__not__)
 

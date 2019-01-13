@@ -6,7 +6,7 @@
 
 (defmacro block (name &rest body)
   (assert (symbol? name) name)
-  (let* ((name (if (is name 'nil)
+  (let* ((name (if (__is name 'nil)
 				   (gensym block)
 				 name)))
 	`(__block ~name
@@ -25,7 +25,7 @@
          (iter-list (gensym dolist-list)))
     `( let* ((~iter-list ~list-value-sym)
 			 (~i-var 0))
-	   (assert (not (is nil ~iter-list)) "list is None")
+	   (assert (not (__is nil ~iter-list)) "list is None")
        (while (< ~i-var (length ~iter-list))
 		 (~(if (symbol? var-sym) 'let* 'let)
 		   ((~var-sym (nth ~i-var ~iter-list)))
@@ -36,7 +36,7 @@
   (fn (args) (apply f args)))
 
 (defun map (f l)
-  (assert (not (is nil l)) "map: list is None")
+  (assert (not (__is nil l)) "map: list is None")
   (let* ((r (list)))
 	(dolist (e l)
 	  (append r (f e)))
@@ -180,7 +180,7 @@
          (if (eq test 'true)
              ;; else/true branch skips test
              (progn
-               (assert (is ifs nil) "else/true needs to be the last clause")
+               (assert (__is ifs nil) "else/true needs to be the last clause")
                `(progn ~@body))
 		   (if ifs
 			   `(if ~test (progn ~@body) ~ifs)
@@ -242,5 +242,8 @@
   (list (intern (test-name (symbol-name type)))
 		value))
 
-(defun is-not (&rest xs) (not (apply is xs)))
 (defun all (l) (dolist (e l) (unless e (return false)) true))
+(defun is (a &rest bs) (if (eq (length bs) 1)
+                           (__is a (1st bs))
+                           (all (map (fn (b) (is a b)) bs))))
+(defun is-not (a b) (not (__is a b)))
