@@ -729,7 +729,7 @@ def make_error_msg(msg, **kwargs):
     
 
 def defstruct(env, name, *fields):
-    assert(is_symbol(name)), name
+    assert(is_symbol(name)), 'defstruct: {s}'.format(s=name)
     name_str = symbol_name(name)
     field_names = [symbol_name(f) for f in fields]
 
@@ -775,7 +775,7 @@ def function_info_nokeys(info):
 
 @native
 def block(env, name, *body):
-    assert is_symbol(name), name
+    assert is_symbol(name), 'block: {s}'.format(s=name)
     try:
         return __progn(env, *body)
     except BlockException as e:
@@ -883,7 +883,7 @@ def __fn(env, parameters, *body):
             if symbol_name(param_name) in used_names:
                 raise Exception(make_error_msg('Duplicate parameter {name}', name=n))
             used_names.add(symbol_name(param_name))
-            
+            assert is_symbol(param_name), param_name
             parsed_parameters.append((param_name, param_default))
         i += 1
 
@@ -917,7 +917,7 @@ def __fn(env, parameters, *body):
 
 
 def __defun(env, name, parameters, *body):
-    assert(is_symbol(name))
+    assert is_symbol(name), 'defun: {s}'.format(s=name)
     #if env_contains(env, name):
     #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
@@ -929,7 +929,9 @@ def __defun(env, name, parameters, *body):
 
 
 def __defmacro(lexical_env, name, parameters, *body):
-    assert(is_symbol(name)), (name)
+    assert(is_symbol(name)), '{i}: {call}'.format(
+        i=get_interpreter_meta_level()
+        , call=format_operator_call('__defmacro', [lexical_env, name, parameters] + body))
     if env_contains(lexical_env, name):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
@@ -982,7 +984,7 @@ def __if(env, condition, then, *else_body):
 def __def(env, name, *args):
     val = __eval(env, args[0]) if args else None
 
-    assert(is_symbol(name))
+    assert(is_symbol(name)), 'def: {s}'.format(s=name)
     env = env_get(env, global_env_sym)
     if env_contains(env, name):
         raise Exception(make_error_msg('var {var} already declared in global env', var=symbol_name(name)))
@@ -992,7 +994,7 @@ def __def(env, name, *args):
 
 def __setq(env, name, value):
     assert(env is not None)
-    assert(is_symbol(name))
+    assert(is_symbol(name)), 'set: {s}'.format(s=name)
     #if not env_contains(env, name):
     #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
     #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
