@@ -1023,6 +1023,7 @@ native_functions = dict()
 
 @native
 def native_set_nokeys(fun, nokeys):
+    fun = get_native_function_id(fun)
     #parameters = py_get_param_names(fun)
     native_functions[fun] = nokeys
 
@@ -1038,14 +1039,19 @@ def is_native_builtin(fun):
     return type(fun).__name__ == 'builtin_function_or_method'
 
 
-
 @native
-def get_native_function_info(fun):
+def get_native_function_id(fun):
     if is_native_builtin(fun):
         c = fun.__self__.__class__
         if c in (list, dict):
             fun = fun.__self__.__class__.__name__ + '_' + fun.__name__
+    else:
+        fun = id(fun)
+    return fun
 
+@native
+def get_native_function_info(fun):
+    fun = get_native_function_id(fun)
     if fun not in native_functions:
         #parameters = py_get_param_names(fun)
         native_set_nokeys(fun, False)
