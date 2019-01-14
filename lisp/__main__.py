@@ -817,6 +817,8 @@ def normal_parameter_name(p):
     else:
         return p
 
+function, is_function, (function_env, function_parameters, function_varargs_name, function_keysargs_name, function_block_name, function_body), _ = __defstruct('function', 'env', 'parameters', 'varargs_name', 'keysargs_name', 'block_name', 'body')
+
 
 def __fn(env, parameters, *body):
 
@@ -891,22 +893,12 @@ def __fn(env, parameters, *body):
         i += 1
 
     block_name = gensym('fn')
-    def user_function(args, varargs, kwargs):
-        fun_env = make_env(env)
-        env_def(fun_env, return_sym, special_form(lambda call_env, value=None: return_from(call_env, block_name, value)))
 
-        for (parameter, default), arg in zip(parsed_parameters, args):
-            assert(is_symbol(parameter)), parameter
-            env_def(fun_env, parameter, arg)
+    varargs_name = special_params[variadic_name]
+    keysargs_name = special_params[keys_name]
 
-        varargs_name = special_params[variadic_name]
-        if is_symbol(varargs_name):
-            env_def(fun_env, varargs_name, varargs)
-        keysargs_name = special_params[keys_name]
-        if is_symbol(keysargs_name):
-            env_def(fun_env, keysargs_name, kwargs)
+    user_function = function(env, parsed_parameters, varargs_name, keysargs_name, block_name, body)
 
-        return block(fun_env, block_name, *body)
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
     add_function(user_function
                  , None # name
@@ -915,7 +907,7 @@ def __fn(env, parameters, *body):
                  , variadic_name in special_used
                  , keys_name in special_used
     )
-    assert is_callable(user_function), repr(user_function)
+    #assert is_callable(user_function), repr(user_function)
     return user_function
 
 
@@ -1184,7 +1176,28 @@ parameters:
         if set_varargs and len(args) > len(parameters):
             varargs = args[len(parameters):]
             args = args[:len(parameters)]
-        return fun(args, varargs, kwargs)
+
+        def user_function(fun, args, varargs, kwargs):
+            fun_env = make_env(env)
+
+            block_name = function_block_name(fun)
+            return_fun = special_form(lambda call_env, value=None: return_from(call_env, block_name, value))
+            env_def(fun_env, return_sym, return_fun)
+
+            for (parameter, default), arg in zip(function_parameters(fun), args):
+                env_def(fun_env, parameter, arg)
+
+            varargs_name = function_varargs_name(fun)
+            if is_symbol(varargs_name):
+                env_def(fun_env, varargs_name, varargs)
+            keysargs_name = function_keysargs_name(fun)
+            if is_symbol(keysargs_name):
+                env_def(fun_env, keysargs_name, kwargs)
+
+            body = function_body(fun)
+            return block(fun_env, block_name, *body)
+            
+        return user_function(fun, args, varargs, kwargs)
     
 
 def __call(env, fun, args_forms, do_eval_args):
@@ -1198,7 +1211,7 @@ def __call(env, fun, args_forms, do_eval_args):
         form = __call_function(env, fun, args_forms, eval=False)
         return __eval(env, form)
 
-    elif is_callable(fun):
+    elif is_function(fun) or is_callable(fun):
         return __call_function(env, fun, args_forms, do_eval_args)
 
     else:
@@ -1229,7 +1242,7 @@ def __eval(env, form):
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
-        assert is_macro(fun) or is_special_form(fun) or is_callable(fun), fun
+        assert is_macro(fun) or is_special_form(fun) or is_function(fun) or is_callable(fun), fun
         r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
     else:
