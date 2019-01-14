@@ -926,7 +926,7 @@ def __defun(env, name, parameters, *body):
 def __defmacro(lexical_env, name, parameters, *body):
     assert(is_symbol(name)), '{i}: {call}'.format(
         i=get_interpreter_meta_level()
-        , call=format_operator_call('__defmacro', [lexical_env, name, parameters] + body))
+        , call=format_operator_call('__defmacro', [lexical_env, name, parameters] + list(body)))
     if env_contains(lexical_env, name):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
