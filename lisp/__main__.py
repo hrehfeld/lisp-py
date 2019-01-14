@@ -752,12 +752,14 @@ functions = {}
 
 
 def add_function(f, *args):
+    f = id(f)
     functions[f] = args
     assert f in functions, functions
 
 
 def patch_function_name(f, name):
     assert(is_str(name))
+    f = id(f)
     assert(f in functions), '{f}\n{fs}'.format(fs=functions, f=f)
     args = functions[f]
     data = name, args[1], args[2], args[3], args[4]
@@ -766,6 +768,7 @@ def patch_function_name(f, name):
 
 
 def function_name(f):
+    f = id(f)
     return functions[f][0] if f in functions else str(f)
 
 
@@ -999,7 +1002,7 @@ def __setq(env, name, value):
     #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
     #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
-    if is_function(value) and not is_native_builtin(value) and value in functions and not functions[value][0]:
+    if is_callable(value) and not is_native_builtin(value) and id(value) in functions and not functions[id(value)][0]:
         patch_function_name(value, symbol_name(name))
     env_change(env, name, value)
     return value
@@ -1065,7 +1068,7 @@ def get_host_function_info(fun):
 
 
 def get_function_info(fun):
-    return functions.get(fun, None)
+    return functions.get(id(fun), None)
 
 
 def __call_function(env, fun, args_forms, eval):
