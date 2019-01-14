@@ -26,7 +26,9 @@ def get_interpreter_meta_level():
 
 
 @native
-def sexps_str(form, indent=0):
+def sexps_str(form, indent=0, seen=None):
+    if seen is None:
+        seen = []
     sexpr_print_operators = {
         quote_fun_name: quote_char
         , backquote_fun_name: backquote_char
@@ -40,35 +42,52 @@ def sexps_str(form, indent=0):
 
     r = ''
     if isinstance(form, list) or isinstance(form, tuple):
-        is_simple = False
-        for op, char in sexpr_print_operators.items():
-            if is_named_operator(form, intern(op)):
-                assert(len(form) == 2)
-                r += char + ' '.join([sexps_str(f) for f in form[1:]])
-                is_simple = True
-                break
-        if not is_simple:
-            r += p('(')
-            for e in form:
-                r += sexps_str(e, indent + 1)
-            r += p(')')
-            
+        if form in seen:
+            r += p('<cyclic list>')
+        else:
+            seen.append(form)
+
+            is_simple = False
+            for op, char in sexpr_print_operators.items():
+                if is_named_operator(form, intern(op)):
+                    assert(len(form) == 2)
+                    r += char + ' '.join([sexps_str(f, indent + 1, seen) for f in form[1:]])
+                    is_simple = True
+                    break
+            if not is_simple:
+                r += p('(')
+                for e in form:
+                    r += sexps_str(e, indent + 1, seen)
+                r += p(')')
+    elif is_env(form):
+        if form in seen:
+            r +=  '<cyclic>'
+        else:
+            seen.append(form)
+
+            r += p(''.join([sexps_str(f, indent + 1, seen) for f in env_d(form).keys()]) + '...')
     elif is_struct(form):
-        r += p(form[TYPE]['__name__'])
+        t = form[TYPE]
+        fields = t['fields']
+        fields = ['{f}={v}'.format(f=f, v=form[f]) for f in fields]
+        r += p('({t} {fields}'.format(t=t['__name__'], fields=fields))
     elif is_symbol(form):
         r += p(symbol_name(form))
     elif isinstance(form, dict):
-        r += p('{')
-        for e, v in form.items():
-            r += sexps_str(e, indent + 1) + ': ' + sexps_str(v, indent + 1)
-        r += p('}')
+        if form in seen:
+            r += p('<cyclic dict>')
+        else:
+            seen.append(form)
+
+            r += p('{')
+            for e, v in form.items():
+                r += sexps_str(e, indent + 1, seen) + ': ' + sexps_str(v, indent + 1, seen)
+            r += p('}')
     elif isinstance(form, str):
         #TODO
         if len(form) > 30:
             form = form[:30] + '[..]'
         r += p('"%s"' % form)
-    elif is_env(form):
-        r += p(''.join([sexps_str(f) for f in env_d(form).keys()]))
     else:
         r += p(form)
 
