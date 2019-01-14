@@ -36,13 +36,27 @@ def sexps_str(form, indent=0, seen=None):
         , backquote_splice_fun_name: backquote_splice_char
     }
 
-    assert(isinstance(indent, int)), indent
+    def is_seen(x):
+        for e in seen:
+            if e is x:
+                return True
+        return False
+
+    assert(is_int(indent)), indent
     def p(f):
-        return ('  ' * indent + str(f) + '\n')
+        return (''.join(['  ' for i in range(indent)]) + str(f) + '\n')
 
     r = ''
-    if isinstance(form, list) or isinstance(form, tuple):
-        if form in seen:
+    if is_env(form):
+        if is_seen(form):
+            r +=  '<cyclic>'
+        else:
+            seen.append(form)
+
+            r += p('(Env {s})'.format(s=''.join([sexps_str(f, indent + 1, seen) for f in env_d(form).keys()]) + '<parents...>'))
+    
+    elif is_list(form) or is_tuple(form):
+        if is_seen(form):
             r += p('<cyclic list>')
         else:
             seen.append(form)
@@ -59,13 +73,6 @@ def sexps_str(form, indent=0, seen=None):
                 for e in form:
                     r += sexps_str(e, indent + 1, seen)
                 r += p(')')
-    elif is_env(form):
-        if form in seen:
-            r +=  '<cyclic>'
-        else:
-            seen.append(form)
-
-            r += p(''.join([sexps_str(f, indent + 1, seen) for f in env_d(form).keys()]) + '...')
     elif is_struct(form):
         t = form[TYPE]
         fields = t['fields']
@@ -73,8 +80,8 @@ def sexps_str(form, indent=0, seen=None):
         r += p('({t} {fields}'.format(t=t['__name__'], fields=fields))
     elif is_symbol(form):
         r += p(symbol_name(form))
-    elif isinstance(form, dict):
-        if form in seen:
+    elif is_dict(form):
+        if is_seen(form):
             r += p('<cyclic dict>')
         else:
             seen.append(form)
@@ -83,7 +90,7 @@ def sexps_str(form, indent=0, seen=None):
             for e, v in form.items():
                 r += sexps_str(e, indent + 1, seen) + ': ' + sexps_str(v, indent + 1, seen)
             r += p('}')
-    elif isinstance(form, str):
+    elif is_str(form):
         #TODO
         if len(form) > 30:
             form = form[:30] + '[..]'
