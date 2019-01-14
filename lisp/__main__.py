@@ -790,7 +790,7 @@ def block(env, name, *body):
 
 @native
 def return_from(env, name, value=None):
-    assert (is_symbol(name)), name
+    assert (is_symbol(name)), 'return_from: {s}'.format(s=name)
     r = __eval(env, value) if value is not None else None
     raise BlockException(name, r)
     
