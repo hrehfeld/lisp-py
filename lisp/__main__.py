@@ -30,10 +30,10 @@ def sexps_str(form, indent=0, seen=None):
     if seen is None:
         seen = []
     sexpr_print_operators = {
-        quote_fun_name: quote_char
-        , backquote_fun_name: backquote_char
-        , backquote_eval_fun_name: backquote_eval_char
-        , backquote_splice_fun_name: backquote_splice_char
+        quote_fun_name: intern(quote_char)
+        , backquote_fun_name: intern(backquote_char)
+        , backquote_eval_fun_name: intern(backquote_eval_char)
+        , backquote_splice_fun_name: intern(backquote_splice_char)
     }
 
     def is_seen(x):
@@ -63,7 +63,7 @@ def sexps_str(form, indent=0, seen=None):
 
             is_simple = False
             for op, char in sexpr_print_operators.items():
-                if is_named_operator(form, intern(op)):
+                if is_list(form) and form and form[0] == op:
                     assert(len(form) == 2)
                     r += p(char + ' '.join([sexps_str(f, indent + 1, seen) for f in form[1:]]).strip())
                     is_simple = True
