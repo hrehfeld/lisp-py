@@ -1033,7 +1033,7 @@ def native_set_nokeys(fun, nokeys):
 
 
 @native
-def is_function(fun):
+def is_native_function(fun):
     return type(fun).__name__ in ('function', 'builtin_function_or_method')
 
 
