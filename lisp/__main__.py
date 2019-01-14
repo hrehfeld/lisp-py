@@ -1561,6 +1561,7 @@ def base_env(args=[]):
         , float=is_float
         , int=is_int
         , str=is_str
+        , atom=is_atom
     )
     for k, f in list(tests.items()):
         bind('{s}?'.format(s=k), f)
