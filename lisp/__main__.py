@@ -65,7 +65,7 @@ def sexps_str(form, indent=0, seen=None):
             for op, char in sexpr_print_operators.items():
                 if is_named_operator(form, intern(op)):
                     assert(len(form) == 2)
-                    r += char + ' '.join([sexps_str(f, indent + 1, seen) for f in form[1:]])
+                    r += p(char + ' '.join([sexps_str(f, indent + 1, seen) for f in form[1:]]).strip())
                     is_simple = True
                     break
             if not is_simple:
