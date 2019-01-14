@@ -257,8 +257,7 @@ def length(l):
 
 @native
 def as_list(arg):
-    assert(is_iterable(arg))
-    # iter not supported currently
+    # iter not supported in host currently
     return list(iter(arg))
 
 
