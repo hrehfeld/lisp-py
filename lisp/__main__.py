@@ -1076,7 +1076,7 @@ def get_native_function_info(fun):
 
 @native
 def get_host_function_info(fun):
-    return functions.get(fun, None)
+    return functions.get(id(fun), None)
 
 
 def get_function_info(fun):
