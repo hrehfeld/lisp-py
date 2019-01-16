@@ -97,6 +97,8 @@ def sexps_str(form, indent=0, seen=None, full=False):
         if not full and len(form) > 30:
             form = form[:30] + '[..]'
         r += p('"%s"' % form)
+    elif is_num(form):
+        r += p(str(form))
     else:
         r += p(form)
 
