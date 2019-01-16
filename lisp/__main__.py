@@ -1149,7 +1149,7 @@ def __call_function(env, fun, args_forms, eval):
         # self-defined fun
         (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
 
-        function_repr = function_name or 'lambda'
+        function_repr = function_name or 'fn'
 
         if not set_varargs and len(args) > len(parameters):
             raise Exception(make_error_msg('''too many arguments for function call: 
