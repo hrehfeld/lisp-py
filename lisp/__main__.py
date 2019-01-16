@@ -1260,7 +1260,6 @@ def __eval(env, form):
     elif is_atom(form):
         r = form
     elif is_list(form) and form:
-        debug(lambda: sexps_str(form))
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
