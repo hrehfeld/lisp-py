@@ -1503,6 +1503,19 @@ def base_env(args=[]):
         form = __eval(env, form)
         return __eval(env, form)
     bind('eval', special_form(source_eval))
+
+    def macroexpand1(env, form):
+        assert is_operator_call(form), form
+        fun = macro_fun(__eval(env, form[0]))
+        return __macroexpand_1(env, fun, form[1:])
+        
+    def macroexpand(env, form):
+        assert is_operator_call(form), form
+        fun = macro_fun(__eval(env, form[0]))
+        return __macroexpand(env, fun, form[1:])
+
+    bind('macroexpand-1', special_form(macroexpand1))
+    bind('macroexpand', special_form(macroexpand))
     bind('set', special_form(__setq))
     bind('__sub-env', special_form(__sub_env))
     bind('progn', special_form(__progn))
