@@ -1200,7 +1200,8 @@ parameters:
             args = args[:len(parameters)]
 
         def user_function(fun, args, varargs, kwargs):
-            fun_env = make_env(env)
+            fun_def_env = function_env(fun)
+            fun_env = make_env(fun_def_env)
 
             block_name = function_block_name(fun)
             return_fun = special_form(lambda call_env, value=None: return_from(call_env, block_name, value))
