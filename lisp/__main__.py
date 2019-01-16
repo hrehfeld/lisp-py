@@ -1152,20 +1152,22 @@ def __call_function(env, fun, args_forms, eval):
         function_repr = function_name or 'fn'
 
         if not set_varargs and len(args) > len(parameters):
-            raise Exception(make_error_msg('''too many arguments for function call: 
+            raise Exception(make_error_msg('''too many arguments (#{n} vs #{m}) in function call:
     {call}
 parsed as:
     {parsed}
 called with:
-    {args} and {kwargs}
+    {args} &rest {varargs} &keys {kwargs}
 parameters:
-    {params} {varargs}.'''
+    {params}.'''
                                            , call=format_operator_call(function_repr, args_forms)
                                            , parsed=format_operator_call(function_repr, args_)
                                            , args=format_operator_call(function_repr, args)
                                            , kwargs=kwargs
-                                           , params=repr(parameters)
+                                           , params=sexps_str(parameters)
                                            , varargs=repr(set_varargs)
+                                           , n=len(parameters)
+                                           , m=len(args)
             ))
 
         # try defaults, extract missing positional args from kwargs
