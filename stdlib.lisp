@@ -1,3 +1,83 @@
+;; TODO uses eval -- can we do without or do we need to replace with compiler internal backquote?
+(defun backquote-internal (form nested)
+  ;; avoid circular macros -- almost everything else uses backquote itself
+  ;; unquote
+  (let* ((single (fn (e) (if nested e (list 'list e))))
+         (quoted (fn (e) (if nested e (list 'quote e)))))
+    (if (named-operator? form 'unquote)
+        (progn
+          (assert (eq (length form) 2)
+                  (repr form))
+          (let* ((unquoted-form (2nd form)))
+            ;; nested unquote suppresses eval
+            (if (or (named-operator? unquoted-form 'unquote)
+                    (named-operator? unquoted-form 'unquote-splice))
+                (single (quoted unquoted-form))
+              (single unquoted-form))))
+      ;; unquote splice
+      (if (named-operator? form 'unquote-splice)
+          (progn 
+            (assert (eq (length form) 2)) 
+            (let* ((form (2nd form)) 
+                   ;;(r (eval form))
+                   ) 
+              ;;(assert (list? r) (tuple r (sexps_str form)))
+              form))
+        ;; backquote
+        (if (named-operator? form 'backquote)
+            (progn 
+              (assert (eq (length form) 2)) 
+              (let* ((backquoted-form (2nd form)) 
+                     (r (backquote-internal backquoted-form false)))
+                ;;(print "inner backquote" (repr r))
+                (assert (list? r) r)
+                (assert (eq  (length r) 2) r)
+                (assert (__is (car r) 'list) r)
+                (single (list 'list '(quote backquote) (cadr r)))))
+          ;; generic list case
+          (if (list? form)
+              (let* ((r (list))
+                     (i 0)
+                     (n (length form)))
+                (__while (< i n)
+                         (let* ((e (nth i form))
+                                (e (backquote-internal e nested)))
+                           ;; if both last r and e are list (constructors), just append e to last r
+                           (if (and (>= (length r) 1)
+                                    (list? e)
+                                    (list? (last r))
+                                    (eq (length e) 2)
+                                    (__is (1st (last r)) 'list)
+                                    (__is (1st e) 'list)
+                                    )
+                               (append (last r) (last e))
+                               (append r e))
+                           ;;(print "backquote-internal" (repr e) "\ner:" (repr er) "\nr:" (repr r))
+                           )
+                         (set i (+ i 1)))
+                ;; add list concatenation if we need it or remove list wrap if only one element
+                (if (not nested)
+                    (if  (> (length r) 1)
+                        (set r (cons '+ r))
+                      (assert (<= (length r) 2))
+                      (if (> (length r) 0)
+                          (set r (last r)))))
+                (single r))
+            ;; atom
+            (if (atom? form)
+                (single (quoted  form))
+              ;; error
+              (throw (Exception (repr form))))))))))
+
+(defmacro backquote (form)
+  (print "backquote " (repr form))
+  (let* ((r (backquote-internal form false)))
+    (assert (eq (length r) 2) (repr r))
+    (assert (__is (car r) 'list) (repr r))
+    (let* ((r (2nd r)))
+      (print "returning from backquote " (repr r))
+      r)))
+
 (defmacro when (test &rest body)
   `(if ~test (progn ~@body)))
 
