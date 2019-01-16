@@ -942,6 +942,7 @@ def __defmacro(lexical_env, name, parameters, *body):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     f = __fn(lexical_env, parameters, *body)
+    patch_function_name(f, symbol_name(name))
     m = macro(f)
     env_def(lexical_env, name, m)
     return m
