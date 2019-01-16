@@ -28,7 +28,7 @@ def get_interpreter_meta_level():
 @native
 def sexps_str(form, indent=0, seen=None):
     if seen is None:
-        seen = []
+        seen = set()
     sexpr_print_operators = {
         quote_fun_name: intern(quote_char)
         , backquote_fun_name: intern(backquote_char)
@@ -37,10 +37,10 @@ def sexps_str(form, indent=0, seen=None):
     }
 
     def is_seen(x):
-        for e in seen:
-            if e is x:
-                return True
-        return False
+        return not full and id(x) in seen
+
+    def add_seen(x):
+        seen.add(id(x))
 
     assert(is_int(indent)), indent
     def p(f):
@@ -51,7 +51,7 @@ def sexps_str(form, indent=0, seen=None):
         if is_seen(form):
             r +=  '<cyclic>'
         else:
-            seen.append(form)
+            add_seen(form)
 
             r += p('(Env {s})'.format(s=''.join([sexps_str(f, indent + 1, seen) for f in env_d(form).keys()]) + '<parents...>'))
     
@@ -59,7 +59,7 @@ def sexps_str(form, indent=0, seen=None):
         if is_seen(form):
             r += p('<cyclic list>')
         else:
-            seen.append(form)
+            add_seen(form)
 
             is_simple = False
             for op, char in sexpr_print_operators.items():
@@ -76,15 +76,15 @@ def sexps_str(form, indent=0, seen=None):
     elif is_struct(form):
         t = form[TYPE]
         fields = t['fields']
-        fields = ['{f}={v}'.format(f=f, v=form[f]) for f in fields]
-        r += p('({t} {fields}'.format(t=t['__name__'], fields=fields))
+        fields = [':{f} {v}'.format(f=f, v=sexps_str(form[f], seen=seen, full=full)) for f in fields]
+        r += p('({t} {fields})'.format(t=t['__name__'], fields=' '.join(fields)))
     elif is_symbol(form):
         r += p(symbol_name(form))
     elif is_dict(form):
         if is_seen(form):
             r += p('<cyclic dict>')
         else:
-            seen.append(form)
+            add_seen(form)
 
             r += p('{')
             for e, v in form.items():
