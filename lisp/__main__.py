@@ -26,7 +26,7 @@ def get_interpreter_meta_level():
 
 
 @native
-def sexps_str(form, indent=0, seen=None):
+def sexps_str(form, indent=0, seen=None, full=False):
     if seen is None:
         seen = set()
     sexpr_print_operators = {
@@ -53,7 +53,7 @@ def sexps_str(form, indent=0, seen=None):
         else:
             add_seen(form)
 
-            r += p('(Env {s})'.format(s=''.join([sexps_str(f, indent + 1, seen) for f in env_d(form).keys()]) + '<parents...>'))
+            r += p('(Env {s})'.format(s=''.join([sexps_str(f, indent + 1, seen, full) for f in env_d(form).keys()]) + '<parents...>'))
     
     elif is_list(form) or is_tuple(form):
         if is_seen(form):
@@ -65,13 +65,13 @@ def sexps_str(form, indent=0, seen=None):
             for op, char in sexpr_print_operators.items():
                 if is_list(form) and form and form[0] == op:
                     assert(len(form) == 2)
-                    r += p(char + ' '.join([sexps_str(f, indent + 1, seen) for f in form[1:]]).strip())
+                    r += p(char + ' '.join([sexps_str(f, indent + 1, seen, full) for f in form[1:]]).strip())
                     is_simple = True
                     break
             if not is_simple:
                 r += p('(')
                 for e in form:
-                    r += sexps_str(e, indent + 1, seen)
+                    r += sexps_str(e, indent + 1, seen, full)
                 r += p(')')
     elif is_struct(form):
         t = form[TYPE]
@@ -86,13 +86,15 @@ def sexps_str(form, indent=0, seen=None):
         else:
             add_seen(form)
 
-            r += p('{')
-            for e, v in form.items():
-                r += sexps_str(e, indent + 1, seen) + ': ' + sexps_str(v, indent + 1, seen)
-            r += p('}')
+            r += p('(dict')
+            for k, v in form.items():
+                assert is_str(k), k
+                r += p(':' + k + ' ' + sexps_str(v, indent + 1, seen, full))
+                #r += ':' + sexps_str(k, indent + 1, seen, full) + ' ' + sexps_str(v, indent + 1, seen, full)
+            r += p(')')
     elif is_str(form):
         #TODO
-        if len(form) > 30:
+        if not full and len(form) > 30:
             form = form[:30] + '[..]'
         r += p('"%s"' % form)
     else:
