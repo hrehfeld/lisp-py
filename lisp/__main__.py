@@ -1220,19 +1220,30 @@ parameters:
             return block(fun_env, block_name, *body)
             
         return user_function(fun, args, varargs, kwargs)
+
+
+def __macroexpand_1(env, fun, args_forms):
+    return __call_function(env, fun, args_forms, eval=False)
+
+
+def __macroexpand(env, fun, args_forms):
+    form = __macroexpand_1(env, fun, args_forms)
+    while is_operator_call(form) and is_macro(form[0]):
+        form = __macroexpand_1(env, *form)
+    return form
     
 
 def __call(env, fun, args_forms, do_eval_args):
     if is_special_form(fun):
         fun = special_form_fun(fun)
         debug(lambda: repr(fun))
-        r = __call_function(env, fun, [env] + args_forms, eval=False)
+        r = __macroexpand_1(env, fun, [env] + args_forms)
         return r
     elif is_macro(fun):
         fun = macro_fun(fun)
-        form = __call_function(env, fun, args_forms, eval=False)
-        return __eval(env, form)
-
+        form = __macroexpand(env, fun, args_forms)
+        r = __eval(env, form)
+        return r
     elif is_function(fun) or is_callable(fun):
         return __call_function(env, fun, args_forms, do_eval_args)
 
