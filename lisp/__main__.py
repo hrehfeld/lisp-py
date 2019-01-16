@@ -1240,6 +1240,10 @@ def __call(env, fun, args_forms, do_eval_args):
         raise Exception(make_error_msg('({fun} {args}) is not callable', fun=repr(fun), args=sexps_str(args_forms) if args_forms else ''))
 
 
+def is_operator_call(form):
+    return is_list(form) and form
+
+
 def __eval(env, form):
     debug('******** eval :', lambda: sexps_str(form))
     r = None
@@ -1259,7 +1263,7 @@ def __eval(env, form):
         r = env_get(env, form)
     elif is_atom(form):
         r = form
-    elif is_list(form) and form:
+    elif is_operator_call(form):
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
