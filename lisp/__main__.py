@@ -1157,9 +1157,9 @@ def __call_function(env, fun, args_forms, eval):
 parsed as:
     {parsed}
 called with:
-    {args} &rest {varargs} &keys {kwargs}
+    {args} 
 parameters:
-    {params}.'''
+    {params} &rest {varargs} &keys {kwargs}.'''
                                            , call=format_operator_call(function_repr, args_forms)
                                            , parsed=format_operator_call(function_repr, args_)
                                            , args=format_operator_call(function_repr, args)
