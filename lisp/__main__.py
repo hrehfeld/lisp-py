@@ -1128,7 +1128,7 @@ def __call_function(env, fun, args_forms, eval):
             kwargs[key] = arg
         else:
             if keywords_started:
-                raise Exception(make_error_msg('positional argument follows keyword argument'))
+                raise Exception(make_error_msg('positional argument follows keyword argument {call}'.format(call=format_operator_call(fun, args_))))
 
             args.append(arg)
         del arg
