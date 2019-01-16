@@ -1865,8 +1865,9 @@ else:
     #         r = traceback.format_exc()
     #         return False, r
 
-    for test, result in tests:
-        print('RUNNING test ', sexps_str(test))
+    for itest, (test, result) in enumerate(tests):
+        print('================ RUNNING test {i} ================'.format(i=itest))
+        print(sexps_str(test))
         test_results.append(run_test(test))
 
     for itest, (success, r) in reversed(list(enumerate(test_results))):
