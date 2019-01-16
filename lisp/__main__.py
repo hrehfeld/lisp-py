@@ -2032,6 +2032,7 @@ p.add_argument('--type')
 p.add_argument('--num', type=int)
 p.add_argument('-c', nargs='+')
 p.add_argument('args', nargs='*')
+p.add_argument('--print', action='store_true')
 
 args = p.parse_args(get_process_args())
 
@@ -2048,6 +2049,12 @@ elif args.c:
         with open(filename, 'r') as f:
             program = f.read()
         print('Result:', interpret(read(Stream(program, 0)), args=args.args))
+elif args.print:
+    for test, result in interpreter_tests:
+        if test:
+            print('((progn {t}) {r})'.format(t=test, r=sexps_str(result, full=True)))
+        else:
+            print(';; warning: test skipped: "{t}" => {r}'.format(t=test, r=sexps_str(result)))
 else:
     suite = load_tests()
     unittest.TextTestRunner().run(suite)
