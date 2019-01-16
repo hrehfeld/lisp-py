@@ -1143,7 +1143,7 @@ def __call_function(env, fun, args_forms, eval):
             try:
                 return fun(*args, **kwargs)
             except TypeError as e:
-                raise Exception(make_error_msg('{e} from {call} with kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
+                raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
 
         return call_function()
     else:
