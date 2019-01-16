@@ -1482,6 +1482,7 @@ def base_env(args=[]):
 
     backquote_level_var = '*__backquote_level*'
 
+    # special form because we need the env
     def source_eval(env, form):
         form = __eval(env, form)
         return __eval(env, form)
