@@ -46,6 +46,11 @@ def sexps_str(form, indent=0, seen=None, full=False):
     def p(f):
         return (''.join(['  ' for i in range(indent)]) + str(f) + '\n')
 
+    values = {}
+    values[True] = 'true'
+    values[False] = 'false'
+    values[None] = 'nil'
+
     r = ''
     if is_env(form):
         if is_seen(form):
@@ -99,6 +104,8 @@ def sexps_str(form, indent=0, seen=None, full=False):
         r += p('"%s"' % form)
     elif is_num(form):
         r += p(str(form))
+    elif form in values:
+        r += p(values[form])
     else:
         r += p(form)
 
