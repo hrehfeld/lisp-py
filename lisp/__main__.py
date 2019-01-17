@@ -759,34 +759,6 @@ def defstruct(env, name, *fields):
     return constructor
 
 
-functions = {}
-
-
-def add_function(f, *args):
-    f = id(f)
-    functions[f] = args
-    assert f in functions, functions
-
-
-def patch_function_name(f, name):
-    assert(is_str(name))
-    f = id(f)
-    assert(f in functions), '{f}\n{fs}'.format(fs=functions, f=f)
-    args = functions[f]
-    data = name, args[1], args[2], args[3], args[4]
-    functions[f] = data
-    debug('patching ', name)
-
-
-def function_name(f):
-    f = id(f)
-    return functions[f][0] if f in functions else str(f)
-
-
-def function_info_nokeys(info):
-    return info[2]
-
-
 @native
 def block(env, name, *body):
     assert is_symbol(name), 'block: {s}'.format(s=name)
@@ -913,13 +885,6 @@ def __fn(env, parameters, *body, name=None):
     user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
 
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
-    add_function(user_function
-                 , None # name
-                 , parsed_parameters
-                 , nokeys_name in special_used
-                 , variadic_name in special_used
-                 , keys_name in special_used
-    )
     #assert is_callable(user_function), repr(user_function)
     return user_function
 
@@ -930,8 +895,7 @@ def __defun(env, name, parameters, *body):
     #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     name_str = symbol_name(name)
-    f = __fn(env, parameters, *body)
-    patch_function_name(f, name_str)
+    f = __fn(env, parameters, *body, name=name)
     env_def(env, name, f)
     return f
 
@@ -943,8 +907,7 @@ def __defmacro(lexical_env, name, parameters, *body):
     if env_contains(lexical_env, name):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
-    f = __fn(lexical_env, parameters, *body)
-    patch_function_name(f, symbol_name(name))
+    f = __fn(lexical_env, parameters, *body, name=name)
     m = macro(f)
     env_def(lexical_env, name, m)
     return m
@@ -952,7 +915,7 @@ def __defmacro(lexical_env, name, parameters, *body):
 
 def __apply(env, f_form, args):
     f = __eval(env, f_form)
-    callstack.append((function_name(f), [args]))
+    callstack.append((function_name(f) if is_function(f) else host_function_name(f), [args]))
     evaled_args = __eval(env, args)
     r = __call(env, f, evaled_args, do_eval_args=False)
     callstack.pop()
@@ -1010,8 +973,8 @@ def __setq(env, name, value):
     #    raise Exception(make_error_msg('set: {sym} not declared in {env} ({is_env})'
     #                    , sym=symbol_name(name), env=sexps_str(env_d(env)), is_env=sexps_str(env_d(env_parent(env)) if env_parent(env) else '{}'))
     value = __eval(env, value)
-    if is_callable(value) and not is_native_builtin(value) and id(value) in functions and not functions[id(value)][0]:
-        patch_function_name(value, symbol_name(name))
+    if is_function(value):
+        function_set_name(value, name)
     env_change(env, name, value)
     return value
 
@@ -1065,8 +1028,13 @@ def get_native_function_id(fun):
         fun = id(fun)
     return fun
 
+
 @native
-def get_native_function_info(fun):
+def host_function_name(fun):
+    return fun.__name__
+
+@native
+def host_function_nokeys(fun):
     fun = get_native_function_id(fun)
     if fun not in native_functions:
         #parameters = py_get_param_names(fun)
@@ -1077,43 +1045,27 @@ def get_native_function_info(fun):
 
 
 @native
-def get_host_function_info(fun):
-    return functions.get(id(fun), None)
+def is_host_function(fun):
+    return callable(fun)
 
 
-def get_function_info(fun):
-    return functions.get(id(fun), None)
+@native
+def call_host_function(fun, args, kwargs):
+    try:
+        return fun(*args, **kwargs)
+    except TypeError as e:
+        raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
 
 
-def __call_function(env, fun, args_forms, eval):
-    nokeys = False
-
-    first_arg = args_forms[0] if args_forms else None
-    if first_arg == nokeys_sym:
-        nokeys = True
-        args_forms.pop(0)
-
-    unevaled_args_forms = args_forms
-    # TODO: if we parse after eval, we can't compile?
-    # apply might already have evaled arguments
-    if eval:
-        args_forms = [__eval(env, arg) for arg in args_forms]
-
-    function_info = None
-    is_native = is_native_builtin(fun)
-    if not is_native:
-        function_info = get_function_info(fun)
-        if function_info is None:
-            function_info = get_host_function_info(fun)
-        debug(lambda: repr(fun), function_info)
-        if function_info:
-            nokeys = nokeys or function_info_nokeys(function_info)
-
-    # native functions
-    if is_native or function_info is None:
-        nokeys = get_native_function_info(fun)
-
-
+def call_function(fun, args_forms, nokeys, unevaled_args_forms):
+    is_host_fun = False
+    if is_function(fun):
+        nokeys = nokeys or function_nokeys(fun)
+    else:
+        assert is_host_function(fun), fun
+        nokeys = nokeys or host_function_nokeys(fun)
+        is_host_fun = True
+        
     iparam = 0
     parsed_args = []
     kwargs = {}
@@ -1139,24 +1091,14 @@ def __call_function(env, fun, args_forms, eval):
         del arg
 
 
-    if is_native or function_info is None:
-        def call_function():
-            return fun(*parsed_args, **kwargs)
-
-        @native
-        def call_function():
-            try:
-                return fun(*parsed_args, **kwargs)
-            except TypeError as e:
-                raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, parsed_args), kwargs=kwargs))
-
-        return call_function()
+    if is_host_fun:
+        return call_host_function(fun, parsed_args, kwargs)
     else:
-        # self-defined fun
-        (function_name, parameters, nokeys_def, set_varargs, set_kwargs) = function_info
-
-        function_repr = function_name or '<fn>'
-
+        function_repr = function_name(fun) or '<fn>'
+        parameters = function_parameters(fun)
+        set_varargs = function_varargs_name
+        set_kwargs = function_keysargs_name
+        
         def call_make_error(err):
             return err + '''
 in function call:
@@ -1231,6 +1173,23 @@ function expects:
             return block(fun_env, block_name, *body)
             
         return user_function(fun, parsed_args, varargs, kwargs)
+
+
+def __call_function(env, fun, args_forms, eval):
+    nokeys = False
+
+    first_arg = args_forms[0] if args_forms else None
+    if first_arg == nokeys_sym:
+        nokeys = True
+        args_forms.pop(0)
+
+    unevaled_args_forms = args_forms
+    # TODO: if we parse after eval, we can't compile?
+    # apply might already have evaled arguments
+    if eval:
+        args_forms = [__eval(env, arg) for arg in args_forms]
+
+    return call_function(fun, args_forms, nokeys, unevaled_args_forms)
 
 
 def __macroexpand_1(env, fun, args_forms):
@@ -1708,9 +1667,8 @@ def base_env(args=[]):
     # TODO
     #(infix
 
-    bind('get_native_function_info', get_native_function_info)
-    bind('get_host_function_info', get_host_function_info)
-    bind('is_native_builtin', is_native_builtin)
+    bind('host_function_name', function_name)
+    bind('is_host_function', is_function)
     bind('native_set_nokeys', native_set_nokeys)
 
     ## python interop
