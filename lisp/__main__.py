@@ -866,7 +866,7 @@ def __fn(env, parameters, *body):
             param_special = symbol_name(param)
             param = None
             if param_special not in valid_specials:
-                raise Exception(make_error_msg('Unkown special keyword: {s} at position {i}', s=p, i=i))
+                raise Exception(make_error_msg('Unknown special keyword: {s} at position {i}', s=p, i=i))
             if param_special in special_params:
                 special_params[param_special] = True
             if param_special in special_allows_next:
