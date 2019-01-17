@@ -833,7 +833,7 @@ function, is_function, (function_env, function_parameters, function_varargs_name
 
 def __fn(env, parameters, *body):
 
-    specials = {variadic_name, keys_name, nokeys_name}
+    valid_specials = {variadic_name, keys_name, nokeys_name}
     special_allows_next = {variadic_name, keys_name}
     # TODO support start_only specials
     special_end_only = {variadic_name, keys_name}
@@ -865,7 +865,7 @@ def __fn(env, parameters, *body):
         if is_special_keyword(param):
             param_special = symbol_name(param)
             param = None
-            if param_special not in specials:
+            if param_special not in valid_specials:
                 raise Exception(make_error_msg('Unkown special keyword: {s} at position {i}', s=p, i=i))
             if param_special in special_params:
                 special_params[param_special] = True
