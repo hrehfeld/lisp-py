@@ -1092,6 +1092,7 @@ def __call_function(env, fun, args_forms, eval):
         args_forms.pop(0)
 
     unevaled_args_forms = args_forms
+    # TODO: if we parse after eval, we can't compile?
     # apply might already have evaled arguments
     if eval:
         args_forms = [__eval(env, arg) for arg in args_forms]
