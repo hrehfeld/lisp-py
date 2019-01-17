@@ -828,10 +828,10 @@ def normal_parameter_name(p):
     else:
         return p
 
-function, is_function, (function_env, function_parameters, function_varargs_name, function_keysargs_name, function_nokeys, function_block_name, function_body), _ = __defstruct('function', 'env', 'parameters', 'varargs_name', 'keysargs_name', 'nokeys', 'block_name', 'body')
+function, is_function, (function_name, function_env, function_parameters, function_varargs_name, function_keysargs_name, function_nokeys, function_block_name, function_body), (function_set_name, *_) = __defstruct('function', 'name', 'env', 'parameters', 'varargs_name', 'keysargs_name', 'nokeys', 'block_name', 'body')
 
 
-def __fn(env, parameters, *body):
+def __fn(env, parameters, *body, name=None):
 
     valid_specials = {variadic_name, keys_name, nokeys_name}
     special_used = set()
@@ -910,7 +910,7 @@ def __fn(env, parameters, *body):
 
     nokeys = nokeys_name in special_used
 
-    user_function = function(env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
+    user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
 
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
     add_function(user_function
