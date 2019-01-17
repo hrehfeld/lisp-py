@@ -1129,7 +1129,9 @@ def __call_function(env, fun, args_forms, eval):
             kwargs[key] = arg
         else:
             if keywords_started:
-                raise Exception(make_error_msg('positional argument follows keyword argument {call}'.format(call=format_operator_call(fun, args_forms))))
+                raise Exception(make_error_msg(
+                    'positional argument follows keyword argument {call}'.format(
+                        call=format_operator_call(fun, args_forms))))
 
             parsed_args.append(arg)
         del arg
@@ -1153,24 +1155,29 @@ def __call_function(env, fun, args_forms, eval):
 
         function_repr = function_name or '<fn>'
 
-        if not set_varargs and len(parsed_args) > len(parameters):
-            raise Exception(make_error_msg('''too many arguments (#{n} vs #{m}) in function call:
+        def call_make_error(err):
+            return err + '''
+in function call:
     {call}
+evaled to:
+    {evaled_args} 
 parsed as:
-    {parsed}
-called with:
-    {args} 
-parameters:
-    {params} &rest {varargs} &keys {kwargs}.'''
-                                           , call=format_operator_call(function_repr, unevaled_args_forms)
-                                           , parsed=format_operator_call(function_repr, args_forms)
-                                           , args=format_operator_call(function_repr, parsed_args)
-                                           , kwargs=kwargs
-                                           , params=sexps_str(parameters)
-                                           , varargs=repr(set_varargs)
-                                           , n=len(parameters)
-                                           , m=len(parsed_args)
-            ))
+    {parsed_args}
+function expects:
+    {params} &rest {varargs} &keys {kwargs}.'''.format(
+        call=format_operator_call(function_repr, unevaled_args_forms)
+        , parsed_args=format_operator_call(function_repr, parsed_args)
+        , evaled_args=format_operator_call(function_repr, args_forms)
+        , kwargs=set_kwargs
+        , params=sexps_str(parameters)
+        , varargs=repr(set_varargs)
+        )
+
+        if not set_varargs and len(parsed_args) > len(parameters):
+            raise Exception(make_error_msg(call_make_error('too many arguments (#{n} vs #{m})'.format(
+            n=len(parameters)
+                , m=len(parsed_args)
+            ))))
 
         # try defaults, extract missing positional args from kwargs
         if len(parsed_args) < len(parameters):
@@ -1180,8 +1187,8 @@ parameters:
                 n = symbol_name(param_name)
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
-                    raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call} -- arg-values: {forms}'
-                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, unevaled_args_forms), forms=sexps_str(parsed_args)))
+                    raise Exception(make_error_msg(call_make_error('function call missing argument "{name}"{default}'.format(name=n, default='(:= {d})'.format(d=param_default()) if param_default else ''))))
+                                    
                 parsed_args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
