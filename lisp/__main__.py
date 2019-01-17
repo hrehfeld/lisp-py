@@ -1848,7 +1848,7 @@ but got:
     {r}'''.format(i=itest, test=sexps_str(tests[itest][0]), expected=sexps_str(tests[itest][1]), r=r))
             if isinstance(r, Exception):
                 traceback.print_tb(r.__traceback__)
-    print('{nfailed} of {n} tests failed.'.format(nfailed=len([1 for success, r in test_results if success]), n=len(test_results)))
+    print('{nfailed} of {n} tests succeeded.'.format(nfailed=len([1 for success, r in test_results if success]), n=len(test_results)))
                       
 
 
