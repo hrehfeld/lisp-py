@@ -842,9 +842,9 @@ def __fn(env, parameters, *body):
 
     parsed_parameters = []
 
-    special_params = {}
-    special_params[variadic_name] = None
-    special_params[keys_name] = None
+    special_param_names = {}
+    special_param_names[variadic_name] = None
+    special_param_names[keys_name] = None
 
     varargs_param = False
     kwargs_param = False
@@ -867,14 +867,14 @@ def __fn(env, parameters, *body):
             param = None
             if param_special not in valid_specials:
                 raise Exception(make_error_msg('Unknown special keyword: {s} at position {i}', s=p, i=i))
-            if param_special in special_params:
-                special_params[param_special] = True
+            if param_special in special_param_names:
+                special_param_names[param_special] = True
             if param_special in special_allows_next:
                 if has_normal_next:
                     # skip next parameter which we just parsed
                     i += 1
-                    if param_special in special_params:
-                        special_params[param_special] = next_param
+                    if param_special in special_param_names:
+                        special_param_names[param_special] = next_param
                 
             if param_special in special_once_only and param_special in special_used:
                 raise Exception(make_error_msg('{special} parameter defined more than once', special=param_special))
@@ -905,8 +905,9 @@ def __fn(env, parameters, *body):
 
     block_name = gensym('fn')
 
-    varargs_name = special_params[variadic_name]
-    keysargs_name = special_params[keys_name]
+    varargs_name = special_param_names[variadic_name]
+    keysargs_name = special_param_names[keys_name]
+
 
     user_function = function(env, parsed_parameters, varargs_name, keysargs_name, block_name, body)
 
