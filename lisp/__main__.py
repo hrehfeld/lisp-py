@@ -1112,7 +1112,7 @@ def __call_function(env, fun, args_forms, eval):
 
 
     iparam = 0
-    args = []
+    parsed_args = []
     kwargs = {}
 
     remaining_args = args_
@@ -1130,20 +1130,20 @@ def __call_function(env, fun, args_forms, eval):
             if keywords_started:
                 raise Exception(make_error_msg('positional argument follows keyword argument {call}'.format(call=format_operator_call(fun, args_))))
 
-            args.append(arg)
+            parsed_args.append(arg)
         del arg
 
 
     if is_native or function_info is None:
         def call_function():
-            return fun(*args, **kwargs)
+            return fun(*parsed_args, **kwargs)
 
         @native
         def call_function():
             try:
-                return fun(*args, **kwargs)
+                return fun(*parsed_args, **kwargs)
             except TypeError as e:
-                raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
+                raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, parsed_args), kwargs=kwargs))
 
         return call_function()
     else:
@@ -1152,7 +1152,7 @@ def __call_function(env, fun, args_forms, eval):
 
         function_repr = function_name or '<fn>'
 
-        if not set_varargs and len(args) > len(parameters):
+        if not set_varargs and len(parsed_args) > len(parameters):
             raise Exception(make_error_msg('''too many arguments (#{n} vs #{m}) in function call:
     {call}
 parsed as:
@@ -1163,41 +1163,41 @@ parameters:
     {params} &rest {varargs} &keys {kwargs}.'''
                                            , call=format_operator_call(function_repr, args_forms)
                                            , parsed=format_operator_call(function_repr, args_)
-                                           , args=format_operator_call(function_repr, args)
+                                           , args=format_operator_call(function_repr, parsed_args)
                                            , kwargs=kwargs
                                            , params=sexps_str(parameters)
                                            , varargs=repr(set_varargs)
                                            , n=len(parameters)
-                                           , m=len(args)
+                                           , m=len(parsed_args)
             ))
 
         # try defaults, extract missing positional args from kwargs
-        if len(args) < len(parameters):
-            for i, p in enumerate(parameters[len(args):]):
+        if len(parsed_args) < len(parameters):
+            for i, p in enumerate(parameters[len(parsed_args):]):
                 assert(isinstance(p, tuple)), p
                 (param_name, param_default) = p
                 n = symbol_name(param_name)
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
-                    raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call} -- forms: {forms}'
-                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, args), forms=sexps_str(args_forms)))
-                args.append(kwargs[n] if in_kwargs else param_default())
+                    raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call} -- arg-values: {forms}'
+                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, args_forms), forms=sexps_str(parsed_args)))
+                parsed_args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
 
         # even afer adding default values still not enough args
-        if len(parameters) > len(args):
+        if len(parameters) > len(parsed_args):
             raise Exception(make_error_msg('function call missing argument "{i}": {call}'
-                                           , i=symbol_name(parameters[len(args)][0]), fun=format_operator_call(function_repr, args_forms)))
+                                           , i=symbol_name(parameters[len(parsed_args)][0]), fun=format_operator_call(function_repr, args_forms)))
 
         if not set_kwargs and kwargs:
             raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {params} {kwargs}) called with {args}'
-                                           , fun=function_repr, args=sexps_str(args_forms), params=sexps_str(parameters), kwargs=sexps_str(kwargs)))
+                                           , fun=function_repr, args=sexps_str(parsed_args_forms), params=sexps_str(parameters), kwargs=sexps_str(kwargs)))
 
         varargs = []
-        if set_varargs and len(args) > len(parameters):
-            varargs = args[len(parameters):]
-            args = args[:len(parameters)]
+        if set_varargs and len(parsed_args) > len(parameters):
+            varargs = parsed_args[len(parameters):]
+            parsed_args = parsed_args[:len(parameters)]
 
         def user_function(fun, args, varargs, kwargs):
             fun_def_env = function_env(fun)
@@ -1220,7 +1220,7 @@ parameters:
             body = function_body(fun)
             return block(fun_env, block_name, *body)
             
-        return user_function(fun, args, varargs, kwargs)
+        return user_function(fun, parsed_args, varargs, kwargs)
 
 
 def __macroexpand_1(env, fun, args_forms):
