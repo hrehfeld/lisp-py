@@ -1091,10 +1091,10 @@ def __call_function(env, fun, args_forms, eval):
         nokeys = True
         args_forms.pop(0)
 
-    args_ = args_forms
+    unevaled_args_forms = args_forms
     # apply might already have evaled arguments
     if eval:
-        args_ = [__eval(env, arg) for arg in args_]
+        args_forms = [__eval(env, arg) for arg in args_forms]
 
     function_info = None
     is_native = is_native_builtin(fun)
@@ -1115,7 +1115,7 @@ def __call_function(env, fun, args_forms, eval):
     parsed_args = []
     kwargs = {}
 
-    remaining_args = args_
+    remaining_args = args_forms
     keywords_started = False
     while remaining_args:
         arg = remaining_args[0]
@@ -1128,7 +1128,7 @@ def __call_function(env, fun, args_forms, eval):
             kwargs[key] = arg
         else:
             if keywords_started:
-                raise Exception(make_error_msg('positional argument follows keyword argument {call}'.format(call=format_operator_call(fun, args_))))
+                raise Exception(make_error_msg('positional argument follows keyword argument {call}'.format(call=format_operator_call(fun, args_forms))))
 
             parsed_args.append(arg)
         del arg
@@ -1161,8 +1161,8 @@ called with:
     {args} 
 parameters:
     {params} &rest {varargs} &keys {kwargs}.'''
-                                           , call=format_operator_call(function_repr, args_forms)
-                                           , parsed=format_operator_call(function_repr, args_)
+                                           , call=format_operator_call(function_repr, unevaled_args_forms)
+                                           , parsed=format_operator_call(function_repr, args_forms)
                                            , args=format_operator_call(function_repr, parsed_args)
                                            , kwargs=kwargs
                                            , params=sexps_str(parameters)
@@ -1180,7 +1180,7 @@ parameters:
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
                     raise Exception(make_error_msg('function call missing argument "{name}" {default}: {call} -- arg-values: {forms}'
-                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, args_forms), forms=sexps_str(parsed_args)))
+                                                   , name=n, default=param_default() if param_default else '', call=format_operator_call(function_repr, unevaled_args_forms), forms=sexps_str(parsed_args)))
                 parsed_args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
                     del kwargs[n]
@@ -1188,7 +1188,7 @@ parameters:
         # even afer adding default values still not enough args
         if len(parameters) > len(parsed_args):
             raise Exception(make_error_msg('function call missing argument "{i}": {call}'
-                                           , i=symbol_name(parameters[len(parsed_args)][0]), fun=format_operator_call(function_repr, args_forms)))
+                                           , i=symbol_name(parameters[len(parsed_args)][0]), fun=format_operator_call(function_repr, unevaled_args_forms)))
 
         if not set_kwargs and kwargs:
             raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {params} {kwargs}) called with {args}'
