@@ -834,13 +834,13 @@ function, is_function, (function_env, function_parameters, function_varargs_name
 def __fn(env, parameters, *body):
 
     valid_specials = {variadic_name, keys_name, nokeys_name}
+    special_used = set()
     special_allows_next = {variadic_name, keys_name}
     # TODO support start_only specials
     special_end_only = {variadic_name, keys_name}
     special_once_only = {variadic_name, keys_name, nokeys_name}
 
     parsed_parameters = []
-    special_used = set()
 
     special_params = {}
     special_params[variadic_name] = None
