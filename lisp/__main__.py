@@ -1623,6 +1623,7 @@ def base_env(args=[]):
 
     def nth(i, l):
         assert (is_list(l) or is_tuple(l) or is_str(l)),  'nth: {i} {l} ({t})'.format(i=sexps_str(i), l=sexps_str(l), t=type(l))
+        assert len(l) > i, (i, len(l))
         return l[i]
     bind('nth', nth)
 
