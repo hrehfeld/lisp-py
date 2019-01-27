@@ -695,11 +695,15 @@ import operator
 import inspect
 
 @native
-class BlockException(Exception):
+class InternalException(Exception):
     def __init__(self, name, value=None):
         Exception.__init__(self, name)
         self.name = name
         self.value = value
+
+@native
+class BlockException(InternalException):
+    pass
 
 
 def format_operator_call(fun, args):
