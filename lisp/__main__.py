@@ -519,12 +519,6 @@ def next_token_is(reader, s):
     return reader(s) != 0
 
 
-def make_parse_fail(msg):
-    def parse_fail(token):
-        raise Exception('unexpected %s: %s' % (token, msg))
-    return parse_fail
-
-
 def read_list(s):
     if stream_empty(s) or not is_paren_open(stream_next(s)):
         return Failed()
