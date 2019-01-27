@@ -804,7 +804,7 @@ def normal_parameter_name(p):
 function, is_function, (function_name, function_env, function_parameters, function_varargs_name, function_keysargs_name, function_nokeys, function_block_name, function_body), (function_set_name, _, _, _, _, _, _, _) = __defstruct('function', 'name', 'env', 'parameters', 'varargs_name', 'keysargs_name', 'nokeys', 'block_name', 'body')
 
 
-def __fn(env, parameters, *body, name=None):
+def __fn(env, parameters, name=None, *body):
 
     valid_specials = {variadic_name, keys_name, nokeys_name}
     special_used = set()
@@ -896,7 +896,7 @@ def __defun(env, name, parameters, *body):
     #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     name_str = symbol_name(name)
-    f = __fn(env, parameters, *body, name=name)
+    f = __fn(env, parameters, name, *body)
     env_def(env, name, f)
     return f
 
@@ -908,7 +908,7 @@ def __defmacro(lexical_env, name, parameters, *body):
     if env_contains(lexical_env, name):
         raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
-    f = __fn(lexical_env, parameters, *body, name=name)
+    f = __fn(lexical_env, parameters, name, *body)
     m = macro(f)
     env_def(lexical_env, name, m)
     return m
@@ -1492,7 +1492,7 @@ def base_env(args=[]):
     bind('def', special_form(__def))
     bind('defun', special_form(__defun))
     bind('defmacro', special_form(__defmacro))
-    bind('fn', special_form(__fn))
+    bind('fn', special_form(lambda env, parameters, *body: __fn(env, parameters, None, *body)))
     bind('apply', special_form(__apply))
 
     bindn('callable?', 'is_callable', is_callable)
