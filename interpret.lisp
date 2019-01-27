@@ -19,9 +19,7 @@
 
 ;; native definition of function "is_str" omitted
 
-(defun is_num (f) 
-  (or (is_int f) 
-      (is_float f)))
+(defun is_num (f) (or (is_int f) (is_float f)))
 ;; native definition of function "is_tuple" omitted
 
 ;; native definition of function "is_dict" omitted
