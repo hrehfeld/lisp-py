@@ -310,7 +310,8 @@ def make_env(parent=None):
 def env_contains(env, k):
     assert is_symbol(k), k
     assert(is_env(env))
-    return k in env_d(env) or (env_parent(env) and env_contains(env_parent(env), k))
+    p = env_parent(env)
+    return k in env_d(env) or (p is not None and env_contains(p, k))
 
 
 def env_get(env, k):
