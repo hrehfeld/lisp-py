@@ -1,7 +1,5 @@
 (defun get_interpreter_meta_level () 
   __interpreter_meta_level)
-;; native definition of function "get_interpreter_meta_level" omitted
-
 ;; native definition of function "sexps_str" omitted
 
 (defun ps (form) 
