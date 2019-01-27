@@ -70,13 +70,10 @@
               (throw (Exception (repr form))))))))))
 
 (defmacro backquote (form)
-  (print "backquote " (repr form))
   (let* ((r (backquote-internal form false)))
     (assert (eq (length r) 2) (repr r))
     (assert (__is (car r) 'list) (repr r))
-    (let* ((r (2nd r)))
-      (print "returning from backquote " (repr r))
-      r)))
+    (2nd r)))
 
 (defmacro when (test &rest body)
   `(if ~test (progn ~@body)))
