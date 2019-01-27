@@ -1,18 +1,7 @@
 ;; warning: test skipped: ""
 ;; TODO check if ending ) is checked
 
-((progn
-   (backquote-internal '(defmacro ~name (var &rest args)
-                          `foo)
-                       false))
-   '(list 'defmacro name (list 'var '&rest 'args)
-          (list 'backquote 'foo)))
-((progn
-   (backquote-internal '(defmacro ~name (var &rest args)
-                          `(setf ~~var (apply ~op (list ~~var ~~@args))))
-                       false))
-   '(list 'defmacro name (list 'var '&rest 'args)
-        (list 'backquote (list 'setf '~var (list 'apply op (list 'list '~var '~@args))))))
+
 ((progn 1) 1 )
 ((progn 1.0) 1.0 )
 ((progn nil) nil )
@@ -212,6 +201,65 @@
 ((progn (slice (range 9) -3 -1)) ( 6 7) )
 ((progn (slice (range 9) -3 0)) ( 6 7 8) )
 ((progn
+   (map-apply
+    (fn (a) a)
+    '((1))))
+ nil)
+((progn
+   (map-apply
+    (fn (a b) (+ a b))
+    '((1 2))))
+ nil)
+((progn
+   (map-apply
+    ( fn (var val) (assert (symbol? var) (repr var)) (list 'set var val))
+    ( destructuring-bind-parse '(a b) 'value) ))
+ nil)
+((progn
+   (let* ((value-var 'evaled-value-var)
+          (value '(evaled-value-a evaled-value-b))
+          (target '(:= foo bar)))
+     `(progn
+       ~@(map-apply
+          (fn (var val)
+              (assert (symbol? var) (repr var))
+              (list 'set var val))
+          (destructuring-bind-parse (as-list (slice target 1 nil)) value-var)))))
+ (+
+ (list 'progn (list 'def value-var value))
+ (cond
+  ((symbol? target)
+   `((set ~target ~value-var)))
+  ((named-operator? target ':=)
+   (map-apply
+    (fn (var val)
+        (assert (symbol? var) (repr var))
+        (list 'set var val))
+    (destructuring-bind-parse (as-list (slice target 1 nil)) value-var)))
+  ((named-operator? target 'aref)
+   (let* ((target (tail target)))
+     (assert (eq (length target) 2) (repr target))
+     (let* ((obj (1st target)) (key (2nd target)))
+       (when (keyword? key) (set key (keyword-name key)))
+       `((if (list? ~obj)
+             (progn (assert (num? ~key) (repr ~key)) (list-set ~obj ~key ~value-var))
+           (assert (dict? ~obj) (repr ~obj))
+           (dict-set ~obj ~key ~value-var))))))
+ (true (throw (Exception (+ "unknown target" (repr target))))))
+ ))
+((progn
+   (backquote-internal '(defmacro ~name (var &rest args)
+                          `foo)
+                       false))
+   '(list 'defmacro name (list 'var '&rest 'args)
+          (list 'backquote 'foo)))
+((progn
+   (backquote-internal '(defmacro ~name (var &rest args)
+                          `(setf ~~var (apply ~op (list ~~var ~~@args))))
+                       false))
+   '(list 'defmacro name (list 'var '&rest 'args)
+          (list 'backquote (list 'setf '~var (list 'apply op (list 'list '~var '~@args))))))
+((progn
    (let* ((value-var 'evaled-value-var)
           (value 'evaled-value)
           (target 'foo))
@@ -237,53 +285,6 @@
                                   (assert (dict? ~obj) (repr ~obj))
                                   (dict-set ~obj ~key ~value-var))))))
                          (true (throw (Exception (+ "unknown target" (repr target))))))))))
- (+
- (list 'progn (list 'def value-var value))
- (cond
-  ((symbol? target)
-   `((set ~target ~value-var)))
-  ((named-operator? target ':=)
-   (map-apply
-    (fn (var val)
-        (assert (symbol? var) (repr var))
-        (list 'set var val))
-    (destructuring-bind-parse (as-list (slice target 1 nil)) value-var)))
-  ((named-operator? target 'aref)
-   (let* ((target (tail target)))
-     (assert (eq (length target) 2) (repr target))
-     (let* ((obj (1st target)) (key (2nd target)))
-       (when (keyword? key) (set key (keyword-name key)))
-       `((if (list? ~obj)
-             (progn (assert (num? ~key) (repr ~key)) (list-set ~obj ~key ~value-var))
-           (assert (dict? ~obj) (repr ~obj))
-           (dict-set ~obj ~key ~value-var))))))
- (true (throw (Exception (+ "unknown target" (repr target))))))
- ))
-((progn
-   (map-apply
-    (fn (a) a)
-    '((1))))
- nil)
-((progn
-   (map-apply
-    (fn (a b) (+ a b))
-    '((1 2))))
- nil)
-((progn
-   (map-apply
-    ( fn (var val) (assert (symbol? var) (repr var)) (list 'set var val))
-    ( destructuring-bind-parse '(a b) 'value) ))
- nil)
-((progn
-   (let* ((value-var 'evaled-value-var)
-          (value '(evaled-value-a evaled-value-b))
-          (target '(:= foo bar)))
-     `(progn
-       ~@(map-apply
-          (fn (var val)
-              (assert (symbol? var) (repr var))
-              (list 'set var val))
-          (destructuring-bind-parse (as-list (slice target 1 nil)) value-var)))))
  (+
  (list 'progn (list 'def value-var value))
  (cond
