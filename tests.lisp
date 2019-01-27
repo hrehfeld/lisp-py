@@ -245,7 +245,7 @@
              (progn (assert (num? ~key) (repr ~key)) (list-set ~obj ~key ~value-var))
            (assert (dict? ~obj) (repr ~obj))
            (dict-set ~obj ~key ~value-var))))))
- (true (throw (Exception (+ "unknown target" (repr target))))))
+ (true (assert false (+ "unknown target" (repr target)))))
  ))
 ((progn
    (backquote-internal '(defmacro ~name (var &rest args)
@@ -284,7 +284,7 @@
                                     (progn (assert (num? ~key) (repr ~key)) (list-set ~obj ~key ~value-var))
                                   (assert (dict? ~obj) (repr ~obj))
                                   (dict-set ~obj ~key ~value-var))))))
-                         (true (throw (Exception (+ "unknown target" (repr target))))))))))
+                         (true (assert false (+ "unknown target" (repr target)))))))))
  (+
  (list 'progn (list 'def value-var value))
  (cond
@@ -305,7 +305,7 @@
              (progn (assert (num? ~key) (repr ~key)) (list-set ~obj ~key ~value-var))
            (assert (dict? ~obj) (repr ~obj))
            (dict-set ~obj ~key ~value-var))))))
- (true (throw (Exception (+ "unknown target" (repr target))))))
+ (true (assert false (+ "unknown target" (repr target)))))
  ))
 ((progn (macroexpand-1 (setf (:= targeta targetb) '(0 1))))
  nil)

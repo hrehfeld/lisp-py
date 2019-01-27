@@ -64,10 +64,8 @@
                           (set r (last r)))))
                 (single r))
             ;; atom
-            (if (atom? form)
-                (single (quoted  form))
-              ;; error
-              (throw (Exception (repr form))))))))))
+            (assert (atom? form) (repr form))
+            (single (quoted  form))))))))
 
 (defmacro backquote (form)
   (let* ((r (backquote-internal form false)))
@@ -191,7 +189,7 @@
               (destructuring-bind-parse target `(nth ~itarget ~value-evaluated-form)))))
      (list)
      (enumerate target)))
-   (true (throw (Exception (+ "unknown destructuring " (repr target)))))))
+   (true (assert false (+ "unknown destructuring " (repr target))))))
 
 (defmacro setf (target value)
   (let* ((value-var (gensym setf-value)))
@@ -225,7 +223,7 @@
                    (dict-set ~obj ~key ~value-var))
                  ))))
           (true
-           (throw (Exception (+ "unknown target" (repr target)))))))))
+           (assert false (+ "unknown target" (repr target))))))))
 
 (defmacro let (vars &rest body)
   (let* ((var-defs

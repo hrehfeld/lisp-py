@@ -1633,9 +1633,23 @@ def base_env(args=[]):
     bind('__defstruct', __defstruct)
 
 
-    def throw(e):
-        raise e
-    bind('throw', throw)
+    def throw(env, tag, value):
+        tag = __eval(env, tag)
+        value = __eval(env, value)
+        raise InternalException(tag, value)
+    bind('throw', special_form(throw))
+
+    def catch(env, tag, *body):
+        tag = __eval(env, tag)
+
+        try:
+            return __progn(env, *body)
+        except InternalException as e:
+            if e.name is tag:
+                return e.value
+            else:
+                raise e
+    bind('catch', special_form(catch))
 
     def exception(s):
         return Exception(s)
