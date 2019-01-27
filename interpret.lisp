@@ -1,10 +1,3 @@
-(py-import sys)
-(defun native (f) 
-  f)
-(defun set_limit ())
-;; native definition of function "set_limit" omitted
-
-(set_limit)
 (defun get_interpreter_meta_level () 
   __interpreter_meta_level)
 ;; native definition of function "get_interpreter_meta_level" omitted
