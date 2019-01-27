@@ -1795,6 +1795,7 @@ args = p.parse_args(get_process_args())
 tests_file = 'tests.lisp'
 
 def load_tests():
+    tests = None
     with open(tests_file, 'r') as f:
         tests = f.read()
     tests = read(Stream(tests, 0))
