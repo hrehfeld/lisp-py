@@ -761,7 +761,7 @@ def defstruct(env, name, *fields):
 
 
 @native
-def block(env, name, *body):
+def __block(env, name, *body):
     assert is_symbol(name), 'block: {s}'.format(s=name)
     try:
         return __progn(env, *body)
@@ -1170,7 +1170,7 @@ function expects:
                 env_def(fun_env, keysargs_name, kwargs)
 
             body = function_body(fun)
-            return block(fun_env, block_name, *body)
+            return __block(fun_env, block_name, *body)
             
         return user_function(fun, parsed_args, varargs, kwargs)
 
@@ -1354,7 +1354,7 @@ def base_env(args=[]):
         assert r, msg
     bindn('assert', '__assert', special_form(__assert))
         
-    bind('__block', special_form(block))
+    bind('__block', special_form(__block))
     bindn('__if', 'if', special_form(__if))
     bind('__while', special_form(__while))
     return_from_special = special_form(return_from)
