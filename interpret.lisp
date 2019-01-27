@@ -4,13 +4,13 @@
 
 (defun ps (form) 
   (print (sexps_str form)))
-(defun debug 
-    (&rest 
-     args) 
+
+(defmacro debug (&rest args)
   (when (> (get_interpreter_meta_level) 0) 
-    (apply print ` (~ map ~ (fn (a) 
-                                (if (is_callable a) 
-                                    (a) a)) ~ args))))
+    (apply print ` (~map ~(fn (a)
+                              (let* ((a (eval a)))
+                                (if (is_callable a) (a) a)))
+                      ~args))))
 (def TYPE "__type")
 (def TYPE_T "__type_t")
 ;; native definition of function "is_int" omitted
