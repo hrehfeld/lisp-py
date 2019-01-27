@@ -927,7 +927,6 @@ def __sub_env(env, *body):
     return __progn(sub_env, *body)
 
 
-@native
 def __let(env, vars, *let_body):
     for var in vars:
         assert(is_list(var)), sexps_str(var)
