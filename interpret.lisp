@@ -729,7 +729,8 @@
                          (when (is_symbol keysargs_name) 
                            (env_def fun_env keysargs_name kwargs))) 
                        (let* ((body (function_body fun))) 
-                         (return (apply __block ` (~ fun_env ~ block_name ~@ body)))))) 
+                         (return (apply __block (cons fun_env (cons block_name body)))))))
+                   
                    (return (user_function fun parsed_args varargs kwargs)))))))))
 (defun __call_function (env fun args_forms eval) 
   (let* ((nokeys false) 
