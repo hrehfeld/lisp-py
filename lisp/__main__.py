@@ -1802,8 +1802,13 @@ p.add_argument('--type')
 p.add_argument('--num', type=int)
 p.add_argument('-c', nargs='+')
 p.add_argument('args', nargs='*')
+p.add_argument('--debug', action='store_true')
 
 args = p.parse_args(get_process_args())
+
+if not args.debug:
+    interpret = native_interpret
+    
 
 tests_file = 'tests.lisp'
 
