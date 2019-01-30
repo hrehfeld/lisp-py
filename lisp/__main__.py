@@ -1210,6 +1210,8 @@ def __call(env, fun, args_forms, do_eval_args):
     elif is_macro(fun):
         fun = macro_fun(fun)
         form = __macroexpand(env, fun, args_forms)
+        if form is None:
+            return form
         r = __eval(env, form)
         return r
     elif is_function(fun) or is_callable(fun):
