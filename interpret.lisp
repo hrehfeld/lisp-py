@@ -6,11 +6,9 @@
   (print (sexps_str form)))
 
 (defmacro debug (&rest args)
-  (when (> (get_interpreter_meta_level) 0) 
-    (apply print ` (~map ~(fn (a)
-                              (let* ((a (eval a)))
-                                (if (is_callable a) (a) a)))
-                      ~args))))
+  (when (> (get_interpreter_meta_level) 0)
+    `(print ~@args)))
+
 (def TYPE "__type")
 (def TYPE_T "__type_t")
 ;; native definition of function "is_int" omitted
