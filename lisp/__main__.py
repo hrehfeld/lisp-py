@@ -307,16 +307,23 @@ def make_env(parent=None):
     return Env({}, parent)
 
 
-def env_contains(env, k):
-    assert is_symbol(k), k
+def env_contains(env, sym):
+    assert is_symbol(sym), sym
     assert(is_env(env))
-    p = env_parent(env)
-    return k in env_d(env) or (p is not None and env_contains(p, k))
+    k = id(sym)
+    while env is not None:
+        d = env_d(env)
+        if k in d:
+            return True
+        else:
+            env = env_parent(env)
+    return False
 
 
-def env_get(env, k):
-    assert is_symbol(k), k
+def env_get(env, sym):
+    assert is_symbol(sym), sym
     assert(is_env(env))
+    k = id(sym)
     while env is not None:
         d = env_d(env)
         if k in d:
@@ -324,35 +331,48 @@ def env_get(env, k):
         else:
             env = env_parent(env)
     # TODO bind
-    raise KeyError(k)
+    raise KeyError(sym)
 
 
-def env_containing_parent(env, k):
-    assert is_symbol(k), k
+def env_containing_parent(env, sym):
+    assert is_symbol(sym), sym
     assert(is_env(env))
+    k = id(sym)
     while env and k not in env_d(env):
         env = env_parent(env)
     return env
 
 
-def env_def(env, k, v):
-    assert is_symbol(k), k
+def env_def(env, sym, v):
+    assert is_symbol(sym), sym
     assert(is_env(env))
     d = env_d(env)
-    assert not k in d, '{k} in {d}'.format(k=k, d=env_d(env))
+    k = id(sym)
+    assert not k in d, '{k} in {d}'.format(k=sym, d=env_print_keys_values(env))
     #print('~~~~~~~~env_def:', k, '=', sexps_str(v), sexps_str(env_d(env)))
     env_d(env)[k] = v
 
 
-def env_change(env, k, v):
-    assert is_symbol(k), k
-    env = env_containing_parent(env, k) or env
+def env_change(env, sym, v):
+    assert is_symbol(sym), sym
+    k = id(sym)
+    env = env_containing_parent(env, sym) or env
     #print('        env_change:', k, '=', sexps_str(v), env_d(env).keys())
     env_d(env)[k] = v
 # from .base import __defstruct, py_bind_env
 
 
+def env_print_keys(env):
+    return ' '.join(sorted(map(symbol_id_name, as_list(env_d(env).keys()))))
+
+
+def env_print_keys_values(env):
+    s = ['{k}: {v}'.format(k=symbol_id_name(k), v=repr(v)) for k, v in env_d(env).items()]
+    return '{ %s }' % ', '.join(sorted(s))
+
+
 symbols = {}
+symbol_names = {}
 
 # symbol, is_symbol, (symbol_name, ), _symbol_setters = __defstruct('symbol', 'name')
 
@@ -375,11 +395,16 @@ def symbol_name(s):
     return s.name
 
 
+def symbol_id_name(i):
+    return symbol_names[i]
+
+
 def intern(s):
     assert(is_str(s)), s
     if s not in symbols:
         sym = symbol(s)
         symbols[s] = sym
+        symbol_names[id(sym)] = s
         return sym
     else:
         return symbols[s]
@@ -1233,7 +1258,7 @@ def __eval(env, form):
             def print_env_keys(env):
                 r = []
                 while env is not None:
-                    r += ['Keys: ' + ' '.join(sorted(map(symbol_name, as_list(env_d(env).keys()))))]
+                    r += ['Keys: ' + env_print_keys(env)]
                     env = env_parent(env)
                 return '\n'.join(r)
                     
