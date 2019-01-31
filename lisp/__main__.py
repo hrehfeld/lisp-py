@@ -1056,6 +1056,8 @@ def call_host_function(fun, args, kwargs):
 
 
 def call_function(fun, args_forms, nokeys, unevaled_args_forms):
+    assert is_callable(fun), fun
+
     is_host_fun = False
     if is_function(fun):
         nokeys = nokeys or function_nokeys(fun)
