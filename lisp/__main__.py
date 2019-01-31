@@ -1661,6 +1661,11 @@ def base_env(args=[]):
         return open(filename, mode)
 
     bind('file-open', file_open)
+
+    def file_read(filename):
+        with open(filename, 'r') as f:
+            return f.read()
+    bind('file-read', file_read)
     
     bind('argv', args)
 
