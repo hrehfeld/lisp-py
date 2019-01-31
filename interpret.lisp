@@ -726,7 +726,8 @@
                        (let* ((keysargs_name (function_keysargs_name fun))) 
                          (when (is_symbol keysargs_name) 
                            (env_def fun_env keysargs_name kwargs))) 
-                       (let* ((body (function_body fun))) 
+                       (let* ((body (function_body fun)))
+                         (assert (list? body) (+ (repr body) (repr fun)))
                          (return (apply __block (cons fun_env (cons block_name body)))))))
                    
                    (return (user_function fun parsed_args varargs kwargs)))))))))
