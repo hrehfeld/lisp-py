@@ -527,6 +527,7 @@
          (f (apply __fn ` (~ env ~ parameters ~ name ~@ body))))) 
   (env_def env name f)
   f)
+
 (defun __defmacro (lexical_env name parameters &rest body) 
   (assert (is_symbol name) 
           ((. "{i}: {call}" format) :i (get_interpreter_meta_level) 
