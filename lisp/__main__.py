@@ -310,7 +310,8 @@ def make_env(parent=None):
 def env_contains(env, sym):
     assert is_symbol(sym), sym
     assert(is_env(env))
-    k = id(sym)
+    #k = id(sym)
+    k = sym
     while env is not None:
         d = env_d(env)
         if k in d:
@@ -323,7 +324,8 @@ def env_contains(env, sym):
 def env_get(env, sym):
     assert is_symbol(sym), sym
     assert(is_env(env))
-    k = id(sym)
+    #k = id(sym)
+    k = sym
     while env is not None:
         d = env_d(env)
         if k in d:
@@ -337,7 +339,8 @@ def env_get(env, sym):
 def env_containing_parent(env, sym):
     assert is_symbol(sym), sym
     assert(is_env(env))
-    k = id(sym)
+    #k = id(sym)
+    k = sym
     while env and k not in env_d(env):
         env = env_parent(env)
     return env
@@ -347,7 +350,8 @@ def env_def(env, sym, v):
     assert is_symbol(sym), sym
     assert(is_env(env))
     d = env_d(env)
-    k = id(sym)
+    #k = id(sym)
+    k = sym
     assert not k in d, '{k} in {d}'.format(k=sym, d=env_print_keys_values(env))
     #print('~~~~~~~~env_def:', k, '=', sexps_str(v), sexps_str(env_d(env)))
     env_d(env)[k] = v
@@ -355,7 +359,8 @@ def env_def(env, sym, v):
 
 def env_change(env, sym, v):
     assert is_symbol(sym), sym
-    k = id(sym)
+    #k = id(sym)
+    k = sym
     env = env_containing_parent(env, sym) or env
     #print('        env_change:', k, '=', sexps_str(v), env_d(env).keys())
     env_d(env)[k] = v
@@ -363,11 +368,11 @@ def env_change(env, sym, v):
 
 
 def env_print_keys(env):
-    return ' '.join(sorted(map(symbol_id_name, as_list(env_d(env).keys()))))
+    return ' '.join(sorted(map(symbol_name, as_list(env_d(env).keys()))))
 
 
 def env_print_keys_values(env):
-    s = ['{k}: {v}'.format(k=symbol_id_name(k), v=repr(v)) for k, v in env_d(env).items()]
+    s = ['{k}: {v}'.format(k=symbol_name(k), v=repr(v)) for k, v in env_d(env).items()]
     return '{ %s }' % ', '.join(sorted(s))
 
 
