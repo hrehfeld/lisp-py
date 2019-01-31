@@ -89,7 +89,7 @@
 			  ~@body)))
 
 (defmacro while (test &rest body)
-  `(block ~(gensym while)
+  `(block ~(gensym while-block)
 	      (__while ~test ~@body)))
 
 (defmacro dolist (iter &rest body)
