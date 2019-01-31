@@ -134,7 +134,7 @@ def ps(form):
 
 def debug(*args):
     if get_interpreter_meta_level() > 0:
-        print(*[a() if is_callable(a) else a for a in args])
+        print(*[a() if callable(a) else a for a in args])
         
 
 TYPE = '__type'
@@ -274,7 +274,7 @@ def as_list(arg):
 
 @native
 def is_callable(e):
-    return callable(e)
+    return is_function(e) or callable(e)
 
 
 Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
@@ -1214,7 +1214,7 @@ def __call(env, fun, args_forms, do_eval_args):
             return form
         r = __eval(env, form)
         return r
-    elif is_function(fun) or is_callable(fun):
+    elif is_callable(fun):
         return __call_function(env, fun, args_forms, do_eval_args)
 
     else:
@@ -1248,7 +1248,7 @@ def __eval(env, form):
         args_forms = form[1:]
         callstack.append((form[0], args_forms))
         fun = __eval(env, form[0])
-        assert is_macro(fun) or is_special_form(fun) or is_function(fun) or is_callable(fun), fun
+        assert is_macro(fun) or is_special_form(fun) or is_callable(fun), fun
         r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
     else:
@@ -1332,9 +1332,6 @@ def base_env(args=[]):
         return as_list(d.keys())
     bindn('dict-keys', 'dict_keys', dict_keys)
 
-
-    env_def(env, 'callable?', is_callable)
-    env_def(env, 'is_callable', is_callable)
 
     @native
     def __while(env, condition, *body):
@@ -1494,8 +1491,6 @@ def base_env(args=[]):
     bind('defmacro', special_form(__defmacro))
     bind('fn', special_form(lambda env, parameters, *body: __fn(env, parameters, None, *body)))
     bind('apply', special_form(__apply))
-
-    bindn('callable?', 'is_callable', is_callable)
 
     bind('gensym', special_form(lambda env, *args: gensym(*args)))
 
