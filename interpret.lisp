@@ -833,7 +833,6 @@
     (bind "true" true) 
     (bind "false" false) 
     (bind "nil" nil) 
-    (bind "type" type) 
     (bind "sorted" sorted) 
     (bindn "as-list" "as_list" as_list) ;; native definition of function "list_set" omitted
     (bindn "list-set" "list_set" list_set) ;; native definition of function "append" omitted
