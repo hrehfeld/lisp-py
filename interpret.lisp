@@ -519,6 +519,7 @@
          (user_function (function name env parsed_parameters varargs_name keysargs_name nokeys
                                   block_name body))))
   user_function)
+
 (defun __defun (env name parameters &rest body) 
   (assert (is_symbol name) 
           ((. "defun: {s}" format) :s name)) 
