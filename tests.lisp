@@ -215,6 +215,7 @@
     ( fn (var val) (assert (symbol? var) (repr var)) (list 'set var val))
     ( destructuring-bind-parse '(a b) 'value) ))
  nil)
+((macroexpand-1 '`(foo ~(lambda () 'test))) (list 'foo 'test))
 ((progn
    (let* ((value-var 'evaled-value-var)
           (value '(evaled-value-a evaled-value-b))
