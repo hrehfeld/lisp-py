@@ -710,6 +710,7 @@
                                  (length parameters))) 
                      (set varargs (slice parsed_args (length parameters) nil)) 
                      (set parsed_args (slice parsed_args nil (length parameters)))) 
+
                    (defun user_function (fun args varargs kwargs) 
                      (let* ((fun_def_env (function_env fun)) 
                             (fun_env (make_env fun_def_env)) 
