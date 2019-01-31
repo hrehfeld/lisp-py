@@ -1007,9 +1007,7 @@
     (bind "argv" args) 
     (py-import pathlib) 
     (bind "make-Path" pathlib.Path) 
-    (defun print_ 
-        (&rest 
-         args) 
+    (defun print_ (&rest args) 
       (apply print args)) 
     (bind "print" print_) 
     (defun princ (arg) 
