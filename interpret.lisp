@@ -515,6 +515,7 @@
          (varargs_name (aref special_param_names variadic_name)) 
          (keysargs_name (aref special_param_names keys_name)) 
          (nokeys (member? nokeys_name special_used)) 
+         (assert (list? body) (repr body))
          (user_function (function name env parsed_parameters varargs_name keysargs_name nokeys
                                   block_name body))))
   user_function)
