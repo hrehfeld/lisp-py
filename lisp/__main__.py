@@ -1281,7 +1281,6 @@ def base_env(args=[]):
     bind('nil', None)
             
     # binds that don't need to be wrapped
-    bind('type', type)
     # FIXME implement in stdlib
     bind('sorted', sorted)
 
