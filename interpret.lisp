@@ -1141,10 +1141,8 @@
 (def args (p.parse_args (get_process_args)))
 (def tests_file "tests.lisp")
 (defun load_tests () 
-  (let* ((tests nil)) 
-    (py-with ((f (file-open tests_file "r"))) 
-             (set tests (f.read))) 
-    (set tests (read (Stream tests 0))) 
+  (let* ((tests (file-read tests_file)) 
+         (tests (read (Stream tests 0))))
     (return tests)))
 (cond ((and 
         (is-not args.type nil) 
