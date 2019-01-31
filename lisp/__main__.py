@@ -1043,11 +1043,6 @@ def host_function_nokeys(fun):
 
 
 @native
-def is_host_function(fun):
-    return callable(fun)
-
-
-@native
 def call_host_function(fun, args, kwargs):
     try:
         return fun(*args, **kwargs)
@@ -1062,7 +1057,7 @@ def call_function(fun, args_forms, nokeys, unevaled_args_forms):
     if is_function(fun):
         nokeys = nokeys or function_nokeys(fun)
     else:
-        assert is_host_function(fun), fun
+        assert callable(fun), fun
         nokeys = nokeys or host_function_nokeys(fun)
         is_host_fun = True
         
