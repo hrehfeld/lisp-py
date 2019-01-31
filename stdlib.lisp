@@ -84,7 +84,7 @@
   (let* ((name (if (__is name 'nil)
 				   (gensym block)
 				 name)))
-	`(__block ~name
+	`(internal:block ~name
 			  (defun break ((value nil)) (return-from ~name value))
 			  ~@body)))
 

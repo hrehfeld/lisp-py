@@ -1351,7 +1351,7 @@ def base_env(args=[]):
         assert r, msg
     bindn('assert', '__assert', special_form(__assert))
         
-    bind('__block', special_form(__block))
+    bind('internal:block', special_form(__block))
     bindn('__if', 'if', special_form(__if))
     bind('__while', special_form(__while))
     return_from_special = special_form(return_from)
