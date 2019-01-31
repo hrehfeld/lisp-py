@@ -935,11 +935,14 @@ def __let(env, vars, *let_body):
     let_env = make_env(env)
 
     # TODO support double assignment to same var
+    assigned = set()
     for var in vars:
         name_sym, body = var
         val = __eval(let_env, body)
         # TODO we should have something like env_set
-        env_d(let_env)[name_sym] = val
+        setter = (env_def if not name_sym in assigned else env_change)
+        setter(let_env, name_sym, val)
+        assigned.add(name_sym)
     return __progn(let_env, *let_body)
 
 
