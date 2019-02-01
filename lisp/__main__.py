@@ -277,7 +277,7 @@ def is_callable(e):
     return is_function(e) or callable(e)
 
 
-Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
+# Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
 
 
 @native
@@ -404,6 +404,7 @@ def symbol_id_name(i):
     return symbol_names[i]
 
 
+@native
 def intern(s):
     assert(is_str(s)), s
     if s not in symbols:
@@ -1354,6 +1355,11 @@ def base_env(args=[]):
 
     bind('keyword', keyword)
     bind('keyword-name', keyword_name)
+
+    bind('Env', Env)
+    bind('is_env', is_env)
+    bind('env_d', env_d)
+    bind('env_parent', env_parent)
 
 
     @native
