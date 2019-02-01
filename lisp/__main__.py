@@ -954,11 +954,6 @@ def __apply(env, f_form, args):
     return r
     
 
-def __sub_env(env, *body):
-    sub_env = make_env(env)
-    return __progn(sub_env, *body)
-
-
 def __let(env, vars, *let_body):
     for var in vars:
         assert(is_list(var)), sexps_str(var)
@@ -1525,7 +1520,6 @@ def base_env(args=[]):
     bind('macroexpand-1', special_form(macroexpand1))
     bind('macroexpand', special_form(macroexpand))
     bind('set', special_form(__setq))
-    bind('__sub-env', special_form(__sub_env))
     bind('progn', special_form(__progn))
 
     bind('def', special_form(__def))
