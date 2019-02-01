@@ -32,16 +32,18 @@
        form
        (is_symbol (1st form)) 
        (eq (1st form) op)))
+
 (let* ((__gensym-let-value-4 (__defstruct "special-form" "fun"))) 
   (def special_form (aref __gensym-let-value-4 0)) 
   (def is_special_form (aref __gensym-let-value-4 1)) 
   (def special_form_fun (aref (aref __gensym-let-value-4 2) 0)) 
   (def _ (aref __gensym-let-value-4 3)))
+
 (let* ((__gensym-let-value-5 (__defstruct "macro" "fun"))) 
   (def macro (aref __gensym-let-value-5 0)) 
   (def is_macro (aref __gensym-let-value-5 1)) 
-  (def macro_fun (aref (aref __gensym-let-value-5 2) 0)) 
-  (set _ (aref __gensym-let-value-5 3)))
+  (def macro_fun (aref (aref __gensym-let-value-5 2) 0)))
+
 (defun is_atom (form) 
   (or (is_num form) 
       (is_str form) 
