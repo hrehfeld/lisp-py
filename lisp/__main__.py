@@ -992,7 +992,7 @@ def __def(env, name, *args):
     assert(is_symbol(name)), 'def: {s}'.format(s=name)
     env = env_get(env, global_env_sym)
     if env_contains(env, name):
-        raise Exception(make_error_msg('var {var} already declared in global env', var=symbol_name(name)))
+        raise Exception(make_error_msg('var {var} already declared in global env {env}', var=repr(name), env=env_print_keys_values(env)))
     env_def(env, name, val)
     return val
 
