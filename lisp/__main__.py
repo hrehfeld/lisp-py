@@ -695,6 +695,7 @@ readers = [
 ]
 
 
+@native
 def read(s, readers=readers, one=False):
     r = []
     action = FAILED
