@@ -1317,6 +1317,11 @@ def base_env(args=[]):
     # list basics
     bindn('as-list', 'as_list', as_list)
 
+    def cons(e, l):
+        assert is_list(l), repr(l)
+        return [e] + l
+    bind('cons', cons)
+
     @native
     def list_set(l, k, v):
         assert(is_list(l))
@@ -1588,11 +1593,6 @@ def base_env(args=[]):
     bind('<=', operator.__le__)
     bind('>', operator.__gt__)
     bind('>=', operator.__ge__)
-
-    def cons(e, l):
-        assert is_list(l), repr(l)
-        return [e] + l
-    bind('cons', cons)
 
     @native
     def slice(l, istart=None, *args):
