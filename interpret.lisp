@@ -51,20 +51,25 @@
       (is_symbol form) 
       (and (is_list form) 
            (not (length form)))))
+
 (defun keyword (s) 
   (assert (is_str s) 
           (sexps_str s)) 
   (intern (+ keyword_start s)))
+
 (defun keyword_name (s) 
   (assert (is_keyword s) s) 
   (slice (symbol_name s) 
          (length keyword_start) nil))
+
 (defun is_keyword (e) 
   (and (is_symbol e) 
        ((. (symbol_name e) startswith) keyword_start)))
+
 (defun is_special_keyword (e) 
   (and (is_symbol e) 
        ((. (symbol_name e) startswith) "&")))
+
 ;; native definition of function "is_iterable" omitted
 
 ;; native definition of function "is_list" omitted
@@ -85,12 +90,14 @@
 
 (defun make_env ((parent nil)) 
   (Env (dict) parent))
+
 (defun env_contains (env k) 
   (assert (is_symbol k) k) 
   (assert (is_env env)) 
   (or (member? k (env_d env)) 
       (and (env_parent env) 
            (env_contains (env_parent env) k))))
+
 (defun env_get (env k) 
   (assert (is_symbol k) k) 
   (assert (is_env env)) 
@@ -100,6 +107,7 @@
           (return (aref d k)) 
         (set env (env_parent env))))) 
   (throw 'env-error k))
+
 (defun env_containing_parent (env k) 
   (assert (is_symbol k) k) 
   (assert (is_env env)) 
@@ -107,6 +115,7 @@
               (not-member? k (env_d env))) 
     (set env (env_parent env)))
   env)
+
 (defun env_def (env k v) 
   (assert (is_symbol k) k) 
   (assert (is_env env)) 
@@ -115,11 +124,13 @@
             ((. "{k} in {d}" format) :k k 
              :d (env_d env)))) 
   (setf (aref (env_d env) k) v))
+
 (defun env_change (env k v) 
   (assert (is_symbol k) k) 
   (set env (or (env_containing_parent env k) 
                env)) 
   (setf (aref (env_d env) k) v))
+
 (def symbols (dict))
 ;; native definition of function "symbol" omitted
 
@@ -338,7 +349,9 @@
                      (sexps_str a)) args)) 
   ((. "({fun} {args})" format) :fun fun 
    :args ((. " " join) args)))
+
 (def callstack (list))
+
 (defun callstack_str () 
   (let* ((max_n 50) 
          (long (> (length callstack) max_n)) 
@@ -357,6 +370,7 @@
                  (+ (+ (list (+ indent msg)) stack_strs) 
                     (list (+ indent "<end>")))))) 
         (return r)))))
+
 (defun make_error_msg (msg &keys kwargs) 
   (let* ((s "Traceback (most recent call last):\n{stack}\n{msg}"))) 
   (s.format :stack (callstack_str) 
@@ -367,6 +381,7 @@
                                                            (aref kwargs k)))) 
                                          (list) 
                                          (as-list (dict-keys kwargs))))))
+
 (defun defstruct (env name &rest fields) 
   (assert (is_symbol name) 
           ((. "defstruct: {s}" format) :s name)) 
@@ -394,20 +409,17 @@
 (def block-tag 'block-tag)
 
 (defun block-tag? (v)
-  (and (list? r)
-       r
-       (__is (car r) name)))
+  (and (list? r) r (__is (car r) name)))
 
 (defun __block (env name &rest body)
   (let* ((r `(catch ~block-tag ~@body)))
     (assert (block-tag? r) r)
     (unless (__is (2nd r) name)
-        (throw block-tag r))))
+      (throw block-tag r))))
 
 ;; native definition of function "return_from" omitted
 
-(defun parameter_default (p) 
-  (2nd p))
+(defun parameter_default (p) (2nd p))
 (defun is_parameter_with_default_ (p) 
   (and (is_list p) 
        (eq (length p) 2) 
@@ -423,6 +435,8 @@
   (if (is_parameter_with_default_ p) 
       (return (1st p)) 
     (return p)))
+
+
 (let* ((function-funs (__defstruct "function" "name" "env" "parameters" "varargs_name"
                                    "keysargs_name" "nokeys" "block_name" "body"))
        (function-getters (3rd function-funs))
@@ -438,6 +452,7 @@
   (def function_block_name (aref function-getters 6)) 
   (def function_body (aref function-getters 7)) 
   (def function_set_name (aref function-setters 0)))
+
 (defun __fn (env parameters (name nil) &rest body) 
   (let* ((valid_specials 
           (Set variadic_name keys_name nokeys_name)) 
