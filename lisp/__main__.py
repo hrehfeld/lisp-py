@@ -368,7 +368,7 @@ def env_change(env, sym, v):
 
 
 def env_print_keys(env):
-    return ' '.join(sorted(map(symbol_name, as_list(env_d(env).keys()))))
+    return ' '.join(sorted(map(symbol_name, env_d(env).keys())))
 
 
 def env_print_keys_values(env):
