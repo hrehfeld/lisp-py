@@ -408,6 +408,7 @@ def symbol_id_name(i):
 def intern(s):
     assert(is_str(s)), s
     if s not in symbols:
+        # i = get_interpreter_meta_level()
         sym = symbol(s)
         symbols[s] = sym
         symbol_names[id(sym)] = s
