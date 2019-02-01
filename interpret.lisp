@@ -782,8 +782,7 @@
                 (r (__eval env form)))) 
          (return r)) 
         ((or 
-          (is_function fun) 
-          (is_callable fun)) 
+          (is_function fun)) 
          (return (__call_function env fun args_forms do_eval_args))) 
         (true 
          (throw 'eval-error (make_error_msg "({fun} {args}) is not callable" 
@@ -820,8 +819,7 @@
              (let* ((fun (__eval env (1st form)))) 
                (assert (or (is_macro fun) 
                            (is_special_form fun) 
-                           (is_function fun) 
-                           (is_callable fun)) fun) 
+                           (is_function fun)) fun) 
                (set r (__call env fun args_forms 
                               :do_eval_args true)))) 
            (callstack.pop)) 
@@ -922,7 +920,6 @@
     (bind "fn" (special_form (fn (env parameters &rest body) 
                                  (apply __fn ` (~ env ~ parameters ~ nil ~@ body))))) 
     (bind "apply" (special_form __apply)) 
-    (bindn "callable?" "is_callable" is_callable) 
     (bind "gensym" (special_form (fn (env &rest args) 
                                      (apply gensym args)))) 
     (bind "null?" (fn 
