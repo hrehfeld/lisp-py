@@ -1823,7 +1823,7 @@ def get_process_args():
 @native
 def get_process_args():
     import sys
-    print('getting process args', sys.argv)
+    #print('getting process args', sys.argv)
     return sys.argv[1:]
 
 
