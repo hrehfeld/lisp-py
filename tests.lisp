@@ -217,6 +217,14 @@
  nil)
 ((macroexpand-1 '`(foo ~(lambda () 'test))) (list 'foo 'test))
 ((progn
+   (defmacro foo (a b c) `(bar 1 2 , c))
+   (macroexpand-1 '(foo 1 2 3)))
+ (bar 1 2 3))
+((progn
+   (macroexpand-1 '(progn (unless t 1))))
+ (progn (unless t 1)))
+;;((macroexpand-1 `(block ~(lambda () 'test) (__while ~test ~@body))) (list 'block ))
+((progn
    (let* ((value-var 'evaled-value-var)
           (value '(evaled-value-a evaled-value-b))
           (target '(:= foo bar)))
