@@ -1888,32 +1888,43 @@ else:
 
     test_results = []
 
-    def run_test(test):
-        return True, interpret(test)
+    def run_test(test, result):
+        r = interpret(test)
+        return result, r, result
 
     # @native
-    # def run_test(test):
+    # def run_test(test, result):
     #     try:
     #         r = interpret(test)
-    #         return True, r
+    #         return r == result, r, result
     #     except Exception as e:
     #         import traceback
     #         r = traceback.format_exc()
-    #         return False, r
+    #         return False, r, result
 
-    for itest, (test, result) in enumerate(tests):
+    for itest, (test, result) in list(enumerate(tests))[istart:]:
         print('================ RUNNING test {i} ================'.format(i=itest))
         print(sexps_str(test))
-        test_results.append(run_test(test))
+        result = interpret([result])
+        r = run_test(test, result)
+        test_results.append(r)
+        assert r[1] == r[2], '''
+{a}
+!=
+{b}
+i.e.
+{aa}
+!= 
+{bb}'''.format(a=repr(r[1]), b=repr(result), aa=sexps_str(r[1]), bb=sexps_str(result))
 
-    for itest, (success, r) in reversed(list(enumerate(test_results))):
+    for itest, (success, r, expected) in reversed(list(enumerate(test_results))):
         if not success:
             print('''^^^^ Test {i} failed. ^^^^
     {test}
 expected:
     {expected}
 but got:
-    {r}'''.format(i=itest, test=sexps_str(tests[itest][0]), expected=sexps_str(tests[itest][1]), r=r))
+    {r}'''.format(i=itest, test=sexps_str(tests[itest][0]), expected=sexps_str(expected), r=r))
             if isinstance(r, Exception):
                 traceback.print_tb(r.__traceback__)
     print('{nfailed} of {n} tests succeeded.'.format(nfailed=len([1 for success, r in test_results if success]), n=len(test_results)))
