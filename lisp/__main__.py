@@ -1803,10 +1803,6 @@ def base_env(args=[]):
         return l[i]
     bind('nth', nth)
 
-    def tail(l):
-        return l[1:]
-    bind('tail', tail)
-    
     def is_vec(l):
         return isinstance(l, list)
 
