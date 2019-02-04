@@ -471,25 +471,30 @@ backquote_eval_fun_sym = intern(backquote_eval_fun_name)
 backquote_splice_fun_sym = intern(backquote_splice_fun_name)
 global_env_sym = intern('*global-env*')
 
-
-VALID = '__VALID'
-RETURN = '__RETURN'
-FAILED = '__FAILED'
+FAILED = 0
+VALID = 1
+SKIP = 2
+RETURN = 4
 
 
 def Valid(expr):
     return (VALID, expr)
 
 
+def Skip():
+    return (VALID | SKIP, None)
+
+
 def Return(expr):
-    return (RETURN, expr)
+    return (VALID | RETURN, expr)
+
+
+def ReturnSkip():
+    return (VALID | RETURN | SKIP, None)
 
 
 def Failed():
     return (FAILED, None)
-
-
-VALID_ACTIONS = VALID, RETURN
 
 
 def ends_token(s):
@@ -559,7 +564,7 @@ def read_list(s):
         def read_list_end(s):
             if stream_empty(s) or not is_paren_close(stream_next(s)):
                 return Failed()
-            return Return(None)
+            return ReturnSkip()
 
         els = read(s, readers=[read_list_end] + readers)
         return Valid(els)
@@ -618,7 +623,7 @@ def read_whitespace(s):
     while not stream_empty(s) and stream_peek(s) in whitespace:
         stream_next(s)
         parsed = True
-    return Valid(None) if parsed else Failed()
+    return Skip() if parsed else Failed()
 
 
 def read_comment(s):
@@ -626,7 +631,7 @@ def read_comment(s):
         return Failed()
     while not stream_empty(s) and stream_peek(s) not in newlines:
         stream_next(s)
-    return Valid(None)
+    return Skip()
 
 
 
@@ -699,18 +704,18 @@ readers = [
 def read(s, readers=readers, one=False):
     r = []
     action = FAILED
-    while not stream_empty(s) and not action is RETURN:
+    while not stream_empty(s) and not action & RETURN:
         for reader in readers:
             istart = stream_pos(s)
             action, res = reader(s)
-            if action in VALID_ACTIONS:
                 e = res
-                if e is not None:
                     r.append(e)
+            if action & VALID:
+                if not action & SKIP:
                 break
             else:
                 stream_pos_set(s, istart)
-        if not action in VALID_ACTIONS:
+        if not action & VALID:
             raise Exception('Unexpected: "%s" at %s' % (stream_peek(s), stream_pos(s)))
         # one reads until one actual token is parsed
         elif r and one:
