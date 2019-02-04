@@ -971,7 +971,7 @@ def normal_parameter_name(p):
 function, is_function, (function_name, function_env, function_parameters, function_varargs_name, function_keysargs_name, function_nokeys, function_block_name, function_body), (function_set_name, _, _, _, _, _, _, _) = __defstruct('function', 'name', 'env', 'parameters', 'varargs_name', 'keysargs_name', 'nokeys', 'block_name', 'body')
 
 
-def __fn(env, parameters, name=None, *body):
+def parse_parameters(parameters):
 
     valid_specials = {variadic_name, keys_name, nokeys_name}
     special_used = set()
@@ -1038,15 +1038,20 @@ def __fn(env, parameters, name=None, *body):
             parsed_parameters.append((param_name, param_default))
         i += 1
 
-    block_name = gensym('fn')
-
     varargs_name = special_param_names[variadic_name]
     keysargs_name = special_param_names[keys_name]
 
     nokeys = nokeys_name in special_used
 
-    user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
+    return parsed_parameters, varargs_name, keysargs_name, nokeys
 
+
+def __fn(env, parameters, name=None, *body):
+    parsed_parameters, varargs_name, keysargs_name, nokeys = parse_parameters(parameters)
+
+    block_name = gensym('fn')
+
+    user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
     #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
     #assert is_callable(user_function), repr(user_function)
     return user_function
