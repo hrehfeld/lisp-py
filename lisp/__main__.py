@@ -744,6 +744,9 @@ class BlockException(InternalException):
     pass
 
 
+class StackTraceException(Exception):
+    pass
+
 def format_operator_call(fun, args):
     args = [sexps_str(a) for a in args]
     return '({fun} {args})'.format(fun=fun, args=' '.join(args))
@@ -1775,10 +1778,12 @@ native_interpret = _interpret
 def native_interpret(*args, **kwargs):
     try:
         return _interpret(*args, **kwargs)
+    except StackTraceException as e:
+        raise e
     except Exception as e:
-        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
+        raise StackTraceException(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
     except KeyboardInterrupt as e:
-        raise Exception(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
+        raise StackTraceException(make_error_msg('{E}: {e}', E=type(e).__name__, e=str(e)))
 
 interpret = _interpret
 #interpret = native_interpret
