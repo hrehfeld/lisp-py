@@ -1249,7 +1249,6 @@ def __call(env, fun, args_forms, do_eval_args):
         return r
     elif is_callable(fun):
         return __call_function(env, fun, args_forms, do_eval_args)
-
     else:
         raise Exception(make_error_msg('({fun} {args}) is not callable', fun=repr(fun), args=sexps_str(args_forms) if args_forms else ''))
 
