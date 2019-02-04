@@ -252,13 +252,6 @@ def is_special_keyword(e):
     return is_symbol(e) and symbol_name(e).startswith('&')
 
 
-@native
-def is_iterable(o):
-    try:
-        iter(o)
-    except TypeError:
-        return False
-    return True
 cons_end = None
 
 class cons:
