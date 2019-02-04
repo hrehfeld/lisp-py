@@ -1945,10 +1945,10 @@ import unittest
 import argparse
 
 reader_tests = [
-    ('''''', None)
-    , ('1', cons(1, None))
-    , ('1.0', cons(1.0, None))
-    , ('''()''', cons(None, None))
+    ('''''', cons_end)
+    , ('1', cons(1, cons_end))
+    , ('1.0', cons(1.0, cons_end))
+    , ('''()''', cons(cons_end, cons_end))
     , ('''(1)''', list_to_cons([[1]]))
     , ('''(1 2)''', list_to_cons([[1, 2]]))
     , ('''(foo)''', list_to_cons([[intern('foo')]]))
