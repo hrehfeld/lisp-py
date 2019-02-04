@@ -2054,7 +2054,7 @@ else:
 
     for itest, (test, result) in list(enumerate(tests))[istart:]:
         print('================ RUNNING test {i} ================'.format(i=itest))
-        print(sexps_str(test))
+        print(sexps_str(test), '=>', sexps_str(result))
         result = interpret([result])
         r = run_test(test, result)
         test_results.append(r)
