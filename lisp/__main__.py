@@ -2026,6 +2026,8 @@ elif args.c:
             program = f.read()
         print('Result:', interpret(read(Stream(program, 0)), args=args.args))
 else:
+    istart = args.num or 0
+    
     for program, expected in reader_tests:
         print('READER-TEST', program)
         r = read(Stream(program, 0))
