@@ -1313,8 +1313,6 @@ def base_env(args=[]):
     bind('nil', None)
             
     # binds that don't need to be wrapped
-    # FIXME implement in stdlib
-    bind('sorted', sorted)
 
     # list basics
     bindn('as-list', 'as_list', as_list)
