@@ -60,6 +60,11 @@ def sexps_str(form, indent=0, seen=None, full=False):
 
             r += p('(Env {s})'.format(s=''.join([sexps_str(f, indent + 1, seen, full) for f in env_d(form).keys()]) + '<parents...>'))
     
+    elif isinstance(form, list):
+        r += p('[')
+        for e in form:
+            r += sexps_str(e, indent + 1, seen, full)
+        r += p(']')
     elif is_list(form) or is_tuple(form):
         if is_seen(form):
             r += p('<cyclic list>')
@@ -68,9 +73,9 @@ def sexps_str(form, indent=0, seen=None, full=False):
 
             is_simple = False
             for op, char in sexpr_print_operators.items():
-                if is_list(form) and form and form[0] is op:
-                    assert(len(form) == 2)
-                    r += p(char + ' '.join([sexps_str(f, indent + 1, seen, full) for f in form[1:]]).strip())
+                if is_list(form) and length(form) == 2 and car(form) is op:
+                    assert (length(form) == 2), form
+                    r += p(char + ' '.join([sexps_str(f, indent + 1, seen, full) for f in cdr(form)]).strip())
                     is_simple = True
                     break
             if not is_simple:
@@ -217,7 +222,7 @@ def is_struct(obj):
 
 def is_named_operator(form, op):
     assert(is_symbol(op))
-    return is_list(form) and form and is_symbol(form[0]) and form[0] == op
+    return is_list(form) and form and is_symbol(car(form)) and car(form) == op
 
 
 special_form, is_special_form, (special_form_fun,), _ = __defstruct('special-form', 'fun')
@@ -226,7 +231,7 @@ macro, is_macro, (macro_fun,), _ = __defstruct('macro', 'fun')
 
 
 def is_atom(form):
-    return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or (is_list(form) and not len(form))
+    return is_num(form) or is_str(form) or is_keyword(form) or is_symbol(form) or form is None
 
 
 def keyword(s):
@@ -254,22 +259,148 @@ def is_iterable(o):
     except TypeError:
         return False
     return True
+cons_end = None
+
+class cons:
+    def __init__(self, car, cdr):
+        self.car = car
+        assert isinstance(cdr, cons) or cdr is cons_end, cdr
+        self.cdr = cdr
+
+    def __iter__(self):
+        class iter:
+            def __init__(self, p):
+                self.p = p
+
+            def __iter__(self):
+                return self
+
+            def __next__(self):
+                if self.p is None:
+                    raise StopIteration()
+                assert isinstance(self.p, cons)
+                r = self.p.car
+                self.p = self.p.cdr
+                return r
+        return iter(self)
+
+    def __getitem__(self, i):
+        while i > 0:
+            return self.cdr[i - 1]
+        return self.car
+
+    def __len__(self):
+        return length(self)
+
+    def __add__(self, o):
+        l = last(self)
+        for e in o:
+            setcdr(l, cons(e, None))
+            l = cdr(l)
+        return l
+
+    def __repr__(self):
+        return '(cons %s %s)' % (repr(self.car), repr(self.cdr))
+
+    def __eq__(self, o):
+        return isinstance(o, cons) and o.car == self.car and o.cdr == self.cdr
+
+def car(c):
+    return c.car
+
+
+def cdr(c):
+    return c.cdr
+
+
+def setcar(c, v):
+    c.car = v
+
+
+def setcdr(c, cdr):
+    assert isinstance(cdr, cons) or cdr is cons_end
+    c.cdr = cdr
 
 
 @native
 def is_list(e):
-    return isinstance(e, list)
+    return isinstance(e, cons)
+
+
+def last(l):
+    while cdr(l) is not cons_end:
+        l = cdr(l)
+    return l
+
+
+def nthcdr(n, l):
+    for i in range(n):
+        l = cdr(l)
+    return l
+    
+
+
+@native
+def cons_append(start, *ols):
+    while start is cons_end:
+        start = ols[0]
+        ols = ols[1:]
+    l = last(start)
+    for ol in ols:
+        assert isinstance(ol, cons) or ol is cons_end, sexps_str(ol)
+        if ol is cons_end:
+            continue
+        setcdr(l, ol)
+        l = last(l)
+    return start
+
+
+def reverse(l):
+    return reverse_helper(l, cons_end)
+
+
+def reverse_helper(l, rest):
+    if l is cons_end:
+        return rest
+    return reverse_helper(cdr(l), cons(car(l), rest))
+
+
+def nreverse(l):
+    return nreverse_helper(l, cons_end)
+
+
+def nreverse_helper(head, tail):
+    if head is cons_end:
+        return tail
+    heads = cdr(head)
+    setcdr(head, tail)
+    return nreverse_helper(heads, head)
 
 
 @native
 def length(l):
-    return len(l)
+    if l is cons_end:
+        return 0
+    if not isinstance(l, cons):
+        return len(l)
+    return 1 + length(cdr(l))
 
 
 @native
 def as_list(arg):
-    # iter not supported in host currently
-    return list(iter(arg))
+    r = cons_end
+    for a in reversed(arg):
+        r = cons(a, r)
+    return r
+
+
+def list_to_cons(l):
+    r = cons_end
+    for e in reversed(l):
+        if isinstance(e, list):
+            e = list_to_cons(e)
+        r = cons(e, r)
+    return r
 
 
 @native
@@ -655,7 +786,7 @@ def read_symbol(s):
                 return resp()
             accessors = [a for a in accessors if a]
             
-            return Valid([accessor_char_sym] + [intern(s) for s in accessors])
+            return Valid(list_to_cons([accessor_char_sym] + [intern(s) for s in accessors]))
     return Failed()
         
 
@@ -664,9 +795,9 @@ def read_quote_like(s, quote_char, quote_call_sym):
         if stream_next(s) != c:
             return Failed()
     # quote only supports one following exp
-    expr =  read(s, one=True)
-    
-    r = [quote_call_sym] + expr
+    expr = read(s, one=True)
+    assert is_list(expr)
+    r = cons(quote_call_sym, expr)
     return Valid(r)
 
 
@@ -702,16 +833,15 @@ readers = [
 
 @native
 def read(s, readers=readers, one=False):
-    r = []
+    r = cons_end
     action = FAILED
     while not stream_empty(s) and not action & RETURN:
         for reader in readers:
             istart = stream_pos(s)
             action, res = reader(s)
-                e = res
-                    r.append(e)
             if action & VALID:
                 if not action & SKIP:
+                    r = cons(res, r)
                 break
             else:
                 stream_pos_set(s, istart)
@@ -720,6 +850,9 @@ def read(s, readers=readers, one=False):
         # one reads until one actual token is parsed
         elif r and one:
             break
+    if r is not None:
+        assert is_list(r), r
+        r = reverse(r)
     return r
 
 # from .base import native, __defstruct, is_struct, TYPE
@@ -748,6 +881,8 @@ class StackTraceException(Exception):
     pass
 
 def format_operator_call(fun, args):
+    if not args:
+        args = []
     args = [sexps_str(a) for a in args]
     return '({fun} {args})'.format(fun=fun, args=' '.join(args))
 
@@ -823,7 +958,7 @@ def parameter_default(p):
 
 
 def is_parameter_with_default_(p):
-    return is_list(p) and len(p) == 2 and is_symbol(p[0])
+    return is_list(p) and length(p) == 2 and is_symbol(p[0])
 
 
 def is_simple_parameter(p):
@@ -935,6 +1070,8 @@ def __defun(env, name, parameters, *body):
     #    raise Exception(make_error_msg('fun {fun} already declared', fun=symbol_name(name)))
 
     name_str = symbol_name(name)
+    if parameters is None:
+        parameters = []
     f = __fn(env, parameters, name, *body)
     env_def(env, name, f)
     return f
@@ -1104,7 +1241,7 @@ def call_function(fun, args_forms, nokeys, unevaled_args_forms):
     parsed_args = []
     kwargs = {}
 
-    remaining_args = args_forms
+    remaining_args = list(args_forms) if args_forms is not None else []
     keywords_started = False
     while remaining_args:
         arg = remaining_args[0]
@@ -1205,12 +1342,16 @@ function expects:
 
             body = function_body(fun)
             return __block(fun_env, block_name, *body)
-            
-        return user_function(fun, parsed_args, varargs, kwargs)
+
+        # force cons for varargs
+        return user_function(fun, parsed_args, as_list(varargs), kwargs)
 
 
 def __call_function(env, fun, args_forms, eval):
     nokeys = False
+
+    if is_list(args_forms):
+        args_forms = list(args_forms)
 
     first_arg = args_forms[0] if args_forms else None
     if first_arg == nokeys_sym:
@@ -1220,7 +1361,7 @@ def __call_function(env, fun, args_forms, eval):
     unevaled_args_forms = args_forms
     # TODO: if we parse after eval, we can't compile?
     # apply might already have evaled arguments
-    if eval:
+    if eval and args_forms is not None:
         args_forms = [__eval(env, arg) for arg in args_forms]
 
     return call_function(fun, args_forms, nokeys, unevaled_args_forms)
@@ -1232,7 +1373,7 @@ def __macroexpand_1(env, fun, args_forms):
 
 def __macroexpand(env, fun, args_forms):
     form = __macroexpand_1(env, fun, args_forms)
-    while is_operator_call(form) and is_macro(form[0]):
+    while is_operator_call(form) and is_macro(car(form)):
         form = __macroexpand_1(env, *form)
     return form
     
@@ -1241,7 +1382,7 @@ def __call(env, fun, args_forms, do_eval_args):
     if is_special_form(fun):
         fun = special_form_fun(fun)
         debug(lambda: repr(fun))
-        r = __macroexpand_1(env, fun, [env] + args_forms)
+        r = __macroexpand_1(env, fun, cons(env, args_forms))
         return r
     elif is_macro(fun):
         fun = macro_fun(fun)
@@ -1280,9 +1421,9 @@ def __eval(env, form):
     elif is_atom(form):
         r = form
     elif is_operator_call(form):
-        args_forms = form[1:]
-        callstack.append((form[0], args_forms))
-        fun = __eval(env, form[0])
+        args_forms = cdr(form)
+        callstack.append((car(form), args_forms))
+        fun = __eval(env, car(form))
         assert is_macro(fun) or is_special_form(fun) or is_callable(fun), fun
         r = __call(env, fun, args_forms, do_eval_args=True)
         callstack.pop()
@@ -1320,25 +1461,17 @@ def base_env(args=[]):
     # list basics
     bindn('as-list', 'as_list', as_list)
 
-    def cons(e, l):
-        assert is_list(l), repr(l)
-        return [e] + l
     bind('cons', cons)
+    bind('car', car)
+    bind('cdr', cdr)
+    
+    bind('setcar', setcar)
+    bind('setcdr', setcdr)
 
-    @native
-    def list_set(l, k, v):
-        assert(is_list(l))
-        assert(is_int(k))
-        l[k] = v
-        return v
-    bindn('list-set', 'list_set', list_set)
+    bind('reverse', reverse)
+    bind('nreverse', nreverse)
 
-    @native
-    def append(l, *es):
-        for e in es:
-            l.append(e)
-        return l
-    bind('append', append)
+    bind('cons:append', cons_append)
 
     @native
     def extend(l, *ls):
@@ -1416,7 +1549,7 @@ def base_env(args=[]):
     @native
     def native_binds():
         def __list(*args):
-            return list(args)
+            return as_list(args)
         bind('list', __list)
 
         def __tuple(*args):
@@ -1515,14 +1648,18 @@ def base_env(args=[]):
     def macroexpand1(env, form):
         form = __eval(env, form)
         assert is_operator_call(form), form
-        fun = macro_fun(__eval(env, form[0]))
-        return __macroexpand_1(env, fun, form[1:])
+        fun = __eval(env, car(form))
+        assert is_macro(fun), fun
+        fun = macro_fun(fun)
+        return __macroexpand_1(env, fun, cdr(form))
         
     def macroexpand(env, form):
         form = __eval(env, form)
         assert is_operator_call(form), form
-        fun = macro_fun(__eval(env, form[0]))
-        return __macroexpand(env, fun, form[1:])
+        fun = car(form)
+        assert is_macro(fun), fun
+        fun = macro_fun(__eval(env, fun))
+        return __macroexpand(env, fun, cdr(form))
 
     bind('macroexpand-1', special_form(macroexpand1))
     bind('macroexpand', special_form(macroexpand))
@@ -1532,7 +1669,7 @@ def base_env(args=[]):
     bind('def', special_form(__def))
     bind('defun', special_form(__defun))
     bind('defmacro', special_form(__defmacro))
-    bind('fn', special_form(lambda env, parameters, *body: __fn(env, parameters, None, *body)))
+    bind('fn', special_form(lambda env, parameters, *body: __fn(env, parameters if parameters else [], None, *body)))
     bind('apply', special_form(__apply))
 
     bind('gensym', special_form(lambda env, *args: gensym(*args)))
@@ -1629,7 +1766,17 @@ def base_env(args=[]):
 
             assert istart >= 0
             assert iend >= 0
-            return l[istart:iend]
+            if is_vec(l):
+                return l[istart:iend]
+            else:
+                l = nthcdr(istart, l)
+                r = cons_end
+                for i in range(iend - istart):
+                    assert l is not cons_end, l
+                    e = car(l)
+                    l = cdr(l)
+                    r = cons(e, r)
+                return reverse(r)
         else:
             if istart is None:
                 istart = 0
@@ -1642,6 +1789,8 @@ def base_env(args=[]):
             r = [l[i] for i in range(istart, iend, step)]
             if is_str(l):
                 return ''.join(r)
+            elif is_list(l):
+                return as_list(r)
             else:
                 return r
     bind('slice', slice)
@@ -1656,7 +1805,7 @@ def base_env(args=[]):
     bindn('contains?', 'contains', contains)
 
     def nth(i, l):
-        assert (is_list(l) or is_tuple(l) or is_str(l)),  'nth: {i} {l} ({t})'.format(i=sexps_str(i), l=sexps_str(l), t=type(l))
+        assert (is_list(l) or is_tuple(l) or is_str(l) or isinstance(l, list)),  'nth: {i} {l} ({t})'.format(i=sexps_str(i), l=sexps_str(l), t=type(l))
         assert len(l) > i, (i, len(l))
         return l[i]
     bind('nth', nth)
@@ -1665,6 +1814,16 @@ def base_env(args=[]):
         return l[1:]
     bind('tail', tail)
     
+    def is_vec(l):
+        return isinstance(l, list)
+
+    bind('vec?', is_vec)
+
+    def vec_set(l, i, v):
+        assert is_vec(l), l
+        l[i] = v
+    bind('vec-set', vec_set)
+
     bind('defstruct', special_form(defstruct))
     bind('__defstruct', __defstruct)
 
@@ -1797,34 +1956,34 @@ import unittest
 import argparse
 
 reader_tests = [
-    ('''''', [])
-    , ('1', [1])
-    , ('1.0', [1.0])
-    , ('''()''', [[]])
-    , ('''(1)''', [[1]])
-    , ('''(1 2)''', [[1, 2]])
-    , ('''(foo)''', [[intern('foo')]])
-    , ('''(foo bar)''', [[intern('foo'), intern('bar')]])
-    , ('''(1+)''', [[intern('1+')]])
-    , ('''(())''', [[[]]])
-    , ('''((list a b ()))''', [[[intern('list'), intern('a'), intern('b'), []]]])
-    , ("'a", [[intern(quote_fun_name), intern('a')]])
-    , ("'()", [[intern(quote_fun_name), []]])
-    , ("()1", [[], 1])
-    , ("'()1", [[intern(quote_fun_name), []], 1])
-    , ("`()", [[intern(backquote_fun_name), []]])
-    , ("`~foo", [[intern(backquote_fun_name), [intern(backquote_eval_fun_name), intern('foo')]]])
-    , ("`(~foo)", [[intern(backquote_fun_name), [[intern(backquote_eval_fun_name), intern('foo')]]]])
-    , ("`(bar ~foo)", [[intern(backquote_fun_name), [intern('bar'), [intern(backquote_eval_fun_name), intern('foo')]]]])
-    , ("`(bar ~foo baz)", [[intern(backquote_fun_name), [intern('bar'), [intern(backquote_eval_fun_name), intern('foo')], intern('baz')]]])
-    , ("`(bar ~@ foo baz)", [[intern(backquote_fun_name), [intern('bar'), [intern(backquote_splice_fun_name), intern('foo')], intern('baz')]]])
-    , ("a.b", [[intern('.'), intern('a'), intern('b')]])
-    , (";a", [])
-    , ("""(;a
-)""", [[]])
-    , ("'() ;1", [[intern(quote_fun_name), []]])
-    , ("(defun foo () (+ 1 2)) (foo)", [[intern('defun'), intern('foo'), [], [intern('+'), 1, 2]], [intern('foo')]])
-    , ("""(set p ((. a b)))""", [[intern('set'), intern('p'), [[intern('.'), intern('a'), intern('b')]]]])
+    ('''''', None)
+    , ('1', cons(1, None))
+    , ('1.0', cons(1.0, None))
+    , ('''()''', cons(None, None))
+    , ('''(1)''', list_to_cons([[1]]))
+    , ('''(1 2)''', list_to_cons([[1, 2]]))
+    , ('''(foo)''', list_to_cons([[intern('foo')]]))
+    , ('''(foo bar)''', list_to_cons([[intern('foo'), intern('bar')]]))
+    , ('''(1+)''', list_to_cons([[intern('1+')]]))
+    , ('''(())''', list_to_cons([[[]]]))
+    , ('''((list a b ()))''', list_to_cons([[[intern('list'), intern('a'), intern('b'), []]]]))
+    , ("'a", list_to_cons([[intern(quote_fun_name), intern('a')]]))
+    , ("'()", list_to_cons([[intern(quote_fun_name), []]]))
+    , ("()1", list_to_cons([[], 1]))
+    , ("'()1", list_to_cons([[intern(quote_fun_name), []], 1]))
+    , ("`()", list_to_cons([[intern(backquote_fun_name), []]]))
+    , ("`~foo", list_to_cons([[intern(backquote_fun_name), [intern(backquote_eval_fun_name), intern('foo')]]]))
+    , ("`(~foo)", list_to_cons([[intern(backquote_fun_name), [[intern(backquote_eval_fun_name), intern('foo')]]]]))
+    , ("`(bar ~foo)", list_to_cons([[intern(backquote_fun_name), [intern('bar'), [intern(backquote_eval_fun_name), intern('foo')]]]]))
+    , ("`(bar ~foo baz)", list_to_cons([[intern(backquote_fun_name), [intern('bar'), [intern(backquote_eval_fun_name), intern('foo')], intern('baz')]]]))
+    , ("`(bar ~@ foo baz)", list_to_cons([[intern(backquote_fun_name), [intern('bar'), [intern(backquote_splice_fun_name), intern('foo')], intern('baz')]]]))
+    , ("a.b", list_to_cons([[intern('.'), intern('a'), intern('b')]]))
+    , (";a", list_to_cons([]))
+    , ("""(;)a
+)""", list_to_cons([[]]))
+    , ("'() ;1", list_to_cons([[intern(quote_fun_name), []]]))
+    , ("(defun foo () (+ 1 2)) (foo)", list_to_cons([[intern('defun'), intern('foo'), [], [intern('+'), 1, 2]], [intern('foo')]]))
+    , ("""(set p ((. a b)))""", list_to_cons([[intern('set'), intern('p'), [[intern('.'), intern('a'), intern('b')]]]]))
 ]
 
 

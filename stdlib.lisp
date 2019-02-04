@@ -1,3 +1,11 @@
+(defun cons:alloc (n)
+  (let* ((i 0)
+         (r nil))
+    (__while (< i n)
+             (set r (cons nil r))
+             (set i (1+ i)))
+    r))
+
 ;; TODO uses eval -- can we do without or do we need to replace with compiler internal backquote?
 (defun backquote-internal (form nested)
   ;; avoid circular macros -- almost everything else uses backquote itself
@@ -8,7 +16,7 @@
         (progn
           (assert (eq (length form) 2)
                   (repr form))
-          (let* ((unquoted-form (2nd form)))
+          (let* ((unquoted-form (cadr form)))
             ;; nested unquote suppresses eval
             (if (or (named-operator? unquoted-form 'unquote)
                     (named-operator? unquoted-form 'unquote-splice))
@@ -18,7 +26,7 @@
       (if (named-operator? form 'unquote-splice)
           (progn 
             (assert (eq (length form) 2)) 
-            (let* ((form (2nd form)) 
+            (let* ((form (cadr form)) 
                    ;;(r (eval form))
                    ) 
               ;;(assert (list? r) (tuple r (sexps_str form)))
@@ -27,7 +35,7 @@
         (if (named-operator? form 'backquote)
             (progn 
               (assert (eq (length form) 2)) 
-              (let* ((backquoted-form (2nd form)) 
+              (let* ((backquoted-form (cadr form)) 
                      (r (backquote-internal backquoted-form false)))
                 ;;(print "inner backquote" (repr r))
                 (assert (list? r) r)
@@ -36,42 +44,46 @@
                 (single (list 'list '(quote backquote) (cadr r)))))
           ;; generic list case
           (if (list? form)
-              (let* ((r (list))
-                     (i 0)
-                     (n (length form)))
-                (__while (< i n)
-                         (let* ((e (nth i form))
+              (let* ((r nil))
+                ;;(print "LISTTTTTTTTTTTT" (repr form))
+                (__while (length form)
+                         ;;(print "element" (repr (car form)))
+                         (let* ((e (car form))
                                 (e (backquote-internal e nested)))
-                           ;; if both last r and e are list (constructors), just append e to last r
-                           (if (and (>= (length r) 1)
+                           (set form (cdr form))
+                           ;; if both last r and e are 'list (constructors), just append e to last r
+                           (if (and (length r)
+                                    (list? (car r))
+                                    (length (car r))
+                                    (__is (car (car r)) 'list)
                                     (list? e)
-                                    (list? (last r))
-                                    (eq (length e) 2)
-                                    (__is (1st (last r)) 'list)
-                                    (__is (1st e) 'list)
+                                    (length e)
+                                    (__is (car e) 'list)
                                     )
-                               (append (last r) (last e))
-                               (append r e))
-                           ;;(print "backquote-internal" (repr e) "\ner:" (repr er) "\nr:" (repr r))
-                           )
-                         (set i (+ i 1)))
+                               (setcar r (cons:append (car r)
+                                                      ;; cut off 'list
+                                                      (cdr e)))
+                             (set r  (cons e r)))
+                           ;;(print "backquote-internal" (repr e) "\nr:" (repr r))
+                           ))
+                (set r (reverse r))
                 ;; add list concatenation if we need it or remove list wrap if only one element
                 (if (not nested)
                     (if  (> (length r) 1)
-                        (set r (cons '+ r))
+                        (set r (cons 'cons:append r))
                       (assert (<= (length r) 2))
                       (if (> (length r) 0)
                           (set r (last r)))))
                 (single r))
             ;; atom
             (assert (atom? form) (repr form))
-            (single (quoted  form))))))))
+            (single (quoted form))))))))
 
 (defmacro backquote (form)
   (let* ((r (backquote-internal form false)))
     (assert (eq (length r) 2) (repr r))
     (assert (__is (car r) 'list) (repr r))
-    (2nd r)))
+    (cadr r)))
 
 (defmacro when (test &rest body)
   `(if ~test (progn ~@body)))
@@ -95,15 +107,15 @@
 (defmacro dolist (iter &rest body)
   (assert (eq (length iter) 2))
   (let* ((var-sym (head iter))
+         (let-sym (if (symbol? var-sym) 'let* 'let))
          (list-value-sym (last iter))
          (i-var (gensym dolist-i))
          (iter-list (gensym dolist-list)))
-    `( let* ((~iter-list ~list-value-sym)
+    `(let* ((~iter-list ~list-value-sym)
 			 (~i-var 0))
-	   (assert (not (__is nil ~iter-list)) "list is None")
-       (while (< ~i-var (length ~iter-list))
-		 (~(if (symbol? var-sym) 'let* 'let)
-		   ((~var-sym (nth ~i-var ~iter-list)))
+       ;; FIXME: use real while for block support
+       (__while (< ~i-var (length ~iter-list))
+		 (~let-sym ((~var-sym (nth ~i-var ~iter-list)))
            ~@body)
          (set ~i-var (+ ~i-var 1))))))
 
@@ -112,11 +124,14 @@
 
 (defun map (f l)
   (assert (not (__is nil l)) "map: list is None")
-  (let* ((r (list)))
-	(dolist (e l)
-	  (append r (f e)))
-	(assert (not (null? r)))
-	r))
+  (let* ((n (length l))
+         (r (cons:alloc n))
+         (i 0))
+    (__while (< i n)
+     ;; avoid setf
+     (cons:list-set r i (f (nth i l)))
+     (set i (+ i 1)))
+    r))
 
 (defun map-apply (f l) (map (wrap-apply f) l))
 
@@ -133,24 +148,27 @@
 	r))
 
 (defun range (&rest args)
-  (let* ((m (length args))
-         (n 0)
-         (i 0)
+  (let* ((nargs (length args))
+         (iend 0)
+         (istart 0)
          (step 1))
-    (cond ((eq m 1)
-           (set n (head args)))
-          ((eq m 2)
-           (setf (:= i n) args))
-          ((eq m 3)
-           (setf (:= i n step) args)))
-    (assert (and (int? n) (>= n 0)) n)
-    (assert (and (int? i) (>= i 0)) i)
+    (cond ((eq nargs 1)
+           (set iend (head args)))
+          ((eq nargs 2)
+           (setf (:= istart iend) args))
+          ((eq nargs 3)
+           (setf (:= istart iend step) args)))
+    (assert (and (int? iend) (>= iend 0)) iend)
+    (assert (and (int? istart) (>= istart 0)) istart)
     (assert (and (int? step) (>= step 0)) step)
-    (let* ((l (list)))
-      (while (< i n)
-        (append l i)
-        (+= i step))
-      l)))
+    (let* ((n (/  (- iend istart) step))
+           (r (cons:alloc n))
+           (i 0))
+      (__while (< istart iend)
+               (cons:list-set r i istart)
+               (+= i 1)
+               (+= istart step))
+      r)))
 
 ;; TODO: generator
 (defun enumerate (l)
@@ -162,9 +180,10 @@
 
 (defun zip (&rest ls)
   (let* ((n (apply min (map length ls)))
-         (r (list)))
+         (r (cons:alloc n)))
     (dolist (iel (range n))
-      (append r (map (fn (l) (nth iel l)) ls))
+      (cons:list-set r iel
+                     (map (fn (l) (nth iel l)) ls))
       (assert (< iel n) (list iel n))
       )
     r))
@@ -185,7 +204,8 @@
                 (target (last target)))
            (assert (int? itarget))
            ;; TODO assert when value was not exhausted
-           (+ binds
+           ;; fixme + doesn't work for cons
+           (cons:append binds
               (destructuring-bind-parse target `(nth ~itarget ~value-evaluated-form)))))
      (list)
      (enumerate target)))
@@ -208,19 +228,23 @@
             (destructuring-bind-parse (as-list (slice target 1 nil))
                                       value-var)))
           ((named-operator? target 'aref)
-           (let* ((target (tail target)))
+           (let* ((target (cdr target)))
              (assert (eq (length target) 2) (repr target))
              (let* ((obj (1st target))
                     (key (2nd target)))
                (when (keyword? key)
                  (set key (keyword-name key)))
                `(
-                 (if (list? ~obj)
-                     (progn
-                       (assert (num? ~key) (repr ~key))
-                       (list-set ~obj ~key ~value-var))
+                 (cond
+                  ((list? ~obj)
+                   (progn
+                     (assert (num? ~key) (repr ~key))
+                     (cons:list-set ~obj ~key ~value-var)))
+                  ((vec? ~obj)
+                   (vec-set ~obj ~key ~value-var))
+                  (true
                    (assert (dict? ~obj) (repr ~obj))
-                   (dict-set ~obj ~key ~value-var))
+                   (dict-set ~obj ~key ~value-var)))
                  ))))
           (true
            (assert false (+ "unknown target" (repr target))))))))
@@ -232,7 +256,7 @@
                (assert (eq (length target-value) 2) target-value)
                (let* ((target (head target-value))
                       (value (last target-value)))
-                 (+ vars
+                 (cons:append vars
                     (if (named-operator? target ':=)
                         (let* ((value-var (gensym let-value)))
                           (cons (list value-var value)
@@ -248,6 +272,7 @@
                    ~@body))))
 
 (defmacro cond (&rest clauses)
+  ;; work from the back outwards to topmost if
   (foldr
    (fn (clause ifs)
 	   (let* ((test (car clause))
@@ -267,15 +292,21 @@
 (defun not-member? (e l) (not  (member? e l)))
 
 (defun reversed (l)
-  (let* ((r (list))
-         (i (- (length l) 1)))
-    (while (>= i 0)
-      (append r (nth i l))
-      (set i (- i 1)))
+  (let* ((n (length l))
+         (r (cons:alloc n))
+         (i 0))
+    (__while
+     (< i n)
+     (let*
+         ((e (nth i l)))
+       ;; avoid setf
+       (cons:list-set r (- n 1 i) e))
+     (set i (+ i 1)))
     r))
 
 
 (defun head (l) (nth 0 l))
+;;(defun tail (l) (nth (- (length l) 1) l))
 (defun 1st (l) (nth 0 l))
 (defun 2nd (l) (nth 1 l))
 (defun 3rd (l) (nth 2 l))
@@ -283,9 +314,14 @@
 (defun 5th (l) (nth 4 l))
 (defun last (l) (nth (- (length l) 1) l))
 
-(defun car (l) (head l))
-(defun cdr (l) (tail l))
-(defun cadr (l) (car (tail l)))
+(defun cadr (l) (car (cdr l)))
+
+(defun cons:list-set (list index value)
+  (assert (list? list))
+  (assert (int? index))
+  (if (eq index 0)
+      (setcar list value)
+    (cons:list-set (cdr list) (- index 1) value)))
 
 (defun min (a &rest args)
   (let* ((mi a))
