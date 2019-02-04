@@ -294,12 +294,11 @@
 		(set mi x)))
 	mi))
 
-(defun max (&rest args)
-  (let* ((ma (head args)))
-	(dolist (x (tail args))
-	  (when (> x ma)
-		(set ma x)))
-	ma))
+(defun max (ma &rest args)
+  (dolist (x args)
+	(when (> x ma)
+	  (set ma x)))
+  ma)
 
 ;; TODO support 1 as default
 (defmacro def-setter-op-varargs (name op)
