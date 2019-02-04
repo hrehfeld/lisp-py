@@ -1635,6 +1635,7 @@ def base_env(args=[]):
                 iend = len(l)
             if step is None:
                 step = 1
+            # FIXME does this work with cons?
             r = [l[i] for i in range(istart, iend, step)]
             if is_str(l):
                 return ''.join(r)
