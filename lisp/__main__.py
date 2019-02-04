@@ -1030,11 +1030,6 @@ def __fn(env, parameters, name=None, *body):
             param_name = normal_parameter_name(param)
             if is_parameter_with_default_(param):
                 param_default = parameter_default(param)
-                def make_default_constructor(param_default):
-                    def constructor():
-                        return __eval(env, param_default)
-                    return constructor
-                param_default = make_default_constructor(param_default)
         if param_name:
             if symbol_name(param_name) in used_names:
                 raise Exception(make_error_msg('Duplicate parameter {name}', name=n))
@@ -1296,8 +1291,8 @@ function expects:
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
                     raise Exception(make_error_msg(call_make_error('function call missing argument "{name}"'.format(name=n))))
-                                    
-                parsed_args.append(kwargs[n] if in_kwargs else param_default())
+
+                parsed_args.append(kwargs[n] if in_kwargs else __eval(env, param_default))
                 if in_kwargs:
                     del kwargs[n]
 
