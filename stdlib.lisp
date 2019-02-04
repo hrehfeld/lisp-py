@@ -321,3 +321,6 @@
                            (__is a (1st bs))
                            (all (map (fn (b) (is a b)) bs))))
 (defun is-not (a b) (not (__is a b)))
+
+(defun 1+ (x) (+ x 1))
+(defun 1- (x) (- x 1))
