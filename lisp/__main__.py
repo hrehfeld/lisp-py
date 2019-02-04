@@ -1878,6 +1878,12 @@ elif args.c:
             program = f.read()
         print('Result:', interpret(read(Stream(program, 0)), args=args.args))
 else:
+    for program, expected in reader_tests:
+        print('READER-TEST', program)
+        r = read(Stream(program, 0))
+        assert r == expected, (r, expected)
+                 
+
     tests = load_tests()
 
     test_results = []
