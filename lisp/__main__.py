@@ -1295,7 +1295,7 @@ function expects:
                 n = symbol_name(param_name)
                 in_kwargs = n in kwargs
                 if not in_kwargs and param_default is None:
-                    raise Exception(make_error_msg(call_make_error('function call missing argument "{name}"{default}'.format(name=n, default='(:= {d})'.format(d=param_default()) if param_default else ''))))
+                    raise Exception(make_error_msg(call_make_error('function call missing argument "{name}"'.format(name=n))))
                                     
                 parsed_args.append(kwargs[n] if in_kwargs else param_default())
                 if in_kwargs:
