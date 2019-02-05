@@ -1624,7 +1624,6 @@ def base_env(args=[]):
                 assert(False), sexps_str(module)
         pass
     bind('py-import', special_form(py_import))
-    bind('py_import', py_import)
 
     @native
     def __lookup(env, obj, *ks):
