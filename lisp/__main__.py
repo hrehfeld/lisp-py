@@ -1057,6 +1057,17 @@ def __fn(env, parameters, name=None, *body):
     return user_function
 
 
+def native_function(native_function, parameters):
+    parameters = read(Stream(parameters, 0))
+    parsed_parameters, varargs_name, keysargs_name, nokeys = parse_parameters(parameters)
+    env = None
+    block_name = None
+    name = native_function.__name__
+    body = native_function
+    user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
+    return user_function
+
+
 def __defun(env, name, parameters, *body):
     assert is_symbol(name), 'defun: {s}'.format(s=name)
     #if env_contains(env, name):
@@ -1316,25 +1327,30 @@ function expects:
             parsed_args = parsed_args[:len(parameters)]
 
         def user_function(fun, args, varargs, kwargs):
-            fun_def_env = function_env(fun)
-            fun_env = make_env(fun_def_env)
-
-            block_name = function_block_name(fun)
-            return_fun = special_form(lambda call_env, value=None: return_from(call_env, block_name, value))
-            env_def(fun_env, return_sym, return_fun)
-
-            for (parameter, default), arg in zip(function_parameters(fun), args):
-                env_def(fun_env, parameter, arg)
-
-            varargs_name = function_varargs_name(fun)
-            if is_symbol(varargs_name):
-                env_def(fun_env, varargs_name, varargs)
-            keysargs_name = function_keysargs_name(fun)
-            if is_symbol(keysargs_name):
-                env_def(fun_env, keysargs_name, kwargs)
-
             body = function_body(fun)
-            return __block(fun_env, block_name, *body)
+
+            if is_list(body) or is_tuple(body):
+                fun_def_env = function_env(fun)
+                fun_env = make_env(fun_def_env)
+
+                block_name = function_block_name(fun)
+                return_fun = special_form(lambda call_env, value=None: return_from(call_env, block_name, value))
+                env_def(fun_env, return_sym, return_fun)
+
+                for (parameter, _default), arg in zip(function_parameters(fun), args):
+                    env_def(fun_env, parameter, arg)
+
+                varargs_name = function_varargs_name(fun)
+                if is_symbol(varargs_name):
+                    env_def(fun_env, varargs_name, varargs)
+                keysargs_name = function_keysargs_name(fun)
+                if is_symbol(keysargs_name):
+                    env_def(fun_env, keysargs_name, kwargs)
+
+                return __block(fun_env, block_name, *body)
+            else:
+                # args can/will be conses
+                return body(*iter(args), *iter(varargs), **kwargs)
 
         # force cons for varargs
         return user_function(fun, parsed_args, as_list(varargs), kwargs)
