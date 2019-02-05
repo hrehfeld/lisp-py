@@ -1633,7 +1633,6 @@ def base_env(args=[]):
             r = getattr(r, symbol_name(k))
         return r
     bind('.', special_form(__lookup))
-    bind('__lookup', __lookup)
 
     bind(quote_fun_name, special_form(lambda env, e: e))
 
