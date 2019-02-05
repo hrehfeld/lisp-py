@@ -1547,18 +1547,6 @@ def base_env(args=[]):
     bind('return-from', return_from_special)
     bind('let*', special_form(__let))
     
-    # these are just for bootstrapping -- functions do not need to exist other than for python reasons
-    def native_binds():
-        # could use list + globals here, but this is easier to bootstrap
-
-        bind('list', list)
-        bind('tuple', tuple)
-        bind('dict', dict)
-
-        bind('dict_setdefault', dict_setdefault)
-        bind('dict-setdefault', dict_setdefault)
-
-
     @native
     def native_binds():
         def __list(*args):
