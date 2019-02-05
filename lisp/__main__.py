@@ -433,7 +433,7 @@ def make_env(parent=None):
 
 def env_contains(env, sym):
     assert is_symbol(sym), sym
-    assert(is_env(env))
+    assert(is_env(env)), env
     #k = id(sym)
     k = sym
     while env is not None:
