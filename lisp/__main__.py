@@ -1894,6 +1894,20 @@ def base_env(args=[]):
                 env_def(env, var, f)
             __progn(env, *body)
     bind('py-with', special_form(py_with))
+    # def py_with(env, _with, *body):
+    #     assert is_list(_with)
+    #     assert len(_with) == 1
+    #     _with = _with[0]
+    #     var = None
+    #     if is_list(_with):
+    #         assert len(_with) == 2
+    #         var, _with = _with
+    #         assert(is_symbol(var))
+    #     with __eval(env, _with) as f:
+    #         if var is not None:
+    #             env_def(env, var, f)
+    #         __progn(env, *body)
+    # bind('py-with', special_form(py_with))
 
     bind('read', read)
 
