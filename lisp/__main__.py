@@ -1859,9 +1859,6 @@ def base_env(args=[]):
     
     bind('argv', args)
 
-    import pathlib
-    bind('make-Path', pathlib.Path)
-
     def print_(*args):
         print(*args)
     bind('print', print_)
