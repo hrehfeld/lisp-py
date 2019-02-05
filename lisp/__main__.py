@@ -1350,6 +1350,10 @@ function expects:
                 return __block(fun_env, block_name, *body)
             else:
                 # args can/will be conses
+                if args is cons_end:
+                    args = []
+                if varargs is cons_end:
+                    varargs = []
                 return body(*iter(args), *iter(varargs), **kwargs)
 
         # force cons for varargs
