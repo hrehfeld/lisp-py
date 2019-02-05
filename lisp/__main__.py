@@ -1707,7 +1707,6 @@ def base_env(args=[]):
     bind('mod', numeric_op(operator.__mod__))
 
     bind('eq', operator.__eq__)
-    bind('neq', operator.__ne__)
 
     @native
     def __is(a, *bs):

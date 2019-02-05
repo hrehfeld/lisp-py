@@ -323,6 +323,8 @@
       (setcar list value)
     (cons:list-set (cdr list) (- index 1) value)))
 
+(defun neq (x) (not (eq x)))
+
 (defun min (a &rest args)
   (let* ((mi a))
 	(dolist (x args)
