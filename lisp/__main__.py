@@ -1636,7 +1636,6 @@ def base_env(args=[]):
 
     bind(quote_fun_name, special_form(lambda env, e: e))
 
-    backquote_level_var = '*__backquote_level*'
 
     # special form because we need the env
     def source_eval(env, form):
