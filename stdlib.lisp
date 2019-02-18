@@ -1,3 +1,6 @@
+(defun atom? (e)
+  (or (num? e) (str? e) (keyword? e) (symbol? e) (nil? e)))
+
 (defun cons:alloc (n)
   (let* ((i 0)
          (r nil))
