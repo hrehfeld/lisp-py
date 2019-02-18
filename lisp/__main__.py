@@ -398,7 +398,7 @@ def list_to_cons(l):
 
 @native
 def is_callable(e):
-    return is_function(e) or callable(e)
+    return is_function(e) or is_native_function(e)
 
 
 # Env, is_env, (env_d, env_parent), _ = __defstruct('Env', 'd', 'parent')
@@ -968,7 +968,20 @@ def normal_parameter_name(p):
     else:
         return p
 
-function, is_function, (function_name, function_env, function_parameters, function_varargs_name, function_keysargs_name, function_nokeys, function_block_name, function_body), (function_set_name, _, _, _, _, _, _, _) = __defstruct('function', 'name', 'env', 'parameters', 'varargs_name', 'keysargs_name', 'nokeys', 'block_name', 'body')
+function, is_function, (function_name, function_env, function_parameters, function_parameter_defaults, function_varargs_name, function_keysargs_name, function_nokeys, function_block_name, function_body), (function_set_name, _, _, _, _, _, _, _, _) = __defstruct('function', 'name', 'env', 'parameters', 'parameter_defaults', 'varargs_name', 'keysargs_name', 'nokeys', 'block_name', 'body')
+
+
+native_function, is_native_function, (native_function_parameters, native_function_parameter_defaults, native_function_varargs_name, native_function_keysargs_name, native_function_nokeys, native_function_function), (native_function_set_name,  _, _, _, _, _) = __defstruct('native_function', 'parameters', 'parameter_defaults', 'varargs_name', 'keysargs_name', 'nokeys', 'function')
+
+
+def native_function_name(fun):
+    if hasattr(fun, '__name__'):
+        return fun.__name__
+    elif hasattr(fun, '__self__'):
+        return fun.__self__.__class__.__name__
+    else:
+        return str(fun)
+
 
 
 def parse_parameters(parameters):
@@ -981,6 +994,7 @@ def parse_parameters(parameters):
     special_once_only = {variadic_name, keys_name, nokeys_name}
 
     parsed_parameters = []
+    parsed_parameter_defaults = []
 
     special_param_names = {}
     special_param_names[variadic_name] = None
@@ -1035,7 +1049,8 @@ def parse_parameters(parameters):
                 raise Exception(make_error_msg('Duplicate parameter {name}', name=n))
             used_names.add(symbol_name(param_name))
             assert is_symbol(param_name), param_name
-            parsed_parameters.append((param_name, param_default))
+            parsed_parameters.append(param_name)
+            parsed_parameter_defaults.append(param_default)
         i += 1
 
     varargs_name = special_param_names[variadic_name]
@@ -1043,29 +1058,34 @@ def parse_parameters(parameters):
 
     nokeys = nokeys_name in special_used
 
-    return parsed_parameters, varargs_name, keysargs_name, nokeys
+    return parsed_parameters, parsed_parameter_defaults, varargs_name, keysargs_name, nokeys
 
 
 def __fn(env, parameters, name=None, *body):
-    parsed_parameters, varargs_name, keysargs_name, nokeys = parse_parameters(parameters)
+    parsed_parameters, parsed_parameter_defaults, varargs_name, keysargs_name, nokeys = parse_parameters(parameters)
+
+    parsed_parameter_defaults = [lambda: __eval(env, default) if default is not None else None
+                                 for default in parsed_parameter_defaults]
+
+    for default in parsed_parameter_defaults:
+        assert default is None or callable(default)
 
     block_name = gensym('fn')
 
-    user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
-    #print('&&&&&&&&', special_used, sexps_str(parameters), nokeys_name in special_used)
-    #assert is_callable(user_function), repr(user_function)
+    user_function = function(name, env, parsed_parameters, parsed_parameter_defaults, varargs_name, keysargs_name, nokeys, block_name, body)
     return user_function
 
 
-def native_function(native_function, parameters):
+def make_native_function(env, fun, parameters):
     parameters = read(Stream(parameters, 0))
-    parsed_parameters, varargs_name, keysargs_name, nokeys = parse_parameters(parameters)
-    env = None
-    block_name = None
-    name = native_function.__name__
-    body = native_function
-    user_function = function(name, env, parsed_parameters, varargs_name, keysargs_name, nokeys, block_name, body)
-    return user_function
+    parameters, parameter_defaults, varargs_name, keysargs_name, nokeys = parse_parameters(parameters)
+    parameter_defaults = [lambda: __eval(env, default) if default is not None else None
+                                 for default in parameter_defaults]
+
+    for default in parameter_defaults:
+        assert default is None or callable(default), repr(default)
+
+    return native_function(parameters, parameter_defaults, varargs_name, keysargs_name, nokeys, fun)
 
 
 def __defun(env, name, parameters, *body):
@@ -1096,7 +1116,7 @@ def __defmacro(lexical_env, name, parameters, *body):
 
 def __apply(env, f_form, args):
     f = __eval(env, f_form)
-    callstack.append((function_name(f) if is_function(f) else host_function_name(f), [args]))
+    callstack.append((function_name(f) if is_function(f) else native_function_name(f), [args]))
     evaled_args = __eval(env, args)
     r = __call(env, f, evaled_args, do_eval_args=False)
     callstack.pop()
@@ -1175,72 +1195,59 @@ def py_get_param_names(obj):
     return args, varargs, varkwargs, False
 
 
-native_functions = dict()
-
-
-@native
-def native_set_nokeys(fun, nokeys):
-    fun = get_native_function_id(fun)
-    #parameters = py_get_param_names(fun)
-    native_functions[fun] = nokeys
-
-
-@native
-def is_native_function(fun):
-    return type(fun).__name__ in ('function', 'builtin_function_or_method')
-
-
-@native
-def is_native_builtin(fun):
-    # TODO: ugly hack around: [].append in {} => unhashable type
-    return type(fun).__name__ == 'builtin_function_or_method'
-
-
-@native
-def get_native_function_id(fun):
-    if is_native_builtin(fun):
-        c = fun.__self__.__class__
-        if c in (list, dict):
-            fun = fun.__self__.__class__.__name__ + '_' + fun.__name__
-    else:
-        fun = id(fun)
-    return fun
-
-
-@native
-def host_function_name(fun):
-    return fun.__name__
-
-@native
-def host_function_nokeys(fun):
-    fun = get_native_function_id(fun)
-    if fun not in native_functions:
-        #parameters = py_get_param_names(fun)
-        native_set_nokeys(fun, False)
-        return False
-    else:
-        return native_functions[fun]
-
-
-@native
-def call_host_function(fun, args, kwargs):
-    try:
-        return fun(*args, **kwargs)
-    except TypeError as e:
-        raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
-
-
 def call_function(fun, args_forms, nokeys, unevaled_args_forms):
     assert is_callable(fun), fun
 
-    is_host_fun = False
     if is_function(fun):
         nokeys = nokeys or function_nokeys(fun)
-    else:
-        assert callable(fun), fun
-        nokeys = nokeys or host_function_nokeys(fun)
-        is_host_fun = True
+        function_repr = function_name(fun) or '<fn>'
+        parameters = function_parameters(fun)
+        parameter_defaults = function_parameter_defaults(fun)
+        set_varargs = function_varargs_name
+        set_kwargs = function_keysargs_name
+
+        def user_function(fun, args, varargs, kwargs):
+            fun_def_env = function_env(fun)
+            fun_env = make_env(fun_def_env)
+
+            block_name = function_block_name(fun)
+            return_fun = special_form(lambda call_env, value=None: return_from(call_env, block_name, value))
+            env_def(fun_env, return_sym, return_fun)
+
+            for parameter, arg in zip(function_parameters(fun), args):
+                env_def(fun_env, parameter, arg)
+
+            varargs_name = function_varargs_name(fun)
+            if is_symbol(varargs_name):
+                env_def(fun_env, varargs_name, varargs)
+            keysargs_name = function_keysargs_name(fun)
+            if is_symbol(keysargs_name):
+                env_def(fun_env, keysargs_name, kwargs)
+
+            body = function_body(fun)
+            return __block(fun_env, block_name, *body)
+
         
+    else:
+        nokeys = nokeys or native_function_nokeys(fun)
+        function_repr = native_function_name(fun) or '<fn>'
+        parameters = native_function_parameters(fun)
+        parameter_defaults = native_function_parameter_defaults(fun)
+        set_varargs = native_function_varargs_name
+        set_kwargs = native_function_keysargs_name
+        
+        def user_function(fun, args, varargs, kwargs):
+            # args can/will be conses
+            if args is cons_end:
+                args = []
+            if varargs is cons_end:
+                varargs = []
+            fun = native_function_function(fun)
+            try:
+                return fun(*iter(args), *iter(varargs), **kwargs)
+            except TypeError as e:
+                raise Exception(make_error_msg('{e}\nfrom {call}\nwith kwargs: {kwargs}', e=e, call=format_operator_call(fun, args), kwargs=kwargs))
+
     iparam = 0
     parsed_args = []
     kwargs = {}
@@ -1265,17 +1272,11 @@ def call_function(fun, args_forms, nokeys, unevaled_args_forms):
             parsed_args.append(arg)
         del arg
 
+    assert isinstance(parsed_args, list)
+    assert isinstance(parameters, list), (parameters, fun)
 
-    if is_host_fun:
-        return call_host_function(fun, parsed_args, kwargs)
-    else:
-        function_repr = function_name(fun) or '<fn>'
-        parameters = function_parameters(fun)
-        set_varargs = function_varargs_name
-        set_kwargs = function_keysargs_name
-        
-        def call_make_error(err):
-            return err + '''
+    def call_make_error(err):
+        return err + '''
 in function call:
     {call}
 evaled to:
@@ -1290,74 +1291,44 @@ function expects:
         , kwargs=set_kwargs
         , params=sexps_str(parameters)
         , varargs=repr(set_varargs)
-        )
+    )
 
-        if not set_varargs and len(parsed_args) > len(parameters):
-            raise Exception(make_error_msg(call_make_error('too many arguments (#{n} vs #{m})'.format(
-            n=len(parameters)
-                , m=len(parsed_args)
-            ))))
+    if not set_varargs and len(parsed_args) > len(parameters):
+        raise Exception(make_error_msg(call_make_error('too many arguments (#{n} vs #{m})'.format(
+        n=len(parameters)
+            , m=len(parsed_args)
+        ))))
 
-        # try defaults, extract missing positional args from kwargs
-        if len(parsed_args) < len(parameters):
-            for i, p in enumerate(parameters[len(parsed_args):]):
-                assert(isinstance(p, tuple)), p
-                (param_name, param_default) = p
-                n = symbol_name(param_name)
-                in_kwargs = n in kwargs
-                if not in_kwargs and param_default is None:
-                    raise Exception(make_error_msg(call_make_error('function call missing argument "{name}"'.format(name=n))))
-
-                parsed_args.append(kwargs[n] if in_kwargs else __eval(env, param_default))
-                if in_kwargs:
-                    del kwargs[n]
-
-        # even afer adding default values still not enough args
-        if len(parameters) > len(parsed_args):
-            raise Exception(make_error_msg('function call missing argument "{i}": {call}'
-                                           , i=symbol_name(parameters[len(parsed_args)][0]), fun=format_operator_call(function_repr, unevaled_args_forms)))
-
-        if not set_kwargs and kwargs:
-            raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {params} {kwargs}) called with {args}'
-                                           , fun=function_repr, args=sexps_str(parsed_args_forms), params=sexps_str(parameters), kwargs=sexps_str(kwargs)))
-
-        varargs = []
-        if set_varargs and len(parsed_args) > len(parameters):
-            varargs = parsed_args[len(parameters):]
-            parsed_args = parsed_args[:len(parameters)]
-
-        def user_function(fun, args, varargs, kwargs):
-            body = function_body(fun)
-
-            if is_list(body) or is_tuple(body):
-                fun_def_env = function_env(fun)
-                fun_env = make_env(fun_def_env)
-
-                block_name = function_block_name(fun)
-                return_fun = special_form(lambda call_env, value=None: return_from(call_env, block_name, value))
-                env_def(fun_env, return_sym, return_fun)
-
-                for (parameter, _default), arg in zip(function_parameters(fun), args):
-                    env_def(fun_env, parameter, arg)
-
-                varargs_name = function_varargs_name(fun)
-                if is_symbol(varargs_name):
-                    env_def(fun_env, varargs_name, varargs)
-                keysargs_name = function_keysargs_name(fun)
-                if is_symbol(keysargs_name):
-                    env_def(fun_env, keysargs_name, kwargs)
-
-                return __block(fun_env, block_name, *body)
+    # try defaults, extract missing positional args from kwargs
+    if len(parsed_args) < len(parameters):
+        for param_name, param_default in zip(parameters[len(parsed_args):], parameter_defaults[len(parsed_args):]):
+            n = symbol_name(param_name)
+            if n in kwargs:
+                parsed_args.append(kwargs[n])
+                del kwargs[n]
+            elif param_default is None:
+                raise Exception(make_error_msg(call_make_error('function call missing argument "{name}"'.format(name=n))))
             else:
-                # args can/will be conses
-                if args is cons_end:
-                    args = []
-                if varargs is cons_end:
-                    varargs = []
-                return body(*iter(args), *iter(varargs), **kwargs)
+                assert callable(param_default), repr(param_default)
+                # instantiate new default value if necessary
+                parsed_args.append(param_default())
 
-        # force cons for varargs
-        return user_function(fun, parsed_args, as_list(varargs), kwargs)
+    # even afer adding default values still not enough args
+    if len(parameters) > len(parsed_args):
+        raise Exception(make_error_msg('function call missing argument "{i}": {call}'
+                                       , i=symbol_name(parameters[len(parsed_args)][0]), fun=format_operator_call(function_repr, unevaled_args_forms)))
+
+    if not set_kwargs and kwargs:
+        raise Exception(make_error_msg('Unexpected keyword arguments for function call: ({fun} {params} {kwargs}) called with {args}'
+                                       , fun=function_repr, args=sexps_str(parsed_args_forms), params=sexps_str(parameters), kwargs=sexps_str(kwargs)))
+
+    varargs = []
+    if set_varargs and len(parsed_args) > len(parameters):
+        varargs = parsed_args[len(parameters):]
+        parsed_args = parsed_args[:len(parameters)]
+
+    # force cons for varargs
+    return user_function(fun, parsed_args, as_list(varargs), kwargs)
 
 
 def __call_function(env, fun, args_forms, eval):
@@ -1471,20 +1442,25 @@ def base_env(args=[]):
             
     # binds that don't need to be wrapped
 
+    def nbind(name, fun, params):
+        bind(name, make_native_function(env, fun, params))
+
+    nspecial_form = lambda f, parameters: special_form(make_native_function(env, f, parameters))
+
     # list basics
-    bindn('as-list', 'as_list', as_list)
+    bindn('as-list', 'as_list', make_native_function(env, as_list, 'list'))
 
-    bind('cons', cons)
-    bind('car', car)
-    bind('cdr', cdr)
+    nbind('cons', cons, 'car cdr')
+    nbind('car', car, 'c')
+    nbind('cdr', cdr, 'c')
     
-    bind('setcar', setcar)
-    bind('setcdr', setcdr)
+    nbind('setcar', setcar, 'c v')
+    nbind('setcdr', setcdr, 'c v')
 
-    bind('reverse', reverse)
-    bind('nreverse', nreverse)
+    nbind('reverse', reverse, 'l')
+    nbind('nreverse', nreverse, 'l')
 
-    bind('cons:append', cons_append)
+    nbind('cons:append', cons_append, 'name value')
 
     @native
     def extend(l, *ls):
@@ -1492,33 +1468,33 @@ def base_env(args=[]):
         for e in ls:
             l += e
         return l
-    bind('extend', extend)
+    #bind('extend', extend)
 
-    bind('aref', lambda l, k: l[k])
+    nbind('aref', lambda l, k: l[k], 'l k')
 
     # needs to be wrapped
-    bind('intern', intern)
-    bind('symbol', symbol)
-    bindn('symbol-name', 'symbol_name', symbol_name)
+    nbind('intern', intern, 's')
+    nbind('symbol', symbol, 'name')
+    nbind('symbol-name', symbol_name, 's')
 
-    bind('keyword', keyword)
-    bind('keyword-name', keyword_name)
+    nbind('keyword', keyword, 's')
+    nbind('keyword-name', keyword_name, 's')
 
-    bind('Env', Env)
-    bind('is_env', is_env)
-    bind('env_d', env_d)
-    bind('env_parent', env_parent)
+    nbind('Env', Env, 'd parent')
+    nbind('is_env', is_env, 'o')
+    nbind('env_d', env_d, 'e')
+    nbind('env_parent', env_parent, 'e')
 
 
     @native
     def dict_set(d, k, v):
         d[k] = v
-    bindn('dict-set', 'dict_set', dict_set)
+    nbind('dict-set', dict_set, 'k v')
 
     @native
     def dict_keys(d):
         return as_list(d.keys())
-    bindn('dict-keys', 'dict_keys', dict_keys)
+    nbind('dict-keys', dict_keys, 'd')
 
 
     @native
@@ -1537,52 +1513,31 @@ def base_env(args=[]):
             msg = '%s: %s' % (sexps_str(condition), msg)
 
         assert r, msg
-    bindn('assert', '__assert', special_form(__assert))
-        
-    bind('internal:block', special_form(__block))
-    bindn('__if', 'if', special_form(__if))
-    bind('__while', special_form(__while))
-    return_from_special = special_form(return_from)
+    bind('assert', nspecial_form(__assert, 'env condition (msg "")'))
+
+
+    bind('internal:block', nspecial_form(__block, 'env name &rest body'))
+    bind('if', nspecial_form(__if, 'condition then &rest else_body'))
+    bind('__while', nspecial_form(__while, 'env condition &rest body'))
+    return_from_special = nspecial_form(return_from, 'env name (value nil)')
     bind('return_from', return_from_special)
     bind('return-from', return_from_special)
-    bind('let*', special_form(__let))
+    bind('let*', nspecial_form(__let, 'env vars &rest let_body'))
     
-    @native
-    def native_binds():
-        def __list(*args):
-            return as_list(args)
-        bind('list', __list)
+    def __list(*args):
+        return as_list(args)
+    nbind('list', __list, '&nokeys &rest args')
 
-        def __tuple(*args):
-            # tuple doesn't take more than one arg
-            return tuple(args)
-        bind('tuple', __tuple)
+    def __tuple(*args):
+        # tuple doesn't take more than one arg
+        return tuple(args)
+    nbind('tuple', __tuple, '&nokeys &rest args')
 
-        def __dict(**kwargs):
-            return dict(**kwargs)
-        bind('dict', __dict)
+    def __dict(**kwargs):
+        return dict(**kwargs)
+    nbind('dict', __dict, '&keys kwargs')
 
-        bindn('repr', 'sexps_str', sexps_str)
-
-        bind('dict_setdefault', dict.setdefault)
-        bind('dict-setdefault', dict.setdefault)
-    
-        
-    native_binds()
-    def set_nokeys_from_env(name):
-        f = env_get(env, name)
-        native_set_nokeys(f, True)
-    set_nokeys_from_env(intern('list'))
-    set_nokeys_from_env(intern('tuple'))
-
-    native_set_nokeys(__defmacro, True)
-
-
-    
-    def __import(env, *args):
-        # TODO 
-        pass
-    bind('import', special_form(__import))
+    nbind('repr', sexps_str, 'form (indent 0) (seen nil) (full false)')
 
     @native
     def py_import(env, *args):
@@ -1623,7 +1578,7 @@ def base_env(args=[]):
             else:
                 assert(False), sexps_str(module)
         pass
-    bind('py-import', special_form(py_import))
+    bind('py-import', nspecial_form(py_import, 'env &rest args'))
 
     @native
     def __lookup(env, obj, *ks):
@@ -1632,16 +1587,15 @@ def base_env(args=[]):
             assert(is_symbol(k)), sexps_str(k)
             r = getattr(r, symbol_name(k))
         return r
-    bind('.', special_form(__lookup))
+    bind('.', nspecial_form(__lookup, 'env obj &rest ks'))
 
-    bind(quote_fun_name, special_form(lambda env, e: e))
-
+    bind(quote_fun_name, nspecial_form(lambda env, e: e, 'env e'))
 
     # special form because we need the env
     def source_eval(env, form):
         form = __eval(env, form)
         return __eval(env, form)
-    bind('eval', special_form(source_eval))
+    bind('eval', nspecial_form(source_eval, 'env form'))
 
     def macroexpand1(env, form):
         form = __eval(env, form)
@@ -1650,6 +1604,7 @@ def base_env(args=[]):
         assert is_macro(fun), fun
         fun = macro_fun(fun)
         return __macroexpand_1(env, fun, cdr(form))
+    bind('macroexpand-1', nspecial_form(macroexpand1, 'env form'))
         
     def macroexpand(env, form):
         form = __eval(env, form)
@@ -1658,21 +1613,22 @@ def base_env(args=[]):
         assert is_macro(fun), fun
         fun = macro_fun(__eval(env, fun))
         return __macroexpand(env, fun, cdr(form))
+    bind('macroexpand', nspecial_form(macroexpand, 'env form'))
 
-    bind('macroexpand-1', special_form(macroexpand1))
-    bind('macroexpand', special_form(macroexpand))
-    bind('set', special_form(__setq))
-    bind('progn', special_form(__progn))
+    bind('set', nspecial_form(__setq, 'env name value'))
+    bind('progn', nspecial_form(__progn, 'env &rest forms'))
 
-    bind('def', special_form(__def))
-    bind('defun', special_form(__defun))
-    bind('defmacro', special_form(__defmacro))
-    bind('fn', special_form(lambda env, parameters, *body: __fn(env, parameters if parameters else [], None, *body)))
-    bind('apply', special_form(__apply))
+    bind('def', nspecial_form(__def, 'env name &rest args'))
+    bind('defun', nspecial_form(__defun, 'env name parameters &rest body'))
+    bind('defmacro', nspecial_form(__defmacro, 'lexical_env name parameters &rest body'))
+    def fn(env, parameters, *body):
+        return __fn(env, parameters if parameters else [], None, *body)
+    bind('fn', nspecial_form(fn, 'env parameters &rest body'))
+    bind('apply', nspecial_form(__apply, 'env f_form args'))
 
-    bind('gensym', special_form(lambda env, *args: gensym(*args)))
+    bind('gensym', nspecial_form(lambda env, *args: gensym(*args), 'env &rest args'))
 
-    bind('null?', lambda *args: all([e is None for e in args]))
+    nbind('null?', lambda *args: all([e is None for e in args]), '&rest args')
 
     tests = dict(
         symbol=is_symbol
@@ -1688,10 +1644,9 @@ def base_env(args=[]):
         , nil=lambda e: e is None
     )
     for k, f in list(tests.items()):
-        bind('{s}?'.format(s=k), f)
-        bind('is_{s}'.format(s=k), f)
+        nbind('{s}?'.format(s=k), f, 'x')
 
-    bind('named-operator?', is_named_operator)
+    nbind('named-operator?', is_named_operator, 'form op')
 
     def numeric_op(op):
         def numeric_op(a, *args):
@@ -1701,20 +1656,26 @@ def base_env(args=[]):
             return r
         return numeric_op
 
-    bind('+', numeric_op(operator.__add__))
-    bind('-', numeric_op(operator.__sub__))
-    bind('*', numeric_op(operator.__mul__))
-    bind('/', numeric_op(operator.__truediv__))
-    bind('mod', numeric_op(operator.__mod__))
+    nbind('+', numeric_op(operator.__add__), 'a &rest args')
+    nbind('-', numeric_op(operator.__sub__), 'a &rest args')
+    nbind('*', numeric_op(operator.__mul__), 'a &rest args')
+    nbind('/', numeric_op(operator.__truediv__), 'a &rest args')
+    nbind('mod', numeric_op(operator.__mod__), 'a &rest args')
 
-    bind('eq', operator.__eq__)
+    nbind('eq', operator.__eq__, 'a b')
 
     @native
     def __is(a, *bs):
         return all([a is b for b in bs])
-    bind('__is', __is)
+    nbind('__is', __is, 'a &rest bs')
 
-    bind('not', operator.__not__)
+    nbind('not', operator.__not__, 'x')
+
+    nbind('<', operator.__lt__, 'a b')
+    nbind('<=', operator.__le__, 'a b')
+    nbind('>', operator.__gt__, 'a b')
+    nbind('>=', operator.__ge__, 'a b')
+    
 
     def _and(env, *tests):
         r = None
@@ -1723,7 +1684,7 @@ def base_env(args=[]):
             if not r:
                 return None
         return r
-    bind('and', special_form(_and))
+    bind('and', nspecial_form(_and, 'env &rest tests'))
     def _or(env, *tests):
         r = None
         for test in tests:
@@ -1731,12 +1692,8 @@ def base_env(args=[]):
             if r:
                 return r
         return None
-    bind('or', special_form(_or))
+    bind('or', nspecial_form(_or, 'env &rest tests'))
 
-    bind('<', operator.__lt__)
-    bind('<=', operator.__le__)
-    bind('>', operator.__gt__)
-    bind('>=', operator.__ge__)
 
     @native
     def slice(l, istart=None, *args):
@@ -1791,42 +1748,41 @@ def base_env(args=[]):
                 return as_list(r)
             else:
                 return r
-    bind('slice', slice)
+    nbind('slice', slice, '(istart nil) &rest args')
 
 
-    bind('length', length)
+    nbind('length', length, 'l')
 
     @native
     def contains(l, e):
         assert is_list(l) or is_tuple(l) or is_dict(l)
         return e in l
-    bindn('contains?', 'contains', contains)
+    nbind('contains?', contains, 'l e')
 
     def nth(i, l):
         assert (is_list(l) or is_tuple(l) or is_str(l) or isinstance(l, list)),  'nth: {i} {l} ({t})'.format(i=sexps_str(i), l=sexps_str(l), t=type(l))
         assert len(l) > i, (i, len(l))
         return l[i]
-    bind('nth', nth)
+    nbind('nth', nth, 'i l')
 
     def is_vec(l):
         return isinstance(l, list)
-
-    bind('vec?', is_vec)
+    nbind('vec?', is_vec, 'l')
 
     def vec_set(l, i, v):
         assert is_vec(l), l
         l[i] = v
-    bind('vec-set', vec_set)
+    nbind('vec-set', vec_set, 'l i v')
 
-    bind('defstruct', special_form(defstruct))
-    bind('__defstruct', __defstruct)
+    bind('defstruct', nspecial_form(defstruct, 'env name &rest fields'))
+    nbind('__defstruct', __defstruct, 'name &rest field_names')
 
 
     def throw(env, tag, value):
         tag = __eval(env, tag)
         value = __eval(env, value)
         raise InternalException(tag, value)
-    bind('throw', special_form(throw))
+    bind('throw', nspecial_form(throw, 'env tag value'))
 
     def catch(env, tag, *body):
         tag = __eval(env, tag)
@@ -1838,11 +1794,11 @@ def base_env(args=[]):
                 return e.value
             else:
                 raise e
-    bind('catch', special_form(catch))
+    bind('catch', nspecial_form(catch, 'env tag &rest body'))
 
     def exception(s):
         return Exception(s)
-    bind('Exception', exception)
+    nbind('Exception', exception, 's')
     
     # sys utils
     def file_open(filename, mode):
@@ -1850,51 +1806,32 @@ def base_env(args=[]):
             mode = symbol_name(mode)
         assert(is_str(mode))
         return open(filename, mode)
-
-    bind('file-open', file_open)
+    nbind('file-open', file_open, 'filename mode')
 
     def file_read(filename):
         with open(filename, 'r') as f:
             return f.read()
-    bind('file-read', file_read)
+    nbind('file-read', file_read, 'filename')
     
     bind('argv', args)
 
     def print_(*args):
         print(*args)
-    bind('print', print_)
+    nbind('print', print_, '&rest args')
 
     def princ(arg):
         ps(arg)
-    bind('princ', princ)
+    nbind('princ', princ, 'arg')
 
     # TODO
     #(infix
 
-    bind('host_function_name', function_name)
-    bind('is_host_function', is_function)
-    bind('native_set_nokeys', native_set_nokeys)
-
     ## python interop
 
-    bind('int', int)
-    bind('float', float)
-    bind('str', str)
+    nbind('int', int, 'x')
+    nbind('float', float, 'x')
+    nbind('str', str, 'x')
 
-    def py_with(env, _with, *body):
-        assert is_list(_with)
-        assert len(_with) == 1
-        _with = _with[0]
-        var = None
-        if is_list(_with):
-            assert len(_with) == 2
-            var, _with = _with
-            assert(is_symbol(var))
-        with __eval(env, _with) as f:
-            if var is not None:
-                env_def(env, var, f)
-            __progn(env, *body)
-    bind('py-with', special_form(py_with))
     # def py_with(env, _with, *body):
     #     assert is_list(_with)
     #     assert len(_with) == 1
@@ -1910,7 +1847,7 @@ def base_env(args=[]):
     #         __progn(env, *body)
     # bind('py-with', special_form(py_with))
 
-    bind('read', read)
+    #nbind('read', read, )
 
     env = make_env(env)
     env_def(env, global_env_sym, env)
