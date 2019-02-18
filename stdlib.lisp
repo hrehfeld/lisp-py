@@ -327,6 +327,7 @@
     (cons:list-set (cdr list) (- index 1) value)))
 
 (defun neq (x) (not (eq x)))
+(defun nis (x) (not (is x)))
 
 (defun min (a &rest args)
   (let* ((mi a))
