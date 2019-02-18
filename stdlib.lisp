@@ -280,7 +280,7 @@
    (fn (clause ifs)
 	   (let* ((test (car clause))
               (body (cdr clause)))
-         (if (eq test 'true)
+         (if (__is test 'true)
              ;; else/true branch skips test
              (progn
                (assert (__is ifs nil) "else/true needs to be the last clause")
